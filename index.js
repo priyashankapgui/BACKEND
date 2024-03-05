@@ -1,29 +1,31 @@
 import  sequelize from './config/database.js';
 import express from "express";
-import products from './src/models/productModel.js';
-import productRoutes from './src/routes/productRoutes.js';
-import { createProduct, getProducts, deleteProduct, updateProduct } from './src/controllers/productControllers.js';
-import category from './src/models/categoryModel.js';
-import categoryRoutes from './src/routes/categoryRoutes.js';
-import {createCategory, getCategory, deleteCategory, updateCategory} from './src/controllers/categoryController.js';
+import products from './src/modules/product/product.js';
+import Productrouter from './src/modules/product/routes.js';
+import categoryRouter from './src/modules/category/routes.js';
+import categories from './src/modules/category/category.js';
+import { getProducts } from './src/modules/product/controller.js';
+import { getAllProducts} from './src/modules/product/service.js';
+
+
 
 
 const app = express();
 
 app.use(express.json());
 
-app.use('/products', productRoutes);
-app.use('/category', categoryRoutes);
+app.use('/', Productrouter);
+app.use('/', categoryRouter);
 
-app.use('/api', productRoutes);
-app.use('/api', categoryRoutes);
+app.use('/api', Productrouter);
+app.use('/api', categoryRouter);
 
-category.hasMany(products, {foreignKey: 'categoryId'});
-products.belongsTo(category, {foreignKey: 'categoryId'});
+//Category.hasMany(products, {foreignKey: 'categoryId'});
+//products.belongsTo(Category, {foreignKey: 'categoryId'});
 
 
 
-sequelize.sync({ force: true })
+sequelize.sync()
   .then(() => {
     console.log('Database synchronized');
   })
