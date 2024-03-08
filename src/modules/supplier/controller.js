@@ -36,7 +36,7 @@ export const createSupplier = async (req, res) => {
   }
 };
 
-// PUT update a supplier by ID
+
 export const updateSupplier = async (req, res) => {
   const supplierId = req.params.id;
   const supplierData = req.body;
@@ -53,7 +53,7 @@ export const updateSupplier = async (req, res) => {
   }
 };
 
-// DELETE a supplier by ID
+
 export const deleteSupplier = async (req, res) => {
   const supplierId = req.params.id;
   try {
