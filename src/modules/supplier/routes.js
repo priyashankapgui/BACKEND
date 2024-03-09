@@ -1,12 +1,12 @@
 import express from 'express';
-import { getAllSuppliers, getSupplierById, createSupplier, updateSupplier, deleteSupplier } from './controller.js';
+import { getSuppliers, getSupplier, createSupplier, updateSupplier, deleteSupplier } from './controller.js';
 
 const supplierRouter = express.Router();
 
-supplierRouter.get('/suppliers', getAllSuppliers);
-supplierRouter.get('/suppliers/:id', getSupplierById);
+supplierRouter.get('/suppliers', getSuppliers);
+supplierRouter.get('/suppliers/:supplierId', getSupplier);
 supplierRouter.post('/suppliers', createSupplier);
-supplierRouter.put('/suppliers/:id', updateSupplier);
-supplierRouter.delete('/suppliers/:id', deleteSupplier);
+supplierRouter.put('/suppliers/:supplierId', updateSupplier);
+supplierRouter.delete('/suppliers/:supplierId', deleteSupplier);
 
 export default supplierRouter;
