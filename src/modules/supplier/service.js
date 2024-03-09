@@ -1,10 +1,5 @@
-//import suppliers from '../supplier/supplier.js';
-//import productRouter from '../product/routes.js';
 import sequelize from '../../../config/database.js';
 import suppliers from '../supplier/supplier.js';
-//import supplierRouter from '../supplier/routes.js';
-
-
 
 
 export const getAllSuppliers = async () => {
@@ -25,7 +20,6 @@ export const getSupplierById = async (supplierId) => {
     throw new Error('Error fetching supplier: ' + error.message);
   };
 };
-
 
 
 export const addSupplier = async (supplierData) => {

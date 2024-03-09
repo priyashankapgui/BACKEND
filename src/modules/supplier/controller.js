@@ -26,30 +26,18 @@ export const getSupplier = async (req, res) => {
 };
 
 
-// export const createSupplier = async (req, res) => {
-
-//   try {
-//     const newSupplier = await addSupplier(req.body);
-//     res.status(201).json(newSupplier);
-//   } catch (error) {
-//     res.status(500).json({ error: error.message });
-//   }
-// };
-
-// POST create a new supplier
 export const createSupplier = async (req, res) => {
     const supplierData = req.body;
     try {
-      console.log('Supplier data received:', supplierData); // Log the request body
+      console.log('Supplier data received:', supplierData); 
       const newSupplier = await addSupplier(supplierData);
       res.status(201).json(newSupplier);
     } catch (error) {
-      console.error('Error creating supplier:', error); // Log the error for debugging
+      console.error('Error creating supplier:', error); 
       res.status(500).json({ error: error.message });
     }
   };
   
-
 
 export const updateSupplier = async (req, res) => {
   const supplierId = req.params.supplierId;

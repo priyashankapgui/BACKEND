@@ -16,19 +16,6 @@ export const getAllProducts = async () => {
   };
 
 
-// export const getProductById = async (productId) => {
-//     try {
-//       const productbyId = await products.findByPk(productId);
-//       console.log('Product:', productbyId ); 
-//       return productbyId;
-//     } catch (error) {
-//       console.error('Error fetching product:', error); 
-//       throw new Error('Error fetching product: ' + error.message);
-//     }
-//   };
-
-
-
 export const getProductById = async (productId) => {
     try {
         const productbyId = await products.findByPk(productId, {
@@ -43,31 +30,6 @@ export const getProductById = async (productId) => {
         throw new Error('Error fetching product: ' + error.message);
     }
 };
-  
-  // export const addProduct = async (productData) => {
-  //   try {
-  //     const newProduct = await products.create(productData);
-  //     return newProduct;
-  //   } catch (error) {
-  //     throw new Error('Error creating product: ' + error.message);
-  //   }
-  // };
-  // export const addProduct = async ({ productName, price, size, brand, description, categoryId }) => {
-  //   try {
-  //     const newProduct = await products.create({
-  //       productName,
-  //       price,
-  //       size,
-  //       brand,
-  //       description,
-  //       categoryId 
-  //     });
-  
-  //     return newProduct;
-  //   } catch (error) {
-  //     throw new Error('Error creating product: ' + error.message);
-  //   }
-  // };
 
   export const addProduct = async (productData) => {
     try {

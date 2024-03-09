@@ -1,4 +1,3 @@
-// productRoutes.js
 import express from 'express';
 import {  getProducts, getProduct, createProduct , deleteProduct , updateProduct } from '../product/controller.js';
 import { getAllProducts } from '../product/service.js';
