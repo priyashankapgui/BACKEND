@@ -4,7 +4,6 @@ import products from './src/modules/product/product.js';
 import Productrouter from './src/modules/product/routes.js';
 import categoryRouter from './src/modules/category/routes.js';
 import supplierRouter from './src/modules/supplier/routes.js';
-import stockRouter from './src/modules/stock/routes.js';
 import categories from './src/modules/category/category.js';
 import suppliers from './src/modules/supplier/supplier.js';
 import { getProducts } from './src/modules/product/controller.js';
@@ -21,7 +20,7 @@ app.use(express.json());
 app.use('/', Productrouter);
 app.use('/', categoryRouter);
 app.use('/', supplierRouter);
-app.use('/', stockRouter);
+
 
 app.use('/api', Productrouter);
 app.use('/api', categoryRouter);
