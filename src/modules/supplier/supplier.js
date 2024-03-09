@@ -1,6 +1,8 @@
 import { DataTypes } from 'sequelize';
 import sequelize from '../../../config/database.js';
-import supplierContact from '../suppliers/supplierContact.js';
+
+
+
 
 const suppliers = sequelize.define('suppliers', {
   supplierId: {
@@ -8,20 +10,40 @@ const suppliers = sequelize.define('suppliers', {
     allowNull: false,
     primaryKey: true,
     autoIncrement: true,
+    
   },
   supplierName: {
     type: DataTypes.STRING,
     allowNull: false,
   },
-  supplierContactNo: {
+  branchName: {
     type: DataTypes.STRING,
-    allowNull: true,
-  }
+    allowNull: false,
+  },
+  regNo: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  email: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  address: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  contactNo: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+
+
 }, { 
   tableName: 'suppliers',
   timestamps: false 
 });
 
-suppliers.hasMany(supplierContact, { foreignKey: 'supplierId' });
+
+
 
 export default suppliers;

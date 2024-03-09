@@ -1,21 +1,21 @@
-import Supplier from './supplier.js';
+import { getAllSuppliers, getSupplierById, addSupplier , deleteSupplierById, updateSupplierById } from '../supplier/service.js';
 
 
-export const getAllSuppliers = async (req, res) => {
+export const getSuppliers = async (req, res) => {
   try {
-    const suppliers = await Supplier.findAll();
-    res.status(200).json(suppliers);
+    const suppliersReq = await getAllSuppliers();
+    res.status(200).json(suppliersReq);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
 
 
-export const getSupplierById = async (req, res) => {
-  const supplierId = req.params.id;
+export const getSupplier = async (req, res) => {
+  const supplierId = req.params.supplierId;
   try {
-    const supplier = await Supplier.findByPk(supplierId);
-    if (!supplier) {
+    const supplier = await getSupplierById(supplierId);
+    if(!supplier){
       res.status(404).json({ error: 'Supplier not found' });
       return;
     }
@@ -26,45 +26,51 @@ export const getSupplierById = async (req, res) => {
 };
 
 
+// export const createSupplier = async (req, res) => {
+
+//   try {
+//     const newSupplier = await addSupplier(req.body);
+//     res.status(201).json(newSupplier);
+//   } catch (error) {
+//     res.status(500).json({ error: error.message });
+//   }
+// };
+
+// POST create a new supplier
 export const createSupplier = async (req, res) => {
-  const supplierData = req.body;
-  try {
-    const newSupplier = await Supplier.create(supplierData);
-    res.status(201).json(newSupplier);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-};
+    const supplierData = req.body;
+    try {
+      console.log('Supplier data received:', supplierData); // Log the request body
+      const newSupplier = await addSupplier(supplierData);
+      res.status(201).json(newSupplier);
+    } catch (error) {
+      console.error('Error creating supplier:', error); // Log the error for debugging
+      res.status(500).json({ error: error.message });
+    }
+  };
+  
 
 
 export const updateSupplier = async (req, res) => {
-  const supplierId = req.params.id;
-  const supplierData = req.body;
+  const supplierId = req.params.supplierId;
+  const updatedSupplierData = req.body;
   try {
-    const supplier = await Supplier.findByPk(supplierId);
-    if (!supplier) {
-      res.status(404).json({ error: 'Supplier not found' });
-      return;
-    }
-    await supplier.update(supplierData);
-    res.status(200).json(supplier);
+    const updatedSupplier = await updateSupplierById(supplierId, updatedSupplierData);
+    res.status(200).json(updatedSupplier);
   } catch (error) {
+    console.error('Error updating supplier:', error);
     res.status(500).json({ error: error.message });
   }
 };
 
 
 export const deleteSupplier = async (req, res) => {
-  const supplierId = req.params.id;
+  const supplierId = req.params.supplierId;
   try {
-    const supplier = await Supplier.findByPk(supplierId);
-    if (!supplier) {
-      res.status(404).json({ error: 'Supplier not found' });
-      return;
-    }
-    await supplier.destroy();
-    res.status(204).send();
+    await deleteSupplierById(supplierId);
+    res.status(204).json({ message: 'Supplier deleted succesfully' });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('Error deleting supplier:', error);
+    res.status(500).json({ error: 'Internal server error' });
   }
 };
