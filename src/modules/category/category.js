@@ -1,5 +1,6 @@
 import { DataTypes } from 'sequelize';
 import sequelize from '../../../config/database.js';
+import products from '../product/product.js';
 
 const Category = sequelize.define('categories', {
     categoryId: {
@@ -18,5 +19,13 @@ const Category = sequelize.define('categories', {
       },
 
 }, {tableName: 'categories'});
+
+
+export const setupCategoryAssociations = () => {
+  Category.hasMany(products, { foreignKey: 'categoryId', as: 'products' });
+};
+
+
+
 
 export default Category;
