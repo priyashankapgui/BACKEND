@@ -1,6 +1,8 @@
 import { DataTypes } from 'sequelize';
 import sequelize from '../../../config/database.js';
 import categories from '../category/category.js';
+import suppliers from '../supplier/supplier.js';
+import stocks from '../stock/stock.js';
 
 
 const products = sequelize.define('products', {
@@ -47,8 +49,14 @@ const products = sequelize.define('products', {
       onDelete: 'CASCADE', 
     },
   },
+
+
+  
 }, { tableName: 'products' });
 
-products.belongsTo(categories, { foreignKey: 'categoryId' });
+
+products.belongsToMany(suppliers, { through: 'product_Supplier' });
+products.belongsToMany(stocks, { through: 'product_Stock' });
+
 
 export default products;

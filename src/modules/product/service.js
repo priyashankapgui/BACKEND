@@ -11,6 +11,7 @@ export const getAllProducts = async () => {
       console.log(productsReq);
       return productsReq;
     } catch (error) {
+      console.error('Error retrieving products:', error);
       throw new Error('Error retrieving products');
     }
   };
