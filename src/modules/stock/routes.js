@@ -9,4 +9,6 @@ stockRouter.post('/stocks', createStock);
 stockRouter.put('/stocks/:GRN_NO', updateStock);
 stockRouter.delete('/stocks/:GRN_NO', deleteStock);
 
+
+
 export default stockRouter;

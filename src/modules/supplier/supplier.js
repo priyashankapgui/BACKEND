@@ -1,7 +1,6 @@
 import { DataTypes } from 'sequelize';
 import sequelize from '../../../config/database.js';
-//import products from '../product/product.js';
-//import products from '../product/product.js';
+
 
 const suppliers = sequelize.define('suppliers', {
   supplierId: {
@@ -41,8 +40,5 @@ const suppliers = sequelize.define('suppliers', {
   tableName: 'suppliers',
   timestamps: false 
 });
-
-//suppliers.belongsToMany(products, { through: 'product_Supplier' });
-//suppliers.hasMany(products, { foreignKey: 'productId', as: 'products' });
 
 export default suppliers;
