@@ -1,8 +1,10 @@
 import  sequelize from './config/database.js';
 import express from "express";
+import cors from "cors";
 import products from './src/modules/product/product.js';
 import Productrouter from './src/modules/product/routes.js';
 import categoryRouter from './src/modules/category/routes.js';
+import EmployeeRouter from './src/modules/employee/routes.js';
 import supplierRouter from './src/modules/supplier/routes.js';
 import stockRouter from './src/modules/stock/routes.js';
 import categories from './src/modules/category/category.js';
@@ -16,17 +18,19 @@ import Category, { setupCategoryAssociations } from './src/modules/category/cate
 
 
 const app = express();
-
+app.use(cors());
 app.use(express.json());
 
 app.use('/', Productrouter);
 app.use('/', categoryRouter);
+app.use('/', EmployeeRouter);
 app.use('/', supplierRouter);
 app.use('/', stockRouter);
 
 
 app.use('/api', Productrouter);
 app.use('/api', categoryRouter);
+app.use('/api', EmployeeRouter);
 app.use('/api', supplierRouter);
 app.use('/api', stockRouter);
 
