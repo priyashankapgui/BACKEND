@@ -10,12 +10,15 @@ import suppliers from './src/modules/supplier/supplier.js';
 import { getProducts } from './src/modules/product/controller.js';
 import { getAllProducts} from './src/modules/product/service.js';
 import Category, { setupCategoryAssociations } from './src/modules/category/category.js';
-
+import feedbackrouter from './src/modules/feedback/routes.js';
+import feedback from './src/modules/feedback/feedback.js';
+import cors from 'cors';
 
 
 
 
 const app = express();
+app.use(cors());
 
 app.use(express.json());
 
@@ -23,12 +26,13 @@ app.use('/', Productrouter);
 app.use('/', categoryRouter);
 app.use('/', supplierRouter);
 app.use('/', stockRouter);
-
+app.use('/', feedbackrouter);
 
 app.use('/api', Productrouter);
 app.use('/api', categoryRouter);
 app.use('/api', supplierRouter);
 app.use('/api', stockRouter);
+app.use('/api',feedbackrouter);
 
 
 
@@ -43,6 +47,9 @@ sequelize.sync()
   .catch((err) => {
     console.error('Error synchronizing database:', err);
   });
+
+
+
 
 
 
@@ -64,6 +71,6 @@ process.on('SIGINT', () => {
 });
 
 
-export { sequelize, Category, products };
+export { sequelize, Category, products ,feedback};
 
 
