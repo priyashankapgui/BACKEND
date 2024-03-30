@@ -12,6 +12,7 @@ import suppliers from './src/modules/supplier/supplier.js';
 import { getProducts } from './src/modules/product/controller.js';
 import { getAllProducts} from './src/modules/product/service.js';
 import Category, { setupCategoryAssociations } from './src/modules/category/category.js';
+import Branchrouter from './src/modules/branch/routes.js';
 
 
 
@@ -26,6 +27,7 @@ app.use('/', categoryRouter);
 app.use('/', EmployeeRouter);
 app.use('/', supplierRouter);
 app.use('/', stockRouter);
+app.use('/', Branchrouter);
 
 
 app.use('/api', Productrouter);
@@ -33,6 +35,7 @@ app.use('/api', categoryRouter);
 app.use('/api', EmployeeRouter);
 app.use('/api', supplierRouter);
 app.use('/api', stockRouter);
+app.use('/api', Branchrouter);
 
 
 
