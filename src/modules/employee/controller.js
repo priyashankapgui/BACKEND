@@ -1,7 +1,8 @@
 // import  sequelize  from '../../../config/database.js';
 import { getAllEmployees,getEmployeeById,createEmployee,updateEmployeeById,deleteEmployeeById } from "../employee/service.js";
-import bcrypt from 'bcrypt';
-import Employee from './employee.js';
+import bcrypt from 'bcryptjs';
+
+
 
 
 // export const test = async (req, res) => {
@@ -42,21 +43,41 @@ export const getEmployee = async (req, res) => {
 export const createNewEmployee = async (req, res) => {
     const employee = req.body;
     try {
-      // Hash the password before saving it to the database
-    const hashedPassword = await bcrypt.hash(employee.password, 10);
-    employee.password = hashedPassword;
 
       const newEmployee = await createEmployee(employee);
-      res.status(201).json(newEmployee);
+      res.status(201).json({ 
+        message: "Employee created successfully", 
+        employee: newEmployee 
+      });
+      
+      
     } catch (error) {
       res.status(500).json({ error: error.message });
     }
   };
 
+
+
+
 export const updateEmployee = async (req, res) => {
     const employeeId = req.params.employeeId;
     const updatedEmployeeData = req.body;
+
+
+    console.log(employeeId);
+
+    // You can access the authenticated user's information here, if needed
+    const authenticatedUserId = req.user.employeeId;
+
     try {
+
+      // Perform authorization check
+      // For example, check if the authenticated user has the right to update this employee
+      if (authenticatedUserId != employeeId) {
+        res.status(403).json({ error: 'Unauthorized to update this employee' });
+        return;
+      }
+
       const updatedEmployee = await updateEmployeeById(employeeId, updatedEmployeeData);
       if (!updatedEmployee) {
         res.status(404).json({ error: 'Employee not found' });
@@ -67,6 +88,11 @@ export const updateEmployee = async (req, res) => {
       res.status(500).json({ error: error.message });
     }
   };
+
+
+
+
+
 
 export const deleteEmployee = async (req, res) => {
     const employeeId = req.params.employeeId;
@@ -85,36 +111,23 @@ export const deleteEmployee = async (req, res) => {
 
 
 
+  export const forgotPassword= async (req, res) => {
+    const { token } = req.query;
 
- // Function to handle login
-export const handleLogin = async (req, res) => {
-  const { employeeId, password } = req.body;
+  // Verify the token
+    try {
+      const decoded = jwt.verify(token, RESET_TOKEN_SECRET);
+      const { email } = decoded;
 
-  if (!employeeId || !password) {
-    return res.status(400).json({ message: 'Username and password are required' });
-  }
-
-  try {
-    // Find the user in the database based on the provided username
-    const user = await Employee.findOne({ where: { employeeId: employeeId } });
-
-    if (!user) {
-      // User not found
-      return res.status(404).json({ message: 'User not found' });
+      // Check if the token matches the one associated with the user's account
+      const user = await Employee.findOne({ email });
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+    } catch (error) {
     }
+  };
 
-    // Compare the hashed password stored in the database with the provided password
-    const passwordMatch = await bcrypt.compare(password, user.password);
-    
-    if (passwordMatch) {
-      // Passwords match, login successful
-      return res.status(200).json({ message: 'Login successful' });
-    } else {
-      // Passwords don't match, login failed
-      return res.status(401).json({ message: 'Invalid credentials' });
-    }
-  } catch (error) {
-    console.error('Login error:', error);
-    return res.status(500).json({ message: 'Internal server error' });
-  }
-};
+
+
+
