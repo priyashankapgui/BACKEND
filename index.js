@@ -1,6 +1,7 @@
 import  sequelize from './config/database.js';
 import express from "express";
 import cors from "cors";
+import dotenv from "dotenv";
 import products from './src/modules/product/product.js';
 import Productrouter from './src/modules/product/routes.js';
 import categoryRouter from './src/modules/category/routes.js';
@@ -14,6 +15,7 @@ import { getAllProducts} from './src/modules/product/service.js';
 
 const app = express();
 app.use(cors());
+dotenv.config();
 app.use(express.json());
 
 app.use('/', Productrouter);
