@@ -13,6 +13,14 @@ const branches = sequelize.define('branches',{
         type:DataTypes.STRING,
         allowNull:false
     },
+    address: {
+        type: DataTypes.STRING,
+        allowNull: false,
+    },
+    email: {
+        type: DataTypes.STRING,
+        allowNull: false,
+    },
     contactNumber:{
         type: DataTypes.STRING(15)
     }

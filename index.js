@@ -13,6 +13,8 @@ import Category, { setupCategoryAssociations } from './src/modules/category/cate
 import feedbackrouter from './src/modules/feedback/routes.js';
 import feedback from './src/modules/feedback/feedback.js';
 import cors from 'cors';
+import Branchrouter from './src/modules/branch/routes.js';
+import Branch from './src/modules/branch/branch.js'
 
 
 
@@ -26,12 +28,14 @@ app.use('/', Productrouter);
 app.use('/', categoryRouter);
 app.use('/', supplierRouter);
 app.use('/', stockRouter);
+app.use('/',Branchrouter);
 app.use('/', feedbackrouter);
 
 app.use('/api', Productrouter);
 app.use('/api', categoryRouter);
 app.use('/api', supplierRouter);
 app.use('/api', stockRouter);
+app.use('/api',Branch);
 app.use('/api',feedbackrouter);
 
 
