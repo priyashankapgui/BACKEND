@@ -1,8 +1,8 @@
 import jwt from 'jsonwebtoken';
 
 
-import { ACCESS } from '../../config/config.js';
-const { ACCESS_TOKEN } = ACCESS;
+import { SECRET } from '../../config/config.js';
+const { SECRET_KEY} = SECRET;
 
 //import { handleLogin } from '../modules/employee/service.js';
 
@@ -16,7 +16,7 @@ export const authenticateToken = (req, res, next) => {
 
     // if (token == null) return res.sendStatus(401);
     
-    jwt.verify(token, ACCESS_TOKEN, (err, user) => {
+    jwt.verify(token, SECRET_KEY, (err, user) => {
         if (err) return res.sendStatus(403);
         req.user = user;
         next();

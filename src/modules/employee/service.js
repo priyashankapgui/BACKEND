@@ -6,10 +6,11 @@ const salt = bcrypt.genSaltSync(10);
 
 import jwt from "jsonwebtoken";
 
-import { ACCESS } from "../../../config/config.js";
-const { ACCESS_TOKEN } = ACCESS;
+import { SECRET } from "../../../config/config.js";
+const { SECRET_KEY: ACCESS_TOKEN } = SECRET;
 
 import emailjs from "@emailjs/nodejs";
+import { or } from "sequelize";
 
 export const getAllEmployees = async () => {
   try {
@@ -30,6 +31,47 @@ export const getEmployeeById = async (employeeId) => {
 };
 
 export const createEmployee = async (employee) => {
+  const { employeeId,role,email, password ,phone} = employee;
+
+  // Check if the employeeId already exists
+  const existingEmployee = await Employee.findOne({ where: { employeeId: employeeId } });
+  if (existingEmployee ) {
+    throw new Error("Employee ID already exists");
+  }
+  else if(employeeId.length != 4){
+    throw new Error("Employee ID must be a 4-digit number");
+  }
+
+  // const existingEmail = await Employee.findOne({ where: { email: email } });
+  // if (existingEmail) {
+  //   throw new Error("Email already exists");
+  // }
+
+  // Validate employee role
+  const roleRegex = /^(cashier|admin|superadmin)$/;
+  if (!roleRegex.test(role)) {
+    throw new Error("Invalid role");
+  }
+ 
+
+  // Validate email
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    throw new Error("Invalid email format");
+  }
+
+  // Validate password
+  if (password.length < 8 && password.length > 20) {
+    throw new Error("Password must be at least 8 characters long");
+  }
+
+  // Validate phone number
+  const phoneRegex = /^[0-9]{10}$/;
+  if (!phoneRegex.test(phone)) {
+    throw new Error("Invalid phone number");
+  }
+
+
   try {
     const newEmployee = await Employee.create(employee);
     return newEmployee;
@@ -239,8 +281,9 @@ export const verifyAdmin = async(req,res)=> {
 
 // Verify the token
   try {
-    const decoded = jwt.verify(token,ACCESS_TOKEN);
 
+    const decoded = jwt.verify(token,ACCESS_TOKEN);
+    console.log(decoded);
     const {employeeId,role} = decoded;
 
     // Check if the employeeid and role matches the one associated with the user's account
@@ -248,7 +291,8 @@ export const verifyAdmin = async(req,res)=> {
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
-    else if (role != 'admin') {
+
+    else if (role != 'admin' && role != 'superadmin') {
       return res.status(403).json({ message: 'Unauthorized' });
     }
     else{
@@ -258,6 +302,32 @@ export const verifyAdmin = async(req,res)=> {
   } catch (error) {
     // Handle token verification errors
   return res.status(500).json({ error: error.message });
+  }
+}
+
+// Function to verify super admin
+export const verifySuperAdmin = async (req, res) => {
+  const authHeader = req.headers["authorization"];
+  const token = authHeader.split(" ")[1];
+
+  // Verify the token
+  try {
+    const decoded = jwt.verify(token, ACCESS_TOKEN);
+
+    const { employeeId, role } = decoded;
+
+    // Check if the employeeid and role matches the one associated with the user's account
+    const user = await Employee.findOne({ employeeId });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    } else if (role != "superadmin") {
+      return res.status(403).json({ message: "Unauthorized" });
+    } else {
+      return res.status(200).json({ message: "User Verified" });
+    }
+  } catch (error) {
+    // Handle token verification errors
+    return res.status(500).json({ error: error.message });
   }
 }
 

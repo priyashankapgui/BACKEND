@@ -8,9 +8,7 @@ const Employee = sequelize.define('employee', {
         type: DataTypes.INTEGER,
         allowNull: false,
         primaryKey: true,
-        
-        
-    },
+      },
     
     employeeName: {
         type: DataTypes.STRING,
@@ -27,7 +25,8 @@ const Employee = sequelize.define('employee', {
     role: {
         type: DataTypes.STRING,
         allowNull: false,
-    },
+      },
+    
     phone: {
         type: DataTypes.STRING,
         allowNull: false,

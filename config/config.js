@@ -1,7 +1,7 @@
 import dotenv from "dotenv";
 dotenv.config();
 
-export const ACCESS = {
-  ACCESS_TOKEN: process.env.ACCESS_TOKEN_SECRET,
+export const SECRET = {
+  SECRET_KEY: process.env.ACCESS_TOKEN_SECRET,
   
 };

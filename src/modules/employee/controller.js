@@ -1,7 +1,7 @@
 // import  sequelize  from '../../../config/database.js';
 import { getAllEmployees,getEmployeeById,createEmployee,updateEmployeeById,deleteEmployeeById } from "../employee/service.js";
-import { ACCESS } from "../../../config/config.js";
-const { ACCESS_TOKEN } = ACCESS;
+import { SECRET } from "../../../config/config.js";
+const { SECRET_KEY: ACCESS_TOKEN } = SECRET;
 
 
   

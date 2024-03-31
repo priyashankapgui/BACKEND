@@ -6,7 +6,7 @@ import {
   updateEmployee,
   deleteEmployee,
 } from "../employee/controller.js";
-import { handleLogin, forgotPassword,passwordReset,verifyAdmin } from "../employee/service.js";
+import { handleLogin, forgotPassword,passwordReset,verifyAdmin , verifySuperAdmin} from "../employee/service.js";
 import { getAllEmployees } from "../employee/service.js";
 import { authenticateToken } from "../../middleware/authenticationMiddleware.js";
 
@@ -35,5 +35,6 @@ EmployeeRouter.get("/api/employees/verify", authenticateToken, (req, res) => {
 
 
 EmployeeRouter.get("/api/employees/verifyAdmin", authenticateToken,verifyAdmin);
+EmployeeRouter.get("/api/employees/verifySuperAdmin", authenticateToken,verifySuperAdmin);
     
 export default EmployeeRouter;
