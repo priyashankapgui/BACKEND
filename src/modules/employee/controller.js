@@ -1,20 +1,9 @@
 // import  sequelize  from '../../../config/database.js';
 import { getAllEmployees,getEmployeeById,createEmployee,updateEmployeeById,deleteEmployeeById } from "../employee/service.js";
-import bcrypt from 'bcryptjs';
+import { ACCESS } from "../../../config/config.js";
+const { ACCESS_TOKEN } = ACCESS;
 
 
-
-
-// export const test = async (req, res) => {
-//     try {
-//         await sequelize.authenticate();
-//         res.status(200).json({ message: 'Connection has been established successfully.' });
-//         console.log('Connection has been established successfully.');
-//       } catch (error) {
-//         res.status(500).json({ error: error.message });
-//         console.error('Unable to connect to the database:', error);
-//       }
-//   };
   
 
 export const getEmployees = async (req, res) => {
@@ -116,7 +105,7 @@ export const deleteEmployee = async (req, res) => {
 
   // Verify the token
     try {
-      const decoded = jwt.verify(token, RESET_TOKEN_SECRET);
+      const decoded = jwt.verify(token,RESET_TOKEN_SECRET);
       const { email } = decoded;
 
       // Check if the token matches the one associated with the user's account
@@ -128,6 +117,9 @@ export const deleteEmployee = async (req, res) => {
     }
   };
 
+
+  
+  
 
 
 

@@ -104,8 +104,14 @@ export const handleLogin = async (req, res) => {
       return res.status(200).json({
         message: "Login successful",
         token: accessToken,
-        role: user.role,
-        id: user.employeeId,
+        user: {
+          employeeId: user.employeeId,
+          employeeName: user.employeeName,
+          email: user.email,
+          role: user.role,
+          phone: user.phone,
+          address: user.address,
+        },
       });
     } else if (!passwordMatch) {
       // Passwords match, login successful
@@ -224,3 +230,34 @@ export const passwordReset = async (req, res) => {
     return res.status(500).json({ message: "Internal server error" });
   }
 };
+
+
+export const verifyAdmin = async(req,res)=> {
+  const authHeader = req.headers['authorization'];
+    const token = authHeader.split(' ')[1];
+
+
+// Verify the token
+  try {
+    const decoded = jwt.verify(token,ACCESS_TOKEN);
+
+    const {employeeId,role} = decoded;
+
+    // Check if the employeeid and role matches the one associated with the user's account
+    const user = await Employee.findOne({ employeeId});
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    else if (role != 'admin') {
+      return res.status(403).json({ message: 'Unauthorized' });
+    }
+    else{
+      return res.status(200).json({ message: 'User Verified' });
+    }
+    
+  } catch (error) {
+    // Handle token verification errors
+  return res.status(500).json({ error: error.message });
+  }
+}
+

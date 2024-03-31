@@ -6,10 +6,10 @@ import {
   updateEmployee,
   deleteEmployee,
 } from "../employee/controller.js";
-import { handleLogin, forgotPassword,passwordReset } from "../employee/service.js";
+import { handleLogin, forgotPassword,passwordReset,verifyAdmin } from "../employee/service.js";
 import { getAllEmployees } from "../employee/service.js";
 import { authenticateToken } from "../../middleware/authenticationMiddleware.js";
-//import { reset } from "nodemon";
+
 
 const EmployeeRouter = express.Router();
 
@@ -26,4 +26,14 @@ EmployeeRouter.post("/api/login", handleLogin);
 EmployeeRouter.post("/api/login/fp", forgotPassword);
 EmployeeRouter.post("/api/login/resetpw", passwordReset);
 
+EmployeeRouter.get("/api/employees/verify", authenticateToken, (req, res) => {
+    res.status(200).json({
+        status: "success",
+        message: "User Verified",
+    });
+});
+
+
+EmployeeRouter.get("/api/employees/verifyAdmin", authenticateToken,verifyAdmin);
+    
 export default EmployeeRouter;
