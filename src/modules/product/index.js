@@ -1,18 +1,11 @@
-import products from './src/modules/product/product.js';
-import productRouter from './src/modules/product/routes.js';
-import { getProducts } from '../product/controller.js';
-import { get_Products} from '../product/service.js';
-
-
+import * as ProductController from "../product/controller.js";
+import * as ProductService from "../product/service.js";
+import * as ProductRoutes from "../product/routes.js";
+import Products from "../product/product.js";
 
 module.exports = {
-  ProductConstants: constants,
-
-  ProductService: service,
-
-  ProductController: controller,
-
-  ProductRoutes: routes,
-
-  Product: Product,
+  Controller: ProductController,
+  Service: ProductService,
+  Routes: ProductRoutes,
+  Product: Products,
 };
