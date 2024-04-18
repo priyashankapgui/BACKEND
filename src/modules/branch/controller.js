@@ -1,16 +1,23 @@
+// Importing required modules
 import express from 'express';
-import branches from './branch.js';
-import { getAllBranches,getBranchById,createBranch,updateBranchById,deleteBranchById } from './service.js'
+import branches from './branch.js'; // Importing the branches model
+import { getAllBranches,
+        getBranchById,
+        createBranch,
+        updateBranchById,
+        deleteBranchById } from './service.js' // Importing service functions to interact with the branches model
 
+// Function to get all branches
 export const getBranches = async (req, res) => {
   try {
-    const branchesList = await getAllBranches();
-    res.status(200).json(branchesList);
+    const branchesList = await getAllBranches(); 
+    res.status(200).json(branchesList);  
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: error.message }); 
   }
 };
 
+// Function to get a specific branch by ID
 export const getBranch = async (req, res) => {
   const branchId = req.params.branchId;
   try {
@@ -25,6 +32,7 @@ export const getBranch = async (req, res) => {
   }
 };
 
+// Function to create a new branch
 export const createNewBranch = async (req, res) => {
   const branchData = req.body;
   try {
@@ -35,6 +43,7 @@ export const createNewBranch = async (req, res) => {
   }
 };
 
+// Function to update a branch by ID
 export const updateBranch = async (req, res) => {
   const branchId = req.params.branchId;
   const updatedBranchData = req.body;
@@ -50,7 +59,7 @@ export const updateBranch = async (req, res) => {
   }
 };
 
-
+// Function to delete a branch by ID
 export const deleteBranch = async (req, res) => {
   const branchId = req.params.branchId;
   try {

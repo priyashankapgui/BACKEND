@@ -77,4 +77,3 @@ process.on('SIGINT', () => {
 
 export { sequelize, Category, products ,feedback};
 
-

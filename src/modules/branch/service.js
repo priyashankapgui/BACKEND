@@ -1,6 +1,7 @@
+// Importing the branches model
 import branches from '../branch/branch.js'
 
-
+// Function to get all branches
 export const getAllBranches = async () => {
     try{
         const branchReq = await branches.findAll();
@@ -12,6 +13,7 @@ export const getAllBranches = async () => {
     }
 };
 
+// Function to get a branch by ID
 export const getBranchById = async (branchId) => {
     try {
         const branchbyId = await branches.findByPk(branchId);
@@ -21,6 +23,7 @@ export const getBranchById = async (branchId) => {
     }
 };
 
+// Function to create a new branch
 export const createBranch = async (Branch) => {
     try {
       const newBranch = await branches.create(Branch);
@@ -30,6 +33,7 @@ export const createBranch = async (Branch) => {
     }
 };
 
+// Function to update a branch by ID
 export const updateBranchById = async (branchId, branchData) => {
   try {
     const branch = await branches.findByPk(branchId);
@@ -45,7 +49,7 @@ export const updateBranchById = async (branchId, branchData) => {
   }
 };
 
-
+// Function to delete a branch by ID
 export const deleteBranchById = async (branchId) => {
     try {
       const branch = await branches.findByPk(branchId);
