@@ -6,6 +6,7 @@ import Productrouter from "./src/modules/product/routes.js";
 import categoryRouter from "./src/modules/category/routes.js";
 import supplierRouter from "./src/modules/supplier/routes.js";
 import GRNRouter from "./src/modules/GRN/routes.js";
+import ListedProductsRouter from "./src/modules/listedProducts/routes.js";
 //import productSupplierRouter from './src/modules/product_Supplier/routes.js';
 import categories from "./src/modules/category/category.js";
 import suppliers from "./src/modules/supplier/supplier.js";
@@ -26,13 +27,18 @@ app.use("/", Productrouter);
 app.use("/", categoryRouter);
 app.use("/", supplierRouter);
 app.use("/", GRNRouter);
+app.use("/", ListedProductsRouter);
 //app.use('/', productSupplierRouter);
 
 app.use("/api", Productrouter);
 app.use("/api", categoryRouter);
 app.use("/api", supplierRouter);
 app.use("/api", GRNRouter);
+app.use("/api", ListedProductsRouter);
 //app.use('/api', productSupplierRouter);
+
+
+
 
 setupCategoryAssociations();
 setupInvoiceAssociations();
