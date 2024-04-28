@@ -3,11 +3,14 @@ import products from "../product/product.js";
 import categories from "../category/category.js";
 import productRouter from "../product/routes.js";
 import sequelize from "../../../config/database.js";
+//import productSupplier from "../product_Supplier/product_Supplier.js";
+import suppliers from "../supplier/supplier.js";
 
 // Function to retrieve all products with their associated categories
 export const getAllProducts = async () => {
   try {
     const productsReq = await products.findAll({
+      
       include: [
         //associated model should be loaded along with the main model
         {
@@ -125,3 +128,65 @@ export const deleteProductById = async (productId) => {
     throw new Error("Error deleting product: " + error.message);
   }
 };
+
+
+// Service function to get productId by productName
+export const getProductIdByProductNameService = async (productName) => {
+  try {
+    const product = await products.findOne({
+      where: { productName },
+      attributes: ['productId']
+    });
+
+    return product ? product.productId : null;
+  } catch (error) {
+    console.error("Error fetching productId by productName:", error);
+    throw new Error("Error fetching productId by productName");
+  }
+};
+
+
+// // Service function to get productId and corresponding supplierName by productName
+// export const getProductDetailsByProductName = async (productName) => {
+//   try {
+//     // Find the product by productName
+//     const product = await products.findOne({
+//       where: { productName },
+//       include: [
+//         {
+//           model: productSupplier,
+//           include: [suppliers] // Include suppliers association
+//         }
+//       ]
+//     });
+
+//     if (!product) {
+//       return null; // Return null if product not found
+//     }
+
+//     // Extract productId and corresponding supplierName
+//     const productId = product.productId;
+//     const supplierName = product.product_Suppliers.length > 0 ? product.product_Suppliers[0].supplier.supplierName : null;
+
+//     return { productId, supplierName };
+//   } catch (error) {
+//     console.error("Error fetching product details by productName:", error);
+//     throw new Error("Error fetching product details by productName");
+//   }
+// };
+
+export const searchSuppliersByProductName = async (productId) => {
+  try {
+    // Query the productSupplier model to find suppliers for the given productId
+    const suppliersDetails = await productSupplier.findAll({
+      where: { productId },
+      include: [{ model: suppliers, attributes: ['branchName', 'supplierId', 'supplierName', 'regNo', 'email', 'address', 'contactNo'] }]
+    });
+
+    return suppliersDetails;
+  } catch (error) {
+    // Log and throw any errors that occur during the process
+    console.error("Error searching suppliers by product ID:", error);
+    throw new Error("Error getting suppliers by product ID");
+  }
+}; 

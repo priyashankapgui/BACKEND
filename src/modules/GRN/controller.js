@@ -1,5 +1,6 @@
 // import { getAllStocks, getStockById, addStock , deleteStockById, updateStockById } from '../stock/service.js';
 
+
 import {
   addGRN,
   getAllGRNs,
@@ -8,44 +9,27 @@ import {
   getGRNDetails,
   updateGRNById,
   deleteGRNById,
+  getTotalAmountByInvoiceNoService
 } from "../GRN/service.js";
+import * as grnService from '../GRN/service.js';
+import { mapCategoryNameToId } from "../../modules/category/service.js";
 
 // Controller function to create a new GRN
 export const createGRN = async (req, res) => {
   const {
     GRN_NO,
     invoiceNo,
-    productId,
-    productName,
-    batchNo,
-    totalQty,
-    purchasePrice,
-    sellingPrice,
-    freeQty,
-    expDate,
-    amount,
     supplierName,
-    branch,
-    comment,
+    branchName,
   } = req.body;
   try {
-    const newStock = await addGRN({
+    const newgrn = await addGRN({
       GRN_NO,
       invoiceNo,
-      productId,
-      productName,
-      batchNo,
-      totalQty,
-      purchasePrice,
-      sellingPrice,
-      freeQty,
-      expDate,
-      amount,
       supplierName,
-      branch,
-      comment,
+      branchName,
     });
-    res.status(201).json(newStock);
+    res.status(201).json(newgrn);
   } catch (error) {
     console.error("Error adding stock:", error);
     res.status(500).json({ error: "Internal server error" });
@@ -131,6 +115,26 @@ export const deleteGRN = async (req, res) => {
     res.status(204).json({ message: "Stock deleted successfully" });
   } catch (error) {
     console.error("Error deleting stock:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+
+export const getTotalAmountByInvoiceNo = async (req, res) => {
+  const { invoiceNo } = req.params;
+  try {
+    if (!invoiceNo) {
+      res.status(400).json({ error: "Invoice number is required" });
+      return;
+    }
+    const totalAmount = await grnService.getTotalAmountByInvoiceNoService(invoiceNo);
+    if (!totalAmount) {
+      res.status(404).json({ error: "No record found for the given invoice number" });
+      return;
+    }
+    res.status(200).json(totalAmount);
+  } catch (error) {
+    console.error("Error fetching total amount by invoiceNo:", error);
     res.status(500).json({ error: "Internal server error" });
   }
 };

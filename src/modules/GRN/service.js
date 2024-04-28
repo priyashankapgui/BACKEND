@@ -3,17 +3,17 @@ import grn from "../GRN/grn.js";
 import suppliers from "../supplier/supplier.js";
 
 // Function to add a new GRN (Goods Receipt Note)
-export const addGRN = async (stockData) => {
+export const addGRN = async (grnData) => {
   try {
-    const amount =(stockData.totalQty - stockData.freeQty) * stockData.purchasePrice;
-    const stockDataWithAmount = { ...stockData, amount };
-    const newStock = await grn.create(stockDataWithAmount);
-    return newStock;
+    const newgrn = await grn.create(grnData);
+    return newgrn;
   } catch (error) {
     console.error("Error creating stock:", error);
     throw new Error("Error creating stock: " + error.message);
   }
 };
+
+
 // Function to get all GRNs
 export const getAllGRNs = async () => {
   try {
@@ -108,5 +108,23 @@ export const deleteGRNById = async (GRN_NO) => {
     await stock.destroy();
   } catch (error) {
     throw new Error("Error deleting stock: " + error.message);
+  }
+};
+
+
+export const getTotalAmountByInvoiceNoService = async (invoiceNo) => {
+  try {
+    const totalAmount = await grn.findOne({
+      attributes: [
+        [sequelize.fn('sum', sequelize.col('amount')), 'totalAmount'],
+      ],
+      where: {
+        invoiceNo: invoiceNo,
+      },
+    });
+    return totalAmount;
+  } catch (error) {
+    console.error("Error getting total amount by invoiceNo:", error);
+    throw new Error("Error getting total amount by invoiceNo");
   }
 };

@@ -2,7 +2,7 @@ import { DataTypes } from "sequelize";
 import sequelize from "../../../config/database.js";
 import products from "../product/product.js";
 
-const Category = sequelize.define(
+const categories = sequelize.define(
   "categories",
   {
     categoryId: {
@@ -25,7 +25,7 @@ const Category = sequelize.define(
 
 // Function to setup associations for Category model
 export const setupCategoryAssociations = () => {
-  Category.hasMany(products, { foreignKey: "productId", as: "products" });
+  categories.hasMany(products, { foreignKey: "productId", as: "products" });
 };
 
-export default Category;
+export default categories;

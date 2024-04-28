@@ -1,81 +1,46 @@
 import { DataTypes } from "sequelize";
 import sequelize from "../../../config/database.js";
-import invoices from "../invoice/invoice.js";
+import suppliers from "../supplier/supplier.js";
+
+
 
 const grn = sequelize.define(
-  "GRN",
+  "grn",
   {
     GRN_NO: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING, 
       allowNull: false,
       primaryKey: true,
     },
     invoiceNo: {
       type: DataTypes.STRING,
       allowNull: false,
+    },
+   
+    branchId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+    supplierId: {
+      type: DataTypes.INTEGER, 
+      allowNull: false,
       references: {
-        model: invoices,
-        key: "invoiceNo",
+        model: suppliers,
+        key: "supplierId",
         onDelete: "CASCADE",
+        onUpdate: "CASCADE"
       },
-    },
-    productId: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-    },
-    productName: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    batchNo: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    totalQty: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-    },
-    purchasePrice: {
-      type: DataTypes.FLOAT,
-      allowNull: false,
-    },
-    sellingPrice: {
-      type: DataTypes.FLOAT,
-      allowNull: false,
-    },
-    freeQty: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-    },
-    expDate: {
-      type: DataTypes.DATE,
-      allowNull: true,
-    },
-    amount: {
-      type: DataTypes.FLOAT,
-      allowNull: true,
-    },
-
-    supplierName: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    branch: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    comment: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
+    }, 
   },
   {
-    tableName: "stocks",
+    tableName: "grn",
   }
 );
 
-grn.belongsTo(invoices, { foreignKey: "invoiceNo" });
+export const setupProductGRNAssociations = () => {
+  grn.belongsToMany(products, { through: "product_GRN" });
+};
 
 export default grn;
 
-//stocks.belongsTo(invoices, { foreignKey: 'invoiceNo' })
+

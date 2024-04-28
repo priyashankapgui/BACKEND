@@ -1,11 +1,13 @@
 import { DataTypes } from "sequelize";
 import sequelize from "../../../config/database.js";
+import products from "../product/product.js";
+//import grn from "../GRN/grn.js";
 
 const suppliers = sequelize.define(
   "suppliers",
   {
     supplierId: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.INTEGER, 
       allowNull: false,
       primaryKey: true,
       autoIncrement: true,
@@ -40,5 +42,13 @@ const suppliers = sequelize.define(
     timestamps: false,
   }
 );
+
+export const setupProductSupplierAssociations = () => {
+  suppliers.belongsToMany(products, { through: "product_Supplier" });
+};
+
+// export const setupGRNSUPPLIERAssociations = () => {
+//   suppliers.hasMany(grn, { foreignKey: "GRN_NO", as: "grn" });
+// };
 
 export default suppliers;

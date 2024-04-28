@@ -62,6 +62,7 @@ export const deleteCategoryById = async (categoryId) => {
 // Function to map a category name to its ID
 export const mapCategoryNameToId = async (categoryName) => {
   try {
+    console.log("Mapping category name to ID:", categoryName);
     const category = await categories.findOne({
       where: { categoryName: categoryName },
     });
@@ -71,6 +72,7 @@ export const mapCategoryNameToId = async (categoryName) => {
       throw new Error("Category not found");
     }
   } catch (error) {
+    console.error("Error mapping category name to ID:", error);
     throw new Error("Error mapping category name to ID: " + error.message);
   }
 };

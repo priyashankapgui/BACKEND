@@ -9,3 +9,4 @@ module.exports = {
   Routes: CategoryRoutes,
   Category: categories,
 };
+

@@ -18,6 +18,10 @@ const products = sequelize.define(
       type: DataTypes.STRING,
       allowNull: false,
     },
+    branchName: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
     description: {
       type: DataTypes.STRING,
       allowNull: true,
@@ -32,7 +36,8 @@ const products = sequelize.define(
       references: {
         model: categories,
         key: "categoryId",
-        onDelete: "SETNULL",
+        onDelete: "CASCADE",
+        onUpdate: "CASCADE"
       },
     },
   },
@@ -40,7 +45,14 @@ const products = sequelize.define(
 );
 
 products.belongsToMany(suppliers, { through: "product_Supplier" });
-products.belongsToMany(grn, { through: "product_Stock" });
+
 products.belongsTo(categories, { foreignKey: "categoryId" });
+
+
+export const setupProductGRNAssociations = () => {
+  products.belongsToMany(grn, { through: "product_GRN" });
+};
+
+
 
 export default products;
