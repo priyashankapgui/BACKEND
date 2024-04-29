@@ -1,16 +1,11 @@
 import Employee from "../employee/employee.js";
-
 import bcrypt from "bcryptjs";
-
 const salt = bcrypt.genSaltSync(10);
-
 import jwt from "jsonwebtoken";
-
 import { SECRET } from "../../../config/config.js";
 const { SECRET_KEY: ACCESS_TOKEN } = SECRET;
-
 import emailjs from "@emailjs/nodejs";
-import { or } from "sequelize";
+
 
 export const getAllEmployees = async () => {
   try {
@@ -42,10 +37,10 @@ export const createEmployee = async (employee) => {
     throw new Error("Employee ID must be a 4-digit number");
   }
 
-  // const existingEmail = await Employee.findOne({ where: { email: email } });
-  // if (existingEmail) {
-  //   throw new Error("Email already exists");
-  // }
+  const existingEmail = await Employee.findOne({ where: { email: email } });
+  if (existingEmail) {
+    throw new Error("Email already exists");
+  }
 
   // Validate employee role
   const roleRegex = /^(cashier|admin|superadmin)$/;
@@ -61,9 +56,10 @@ export const createEmployee = async (employee) => {
   }
 
   // Validate password
-  if (password.length < 8 && password.length > 20) {
-    throw new Error("Password must be at least 8 characters long");
+  if (!/^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,20}$/.test(password)) {
+    throw new Error("Invalid password format");
   }
+
 
   // Validate phone number
   const phoneRegex = /^[0-9]{10}$/;
@@ -121,8 +117,7 @@ export const handleLogin = async (req, res) => {
     const user = await Employee.findOne({ where: { employeeId: employeeId } });
 
     if (!user) {
-      // User not found
-      return res.status(404).json({ message: "User not found" });
+      return res.status(404).json({ message: "Invalid Credentials" });
     }
 
     const storedPassword = await user.password;
@@ -156,7 +151,6 @@ export const handleLogin = async (req, res) => {
         },
       });
     } else if (!passwordMatch) {
-      // Passwords match, login successful
       return res.status(401).json({ message: "Invalid Credentials" });
     }
   } catch (error) {
@@ -191,23 +185,20 @@ export const forgotPassword = async (req, res) => {
       emailjs.init({
         publicKey: "U4RoOjKB87mzLhhqW",
         privateKey: process.env.EMAILJS_API_KEY,
-        // Do not allow headless browsers
         blockHeadless: true,
 
         limitRate: {
-          // Set the limit rate for the application
           id: "app",
-          // Allow 1 request per 10s
           throttle: 10000,
         },
       });
 
-      // Provide template params if needed (optional)
+      
       const templateParams = {
         resetLink: resetLink,
       };
 
-      // Send email using EmailJS with the specified template
+      // Send email using EmailJS with the  template
       emailjs.send("service_kqwt4xi", "template_hbmw31c", templateParams).then(
         (response) => {
           console.log("SUCCESS!", response.status, response.text);
@@ -245,14 +236,10 @@ export const passwordReset = async (req, res) => {
       return res.status(404).json({ message: "Invalid Request" });
     }
 
-    if (newPassword !== confirmPassword) {
-      return res.status(400).json({ message: "Passwords do not match" });
-    }
-
-    if (newPassword.length < 8) {
+    if (newPassword.length < 8 || newPassword.length > 20 || !/^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,20}$/.test(newPassword)) {
       return res
         .status(400)
-        .json({ message: "Password must be at least 8 characters long" });
+        .json({ message: "Invalid password format" });
     }
 
     if (newPassword === user.password) {
@@ -261,8 +248,7 @@ export const passwordReset = async (req, res) => {
         .json({ message: "New password cannot be the same as old password" });
     }
 
-    //const hashedPassword = bcrypt.hashSync(newPassword, salt);
-    //user.password = hashedPassword;
+    
     user.password = newPassword;
     await user.save();
 
@@ -274,12 +260,22 @@ export const passwordReset = async (req, res) => {
 };
 
 
+
+export const verify = async (req, res) => {
+  res.status(200).json({
+    status: "success",
+    message: "User Verified",
+});
+}
+
+
+//function to verify admin
 export const verifyAdmin = async(req,res)=> {
   const authHeader = req.headers['authorization'];
     const token = authHeader.split(' ')[1];
 
 
-// Verify the token
+
   try {
 
     const decoded = jwt.verify(token,ACCESS_TOKEN);
@@ -300,7 +296,6 @@ export const verifyAdmin = async(req,res)=> {
     }
     
   } catch (error) {
-    // Handle token verification errors
   return res.status(500).json({ error: error.message });
   }
 }
@@ -310,7 +305,7 @@ export const verifySuperAdmin = async (req, res) => {
   const authHeader = req.headers["authorization"];
   const token = authHeader.split(" ")[1];
 
-  // Verify the token
+
   try {
     const decoded = jwt.verify(token, ACCESS_TOKEN);
 
@@ -326,7 +321,7 @@ export const verifySuperAdmin = async (req, res) => {
       return res.status(200).json({ message: "User Verified" });
     }
   } catch (error) {
-    // Handle token verification errors
+   
     return res.status(500).json({ error: error.message });
   }
 }
