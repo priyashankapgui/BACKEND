@@ -1,21 +1,12 @@
-import express from 'express';
-import Category from './src/modules/category/category.js';
-import categoryRouter from './src/modules/category/routes.js';
-import { createCategory, getCategory, deleteCategory, updateCategory } from '../category/controller.js';
-
-
+import * as CategoryController from "../category/controller.js";
+import * as CategoryService from "../category/service.js";
+import * as CategoryRoutes from "../category/routes.js";
+import categories from "../category/category.js";
 
 module.exports = {
-  //ProductConstants: constants,
-
-  //ProductService: service,
-
-  CategoryController: controller,
-
-  CategoryRoutes: routes,
-
-  Category: category,
+  Controller: CategoryController,
+  Service: CategoryService,
+  Routes: CategoryRoutes,
+  Category: categories,
 };
-
-
 
