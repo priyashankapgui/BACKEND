@@ -15,8 +15,11 @@ import { getProducts } from "./src/modules/product/controller.js";
 import { getAllProducts } from "./src/modules/product/service.js";
 import categories, {setupCategoryAssociations} from "./src/modules/category/category.js";
 import cors from "cors"; 
-import productGRNRouter from "./src/modules/product_GRN/routes.js";
+//import productGRNRouter from "./src/modules/product_GRN/routes.js";
 import { setupAssociations } from "./src/modules/associationSetup.js";
+import Branchrouter from "./src/modules/branch/routes.js";
+import branchSupplierRouter from "./src/modules/branch_Supplier/routes.js";
+import branches, {setupBranchSupplierAssociations} from "./src/modules/branch/branch.js";
  
 const app = express();
  
@@ -29,14 +32,16 @@ app.use("/", categoryRouter);
 app.use("/", supplierRouter);
 app.use("/", GRNRouter);
 app.use('/', productSupplierRouter);
-app.use('/', productGRNRouter);
+//app.use('/', productGRNRouter);
+app.use('/',Branchrouter);
+app.use('/', branchSupplierRouter);
 
 app.use("/api", Productrouter);  
 app.use("/api", categoryRouter);
 app.use("/api", supplierRouter);
 app.use("/api", GRNRouter);
 app.use('/api', productSupplierRouter);
-app.use('/api', productGRNRouter);
+//app.use('/api', productGRNRouter);
 
 app.use('/Images', express.static('.src/Images'))
 
@@ -45,6 +50,7 @@ setupCategoryAssociations();
 setupProductSupplierAssociations();
 setupProductGRNAssociations();
 //setupGRNSUPPLIERAssociations();
+setupBranchSupplierAssociations();
 
 setupAssociations();
 
@@ -107,4 +113,4 @@ process.on('unhandledRejection', (err) => {
 //     });
 // });
 
- export { sequelize, categories, suppliers, grn, products };
+ export { sequelize, categories, suppliers, grn, products, branches };

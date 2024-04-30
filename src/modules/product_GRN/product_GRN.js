@@ -30,7 +30,7 @@ const productGRN = sequelize.define(
         key: 'GRN_NO'
       }
     },
-    batchNo: {
+    batchNo: { 
       type: DataTypes.STRING,
       allowNull: false,
     },
@@ -93,7 +93,7 @@ const productGRN = sequelize.define(
   },
   {
     tableName: "product_GRN",
-    timestamps: false,
+    timestamps: true,
   }
 );
 

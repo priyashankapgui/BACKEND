@@ -20,7 +20,9 @@ const categories = sequelize.define(
       allowNull: true,
     },
   },
-  { tableName: "categories" }
+  { tableName: "categories",
+    timestamps: true,
+  }
 );
 
 // Function to setup associations for Category model

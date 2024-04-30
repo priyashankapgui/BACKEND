@@ -100,18 +100,18 @@ export const getSuppliersByProductName = async (req, res) => {
   }
 };
 
-// Controller function to create a new supplier
-export const createSupplier = async (req, res) => {
-  const supplierData = req.body;
-  try {
-    console.log("Supplier data received:", supplierData);
-    const newSupplier = await addSupplier(supplierData);
-    res.status(201).json(newSupplier);
-  } catch (error) {
-    console.error("Error creating supplier:", error);
-    res.status(500).json({ error: error.message });
-  }
-};
+// // Controller function to create a new supplier
+// export const createSupplier = async (req, res) => {
+//   const supplierData = req.body;
+//   try {
+//     console.log("Supplier data received:", supplierData);
+//     const newSupplier = await addSupplier(supplierData);
+//     res.status(201).json(newSupplier);
+//   } catch (error) {
+//     console.error("Error creating supplier:", error);
+//     res.status(500).json({ error: error.message });
+//   }
+// };
 
 // Controller function  to update an existing supplier
 export const updateSupplier = async (req, res) => {
@@ -138,5 +138,50 @@ export const deleteSupplier = async (req, res) => {
   } catch (error) {
     console.error("Error deleting supplier:", error);
     res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+
+// const addSupplier = async (req, res) => {
+//   const { supplierName, regNo, email, address, contactNo, branchName } = req.body;
+
+//   try {
+//     // Map branch name to branchId
+//     const branchId = await mapBranchNameToId(branchName);
+
+//     // Create new supplier record
+//     const newSupplier = await suppliers.create({
+//       supplierName,
+//       regNo,
+//       email,
+//       address,
+//       contactNo
+//     });
+
+//     // Create new record in branch_Supplier table
+//     await branchSupplier.create({
+//       branchId,
+//       supplierId: newSupplier.supplierId
+//     });
+
+//     res.status(201).json({ message: 'Supplier added successfully' });
+//   } catch (error) {
+//     res.status(500).json({ error: error.message });
+//   }
+// };
+
+// export default addSupplier;
+
+
+export const createSupplier = async (req, res) => {
+  const { supplierName, regNo, email, address, contactNo, branchName } = req.body;
+
+  try {
+    // Call service function to add supplier
+    await addSupplier(supplierName, regNo, email, address, contactNo, branchName);
+    
+    res.status(201).json({ message: 'Supplier added successfully' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
 };

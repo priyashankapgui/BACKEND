@@ -1,6 +1,8 @@
 import { Op } from "sequelize";
 import sequelize from "../../../config/database.js";
 import suppliers from "../supplier/supplier.js";
+import { mapBranchNameToId } from "../../modules/branch/service.js";
+
 //import products from "../product/product.js";
 //import productSupplier from "../product_Supplier/product_Supplier.js";
 
@@ -71,15 +73,15 @@ export const searchSuppliersByProductName = async (productId) => {
 };
 
 // Function to add a new supplier to the database
-export const addSupplier = async (supplierData) => {
-  try {
-    const newSupplier = await suppliers.create(supplierData);
-    if(email)
-    return newSupplier;
-  } catch (error) {
-    throw new Error("Error creating supplier: " + error.message);
-  }
-};
+// export const addSupplier = async (supplierData) => {
+//   try {
+//     const newSupplier = await suppliers.create(supplierData);
+//     if(email)
+//     return newSupplier;
+//   } catch (error) {
+//     throw new Error("Error creating supplier: " + error.message);
+//   }
+// };
 
 // Function to update a supplier by its ID
 export const updateSupplierById = async (supplierId, updatedSupplierData) => {
@@ -124,5 +126,31 @@ export const mapSupplierNameToId = async (supplierName) => {
   } catch (error) {
     console.error("Error mapping supplier name to ID:", error);
     throw new Error("Error mapping supplier name to ID: " + error.message);
+  }
+};
+
+
+export const addSupplier = async (supplierName, regNo, email, address, contactNo, branchName) => {
+  try {
+    // Map branch name to branchId
+    const branchId = await mapBranchNameToId(branchName);
+    
+
+    // Create new supplier record
+    const newSupplier = await suppliers.create({
+      supplierName,
+      regNo,
+      email,
+      address,
+      contactNo
+    });
+
+    // Create new record in branch_Supplier table
+    await branchSupplier.create({
+      branchId,
+      supplierId: newSupplier.supplierId
+    });
+  } catch (error) {
+    throw new Error(error.message);
   }
 };

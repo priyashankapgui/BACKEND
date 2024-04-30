@@ -1,6 +1,7 @@
 import { DataTypes } from "sequelize";
 import sequelize from "../../../config/database.js";
 import suppliers from "../supplier/supplier.js";
+import branches from "../branch/branch.js";
 
 
 
@@ -14,12 +15,18 @@ const grn = sequelize.define(
     },
     invoiceNo: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: false,  
     },
    
     branchId: {
       type: DataTypes.INTEGER,
       allowNull: false,
+      references: {
+        model: branches,
+        key: "branchId",
+        onDelete: "CASCADE",
+        onUpdate: "CASCADE"
+      },
     },
     supplierId: {
       type: DataTypes.INTEGER, 
@@ -34,8 +41,13 @@ const grn = sequelize.define(
   },
   {
     tableName: "grn",
+    timestamps: true,
   }
 );
+
+grn.belongsTo(suppliers, { foreignKey: "supplierId" });
+grn.belongsTo(branches, { foreignKey: "branchId"} );
+
 
 export const setupProductGRNAssociations = () => {
   grn.belongsToMany(products, { through: "product_GRN" });
