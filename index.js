@@ -1,9 +1,12 @@
 import sequelize from "./config/database.js";
 import express from "express";
+import cors from "cors"; 
+import dotenv from "dotenv";
 import products, {setupProductGRNAssociations} from "./src/modules/product/product.js";
 import productSupplier from './src/modules/product_Supplier/product_Supplier.js';
 import Productrouter from "./src/modules/product/routes.js";
 import categoryRouter from "./src/modules/category/routes.js";
+import EmployeeRouter from './src/modules/employee/routes.js';
 import supplierRouter from "./src/modules/supplier/routes.js";
 import GRNRouter from "./src/modules/GRN/routes.js";
 import productSupplierRouter from './src/modules/product_Supplier/routes.js';
@@ -14,7 +17,6 @@ import grn from "./src/modules/GRN/grn.js";
 import { getProducts } from "./src/modules/product/controller.js";
 import { getAllProducts } from "./src/modules/product/service.js";
 import categories, {setupCategoryAssociations} from "./src/modules/category/category.js";
-import cors from "cors"; 
 //import productGRNRouter from "./src/modules/product_GRN/routes.js";
 import { setupAssociations } from "./src/modules/associationSetup.js";
 import Branchrouter from "./src/modules/branch/routes.js";
@@ -24,6 +26,7 @@ import branches, {setupBranchSupplierAssociations} from "./src/modules/branch/br
 const app = express();
  
 app.use(cors());
+dotenv.config();
 
 app.use(express.json());  
   
@@ -35,12 +38,14 @@ app.use('/', productSupplierRouter);
 //app.use('/', productGRNRouter);
 app.use('/',Branchrouter);
 app.use('/', branchSupplierRouter);
+app.use('/', EmployeeRouter);
 
 app.use("/api", Productrouter);  
 app.use("/api", categoryRouter);
 app.use("/api", supplierRouter);
 app.use("/api", GRNRouter);
 app.use('/api', productSupplierRouter);
+app.use('/api', EmployeeRouter);
 //app.use('/api', productGRNRouter);
 
 app.use('/Images', express.static('.src/Images'))
