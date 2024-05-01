@@ -8,7 +8,7 @@ const branchSupplier = sequelize.define(
   {
     branchId: {
       type: DataTypes.INTEGER,
-      allowNull: false,
+      allowNull: false, 
       //primaryKey: true,
       references: {
         model: branches,
