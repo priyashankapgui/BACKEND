@@ -37,6 +37,10 @@ const products = sequelize.define(
       type: DataTypes.STRING,
       allowNull: true,
     },
+    barcode: { 
+      type: DataTypes.STRING, 
+      allowNull: true,
+    },
     categoryId: {
       type: DataTypes.INTEGER,
       allowNull: true,
@@ -47,6 +51,7 @@ const products = sequelize.define(
         onUpdate: "CASCADE"
       },
     },
+    
   },
   { tableName: "products",
     timestamps: true, 
