@@ -9,6 +9,7 @@ export const setupAssociations = () => {
   //setupProductGRNAssociations(grn, products);
   //setupBranchSupplierAssociations(branches, suppliers);
   setupProductBranchAssociations(branches, products);
+  setupGRNBranchAssociations(grn, branches);
 };
 
 // const setupProductSupplierAssociations = (productsModel, suppliersModel) => {
@@ -16,11 +17,11 @@ export const setupAssociations = () => {
 // };
 
 const setupGRNSupplierAssociations = (grn, suppliers) => {
-  suppliers.hasMany(grn, { foreignKey: "GRN_NO", as: "grn" }); 
+  suppliers.hasMany(grn, { foreignKey: "supplierId", as: "grn" }); 
 };
 
 const setupGRNBranchAssociations = (grn, branches) => {
-  branches.hasMany(grn, { foreignKey: "GRN_NO", as: "grn" }); 
+  branches.hasMany(grn, { foreignKey: "branchId", as: "grn" }); 
 };
 
 
