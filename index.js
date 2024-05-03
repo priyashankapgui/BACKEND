@@ -7,12 +7,14 @@ import productSupplier from './src/modules/product_Supplier/product_Supplier.js'
 import Productrouter from "./src/modules/product/routes.js";
 import categoryRouter from "./src/modules/category/routes.js";
 import EmployeeRouter from './src/modules/employee/routes.js';
+import feedbackRouter from './src/modules/feedback/routes.js';
 import supplierRouter from "./src/modules/supplier/routes.js";
 import GRNRouter from "./src/modules/GRN/routes.js";
 import productSupplierRouter from './src/modules/product_Supplier/routes.js';
 //import categories from "./src/modules/category/category.js";
 import suppliers, {setupProductSupplierAssociations} from "./src/modules/supplier/supplier.js";
 import grn from "./src/modules/GRN/grn.js";
+import feedback from "./src/modules/feedback/feedback.js";
 //import invoices, {setupInvoiceAssociations,} from "./src/modules/invoice/invoice.js";
 import { getProducts } from "./src/modules/product/controller.js";
 import { getAllProducts } from "./src/modules/product/service.js";
@@ -37,6 +39,7 @@ app.use("/", GRNRouter);
 app.use('/', productSupplierRouter);
 //app.use('/', productGRNRouter);
 app.use('/',Branchrouter);
+app.use('/',feedbackRouter);
 app.use('/', branchSupplierRouter);
 app.use('/', EmployeeRouter);
 
@@ -44,6 +47,7 @@ app.use("/api", Productrouter);
 app.use("/api", categoryRouter);
 app.use("/api", supplierRouter);
 app.use("/api", GRNRouter);
+app.use("/api", feedbackRouter);
 app.use('/api', productSupplierRouter);
 app.use('/api', EmployeeRouter);
 //app.use('/api', productGRNRouter);
@@ -118,4 +122,4 @@ process.on('unhandledRejection', (err) => {
 //     });
 // });
 
- export { sequelize, categories, suppliers, grn, products, branches };
+ export { sequelize, categories, suppliers, grn, feedback, products, branches };
