@@ -4,15 +4,13 @@ import sequelize from '../../../config/database.js';
 
 
 
-export const getAllfeedback = async () => {
-    // try {
-    //   const productsReq = await feedback.findAll();
-    //   console.log(productsReq);
-    //   return productsReq;
-    // } catch (error) {
-    //   console.error('Error retrieving products:', error);
-    //   throw new Error('Error retrieving products');
-    // }
+  export const getAllFeedback = async () => {
+    try {
+      const allFeedback = await feedback.findAll();
+      return allFeedback;
+    } catch (error) {
+      throw new Error('Error retrieving feedback: ' + error.message);
+    }
 
     console.log ('hello');
   };

@@ -1,15 +1,7 @@
 // main.js
 import express from "express";
-import { getAllfeedback, addFeedback } from "./service.js";
+import { getAllFeedback , addFeedback } from "./service.js";
 
-export const getfeedback = async (req, res) => {
-  try {
-    const feedbackData = await getAllfeedback();
-    res.status(200).json(feedbackData);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-};
 
 export const createfeedback = async (req, res) => {
   try {
@@ -27,5 +19,16 @@ export const createfeedback = async (req, res) => {
   } catch (error) {
     console.error("Error adding feedback:", error);
     res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+
+export const getFeedback = async (req, res) => {
+  try {
+    const feedbackData = await getAllFeedback();
+    res.status(200).json(feedbackData);
+  } catch (error) {
+    console.error('Error retrieving feedback:', error);
+    res.status(500).json({ error: 'Internal server error' });
   }
 };

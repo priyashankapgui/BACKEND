@@ -1,12 +1,11 @@
 import express from 'express';
-import {  getfeedback ,createfeedback} from '../feedback/controller.js';
-import { getAllfeedback } from '../feedback/service.js';
-import feedback from './feedback.js';
+import {  getFeedback ,createfeedback} from '../feedback/controller.js';
+
 
 const feedbackrouter = express.Router();
 
 feedbackrouter.post('/feedback', createfeedback);
-feedbackrouter.get('/feedback', getfeedback);
+feedbackrouter.get('/feedback', getFeedback);
 
 //http://localhost:8082/feedback
 

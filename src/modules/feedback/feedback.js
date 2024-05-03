@@ -28,6 +28,11 @@ const feedback = sequelize.define('feedback', {
     type: DataTypes.STRING,
     allowNull: true,
   },
+  sumerryOfAction: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+ 
  
 
 

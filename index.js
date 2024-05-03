@@ -2,6 +2,7 @@ import sequelize from "./config/database.js";
 import express from "express";
 import cors from "cors"; 
 import dotenv from "dotenv";
+import bodyParser from 'body-parser';
 import products, {setupProductGRNAssociations} from "./src/modules/product/product.js";
 import productSupplier from './src/modules/product_Supplier/product_Supplier.js';
 import Productrouter from "./src/modules/product/routes.js";
@@ -31,6 +32,7 @@ app.use(cors());
 dotenv.config();
 
 app.use(express.json());  
+app.use(bodyParser.urlencoded({ extended: true }));
   
 app.use("/", Productrouter);
 app.use("/", categoryRouter);
