@@ -6,7 +6,7 @@ import {
   mapCategoryNameToId,
   updateCategoryById,
   deleteCategoryById,
-} from "../category/service.js";
+} from "../category/service.js"; 
 
 
 // Controller function to get all categories
@@ -63,7 +63,7 @@ export const updateCategory = async (req, res) => {
 
 // Controller function to delete a category
 export const deleteCategory = async (req, res) => {
-  const categoryId = req.params.categoryId;
+  const categoryId = req.params.categoryId; 
   try {
     await deleteCategoryById(categoryId);
     res.status(200).json({ message: "Category deleted successfully" });
