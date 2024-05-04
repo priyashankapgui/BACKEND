@@ -10,11 +10,9 @@ import {
   getDetailsByInvoiceNoService
   //getTotalAmountByInvoiceNoService
 } from "../GRN/service.js";
-import * as grnService from '../GRN/service.js';
-
 import { createProductGRNService } from "../../modules/product_GRN/service.js";
-import grn from "../../modules/GRN/grn.js";
-import { calculateTotalAmount } from '../../modules/product_GRN/service.js';
+import { calculateTotalAmount, updateProductQty } from '../../modules/product_GRN/service.js'; 
+
 
 
 // Function to create GRN and Product_GRN
@@ -43,6 +41,9 @@ export const createGRNAndProduct = async (req, res) => {
       comment
     };
     const newProductGRN = await createProductGRNService(productGRNData); 
+
+    
+    await updateProductQty(productId);
     
     res.status(201).json({
       GRN: newGRN,
@@ -54,6 +55,7 @@ export const createGRNAndProduct = async (req, res) => {
   }
 };
 
+
 // Controller function to get all GRNs
 export const getGRNs = async (req, res) => {
   try {
@@ -64,6 +66,7 @@ export const getGRNs = async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 };
+
 
 // Controller function to get a GRN by its GRN_NO
 export const getGRN = async (req, res) => {
@@ -81,6 +84,8 @@ export const getGRN = async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 };
+
+
 // Controller function to get GRNs by invoice number
 export const getGRNByInvoiceNoController = async (req, res) => {
   const invoiceNo = req.params.invoiceNo;
@@ -92,25 +97,9 @@ export const getGRNByInvoiceNoController = async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 };
-// Controller function to get GRNs by criteria
-// export const getGRNByCriteria = async (req, res) => {
-//   try {
-//     const { invoiceNo, productId, productName, supplierId, supplierName } =
-//       req.query;
-//     const stockDetails = await getGRNDetails({
-//       invoiceNo,
-//       productId,
-//       productName,
-//       supplierId,
-//       supplierName,
-//     });
 
-//     res.status(200).json(stockDetails);
-//   } catch (error) {
-//     console.error("Error fetching stock details:", error);
-//     res.status(500).json({ error: "Internal server error" });
-//   }
-// };
+
+
 
 export const getGRNByProduct = async (req, res) => {
   try {
@@ -156,6 +145,8 @@ export const updateGRN = async (req, res) => {
   }
 };
 
+
+
 // Controller function to delete a GRN
 export const deleteGRN = async (req, res) => {
   const GRN_NO = req.params.GRN_NO;
@@ -196,6 +187,7 @@ export const getTotalAmountByInvoiceNo = async (req, res) => {
 
 
 
+
 // Controller function to retrieve details by invoice number
 export const getDetailsByInvoiceNo = async (req, res) => {
   try {
@@ -215,3 +207,28 @@ export const getDetailsByInvoiceNo = async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 };
+
+
+
+
+
+
+// Controller function to get GRNs by criteria
+// export const getGRNByCriteria = async (req, res) => {
+//   try {
+//     const { invoiceNo, productId, productName, supplierId, supplierName } =
+//       req.query;
+//     const stockDetails = await getGRNDetails({
+//       invoiceNo,
+//       productId,
+//       productName,
+//       supplierId,
+//       supplierName,
+//     });
+
+//     res.status(200).json(stockDetails);
+//   } catch (error) {
+//     console.error("Error fetching stock details:", error);
+//     res.status(500).json({ error: "Internal server error" });
+//   }
+// };

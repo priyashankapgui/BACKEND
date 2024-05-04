@@ -3,8 +3,9 @@ import products from "../product/product.js";
 import categories from "../category/category.js";
 import productRouter from "../product/routes.js";
 import sequelize from "../../../config/database.js";
-//import productSupplier from "../product_Supplier/product_Supplier.js";
 import suppliers from "../supplier/supplier.js";
+
+
 
 // Function to retrieve all products with their associated categories
 export const getAllProducts = async () => {
@@ -28,6 +29,8 @@ export const getAllProducts = async () => {
   }
 };
 
+
+
 // Function to retrieve a product by its ID with its associated category
 export const getProductById = async (productId) => {
   try {
@@ -43,6 +46,8 @@ export const getProductById = async (productId) => {
     throw new Error("Error fetching product: " + error.message);
   }
 };
+
+
 
 // Function to search products by name using a partial match
 export const searchProductsByName = async (productName) => {
@@ -60,6 +65,8 @@ export const searchProductsByName = async (productName) => {
     throw new Error("Error searching products");
   }
 };
+
+
 
 // Function to search products by category name
 export const searchProductsByCategoryName = async (categoryName) => {
@@ -79,6 +86,7 @@ export const searchProductsByCategoryName = async (categoryName) => {
         "productName",
         "description",
         "image",
+        "barcode",
         "createdAt",
         "updatedAt",
       ],
@@ -91,6 +99,8 @@ export const searchProductsByCategoryName = async (categoryName) => {
   }
 };
 
+
+
 // Function to add a new product
 export const addProduct = async (productData) => {
   try {
@@ -100,6 +110,8 @@ export const addProduct = async (productData) => {
     throw new Error("Error creating product: " + error.message);
   }
 };
+
+
 
 // Function to update a product by its ID
 export const updateProductById = async (productId, updatedProductData) => {
@@ -114,6 +126,8 @@ export const updateProductById = async (productId, updatedProductData) => {
     throw new Error("Error updating product: " + error.message);
   }
 };
+
+
 
 // Function to delete a product by its ID
 export const deleteProductById = async (productId) => {
@@ -130,6 +144,7 @@ export const deleteProductById = async (productId) => {
 };
 
 
+
 // Service function to get productId by productName
 export const getProductIdByProductNameService = async (productName) => {
   try {
@@ -144,6 +159,52 @@ export const getProductIdByProductNameService = async (productName) => {
     throw new Error("Error fetching productId by productName");
   }
 };
+
+
+
+export const searchSuppliersByProductName = async (productId) => {
+  try {
+    // Query the productSupplier model to find suppliers for the given productId
+    const suppliersDetails = await productSupplier.findAll({
+      where: { productId },
+      include: [{ model: suppliers, attributes: ['branchName', 'supplierId', 'supplierName', 'regNo', 'email', 'address', 'contactNo'] }]
+    });
+
+    return suppliersDetails;
+  } catch (error) {
+    console.error("Error searching suppliers by product ID:", error);
+    throw new Error("Error getting suppliers by product ID");
+  }
+}; 
+
+
+
+
+
+
+
+
+
+
+
+//Update the qty of a product
+// export const updateProductQty = async (productId, totalQty) => {
+//   try {
+//     // Find the product by productId
+//     const product = await products.findByPk(productId);
+    
+//     // Update the quantity
+//     if (product) {
+//       await product.update({ qty: product.qty + totalQty });
+//     } else {
+//       throw new Error(`Product with ID ${productId} not found.`);
+//     }
+//   } catch (error) {
+//     throw new Error(`Error updating product quantity: ${error.message}`);
+//   }
+// };
+
+
 
 
 // // Service function to get productId and corresponding supplierName by productName
@@ -174,19 +235,3 @@ export const getProductIdByProductNameService = async (productName) => {
 //     throw new Error("Error fetching product details by productName");
 //   }
 // };
-
-export const searchSuppliersByProductName = async (productId) => {
-  try {
-    // Query the productSupplier model to find suppliers for the given productId
-    const suppliersDetails = await productSupplier.findAll({
-      where: { productId },
-      include: [{ model: suppliers, attributes: ['branchName', 'supplierId', 'supplierName', 'regNo', 'email', 'address', 'contactNo'] }]
-    });
-
-    return suppliersDetails;
-  } catch (error) {
-    // Log and throw any errors that occur during the process
-    console.error("Error searching suppliers by product ID:", error);
-    throw new Error("Error getting suppliers by product ID");
-  }
-}; 

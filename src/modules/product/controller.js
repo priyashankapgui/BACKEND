@@ -9,12 +9,14 @@ import {
   deleteProductById,
   updateProductById,
   getProductIdByProductNameService,
-  // getProductDetailsByProductName,
   searchSuppliersByProductName,
 } from "../product/service.js";
 import { mapCategoryNameToId } from "../../modules/category/service.js";
 import multer from "multer";
 import path from "path";
+import { getProductTotalQuantity } from "../../modules/product_GRN/service.js"
+
+
 
 // Controller function to get all products
 export const getProducts = async (req, res) => {
@@ -25,6 +27,8 @@ export const getProducts = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
+
 
 // Controller function to get a product by its ID
 export const getProduct = async (req, res) => {
@@ -41,6 +45,8 @@ export const getProduct = async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 };
+
+
 
 // Controller function to search products by name
 export const getStocksByProductName = async (req, res) => {
@@ -60,6 +66,8 @@ export const getStocksByProductName = async (req, res) => {
   }
 };
 
+
+
 // Controller function to get products by category name
 export const getProductsByCategoryName = async (req, res) => {
   const { categoryName } = req.params;
@@ -78,6 +86,8 @@ export const getProductsByCategoryName = async (req, res) => {
   }
 };
 
+
+
 // Controller function to update a product
 export const updateProduct = async (req, res) => {
   const productId = req.params.productId;
@@ -94,17 +104,16 @@ export const updateProduct = async (req, res) => {
   }
 };
 
+
+
 // Controller function to create a new product
 export const createProduct = async (req, res) => {
-  const { branchName, productName, description, categoryName } = req.body;
+  const { branchName, productName, description, categoryName, barcode } = req.body;
   try {
     // Check if a file is uploaded
     if (!req.file) {
       return res.status(400).json({ error: "No file uploaded" });
     }
-  
-  
-  
     const categoryId = await mapCategoryNameToId(categoryName);
     if (!categoryId) {
       return res.status(404).json({ error: "Category not found" });
@@ -125,11 +134,10 @@ export const createProduct = async (req, res) => {
         description,
         categoryId,
         image,
+        barcode,
     });
 
     res.status(201).json(newProduct);
-  
-
   } catch (error) {
     console.error("Error adding product:", error);
     res.status(500).json({ error: "Internal server error" });
@@ -150,6 +158,8 @@ export const deleteProduct = async (req, res) => {
   }
 };
 
+
+
 //Controller function to get productId by productName
 export const getProductIdByProductNameController = async (req, res) => {
   const { productName } = req.params;
@@ -167,31 +177,7 @@ export const getProductIdByProductNameController = async (req, res) => {
   }
 };
 
-// //Controller function to get productId and corresponding supplierName by productName
-// export const getProductDetailsByProductNameController = async (req, res) => {
-//   const { productName } = req.params;
 
-//   try {
-//     if (!productName) {
-//       res.status(400).json({ error: "Product name is required" });
-//       return;
-//     }
-
-//     // Call the service function to get product details
-//     const productDetails = await getProductDetailsByProductName(productName);
-
-//     if (!productDetails) {
-//       res.status(404).json({ error: "No product found for the given product name" });
-//       return;
-//     }
-
-//     // Return the product details
-//     res.status(200).json(productDetails);
-//   } catch (error) {
-//     console.error("Error fetching product details by product name:", error);
-//     res.status(500).json({ error: "Internal server error" });
-//   }
-// };
 
 export const getProductAndSuppliersDetailsByProductName = async (req, res) => {
   const { productName } = req.params;
@@ -229,6 +215,8 @@ export const getProductAndSuppliersDetailsByProductName = async (req, res) => {
 };
 
 
+
+
 //upload image controller
 
  const storage = multer.diskStorage({
@@ -254,3 +242,50 @@ export const getProductAndSuppliersDetailsByProductName = async (req, res) => {
     cb('Give proper file format to upload')
   }
 }).single('image')
+
+
+
+
+export const getTotalQuantityByBranchAndProduct = async (req, res) => {
+  try {
+    const { branchName, productName } = req.body;
+    const totalQuantity = await getProductTotalQuantity(branchName, productName);
+
+    res.status(200).json({ totalQuantity });
+  } catch (error) {
+    console.error("Error retrieving total quantity:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+
+
+
+
+
+
+// //Controller function to get productId and corresponding supplierName by productName
+// export const getProductDetailsByProductNameController = async (req, res) => {
+//   const { productName } = req.params;
+
+//   try {
+//     if (!productName) {
+//       res.status(400).json({ error: "Product name is required" });
+//       return;
+//     }
+
+//     // Call the service function to get product details
+//     const productDetails = await getProductDetailsByProductName(productName);
+
+//     if (!productDetails) {
+//       res.status(404).json({ error: "No product found for the given product name" });
+//       return;
+//     }
+
+//     // Return the product details
+//     res.status(200).json(productDetails);
+//   } catch (error) {
+//     console.error("Error fetching product details by product name:", error);
+//     res.status(500).json({ error: "Internal server error" });
+//   }
+// };

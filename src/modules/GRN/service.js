@@ -5,7 +5,7 @@ import suppliers from "../supplier/supplier.js";
 import { mapSupplierNameToId } from "../../modules/supplier/service.js"; 
 import { mapBranchNameToId } from "../../modules/branch/service.js";
 import branches from "../branch/branch.js";
-//import suppliers from "../supplier/supplier.js";
+
 
 
 // Function to generate GRN number
@@ -41,6 +41,7 @@ const generateGRNNumber = async (branchName) => {
 };
 
 
+
 // Function to get the last GRN number from the database
 const getLastGRNNumber = async () => {
   try {
@@ -70,6 +71,8 @@ const extractCounterFromGRN = (GRN_NO) => {
   }
   throw new Error("Invalid GRN number format");
 };
+
+
 
 // Function to add a GRN
 export const addGRN = async (grnData, supplierName, branchName) => {
@@ -117,6 +120,8 @@ export const getAllGRNs = async () => {
 };
 
 
+
+
 // Function to get a GRN by its ID
 export const getGRNById = async (GRN_NO) => {
   try {
@@ -130,6 +135,10 @@ export const getGRNById = async (GRN_NO) => {
     throw new Error("Error fetching stock: " + error.message);
   }
 };
+
+
+
+
 // Function to get GRNs by invoice number
 export const getGRNByInvoiceNo = async (invoiceNo) => {
   try {
@@ -148,44 +157,8 @@ export const getGRNByInvoiceNo = async (invoiceNo) => {
     throw new Error("Error retrieving stocks");
   }
 };
-// Function to get GRN details based on provided criteria
-// export const getGRNDetails = async ({
-//   invoiceNo,
-//   productId,
-//   productName,
-//   supplierId,
-//   supplierName,
-// }) => {
-//   try {
-//     let whereClause = {};
 
-//     for (const key in {
-//       invoiceNo,
-//       productId,
-//       productName,
-//       supplierId,
-//       supplierName,
-//     }) {
-//       switch (key) {
-//         case "invoiceNo":
-//         case "productId":
-//         case "productName":
-//         case "supplierId":
-//         case "supplierName":
-//           if (eval(key)) {
-//             whereClause[key] = eval(key);
-//           }
-//           break;
-//       }
-//     }
 
-//     const stockDetails = await grn.findAll({ where: whereClause });
-//     return stockDetails;
-//   } catch (error) {
-//     console.error("Error retrieving stock details:", error);
-//     throw new Error("Error retrieving stock details");
-//   }
-// };
 
 // Function to query GRN data by productId from the grn table
 const getGRNDataByProductId = async (productId) => {
@@ -204,6 +177,8 @@ const getGRNDataByProductId = async (productId) => {
     throw new Error("Error fetching GRN data by productId: " + error.message);
   }
 };
+
+
 
 export const getGRNByProductId = async (productId) => {
   try {
@@ -232,6 +207,8 @@ export const updateGRNById = async (GRN_NO, updatedStockData) => {
     throw new Error("Error updating stock: " + error.message);
   }
 };
+
+
 
 // Function to delete a GRN by its ID
 export const deleteGRNById = async (GRN_NO) => {
@@ -282,4 +259,48 @@ export const getDetailsByInvoiceNoService = async (invoiceNo) => {
   }
 };
 
+
+
+
+
+
+
+// Function to get GRN details based on provided criteria
+// export const getGRNDetails = async ({
+//   invoiceNo,
+//   productId,
+//   productName,
+//   supplierId,
+//   supplierName,
+// }) => {
+//   try {
+//     let whereClause = {};
+
+//     for (const key in {
+//       invoiceNo,
+//       productId,
+//       productName,
+//       supplierId,
+//       supplierName,
+//     }) {
+//       switch (key) {
+//         case "invoiceNo":
+//         case "productId":
+//         case "productName":
+//         case "supplierId":
+//         case "supplierName":
+//           if (eval(key)) {
+//             whereClause[key] = eval(key);
+//           }
+//           break;
+//       }
+//     }
+
+//     const stockDetails = await grn.findAll({ where: whereClause });
+//     return stockDetails;
+//   } catch (error) {
+//     console.error("Error retrieving stock details:", error);
+//     throw new Error("Error retrieving stock details");
+//   }
+// };
 

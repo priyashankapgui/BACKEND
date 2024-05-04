@@ -6,12 +6,7 @@ import suppliers from '../supplier/supplier.js';
 const productSupplier = sequelize.define(
   'product_Supplier',
   {
-    // id: {
-    //   type: DataTypes.INTEGER,
-    //   primaryKey: true,
-    //   allowNull: false,
-    //   autoIncrement: true
-    // },
+  
     productId: {
       type: DataTypes.INTEGER,
       allowNull: false,
