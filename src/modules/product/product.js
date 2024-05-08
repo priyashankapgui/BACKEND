@@ -43,7 +43,7 @@ const products = sequelize.define(
     },
     qty: {
       type: DataTypes.INTEGER,
-      allowNull: false,
+      allowNull: true,
     },
     categoryId: {
       type: DataTypes.INTEGER,
