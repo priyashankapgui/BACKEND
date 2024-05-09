@@ -3,6 +3,7 @@ import sequelize from "../../../config/database.js";
 import categories from "../category/category.js";
 import suppliers from "../supplier/supplier.js";
 import grn from "../GRN/grn.js";
+import branches from "../branch/branch.js";
 //import productSupplier from "../product_Supplier/product_Supplier.js";
 
 const products = sequelize.define(
@@ -18,6 +19,16 @@ const products = sequelize.define(
       type: DataTypes.STRING,
       allowNull: false,
     },
+    branchId: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      references: {
+        model: branches,
+        key: "branchId",
+        onDelete: "CASCADE",
+        onUpdate: "CASCADE"
+      },
+    },
     description: {
       type: DataTypes.STRING,
       allowNull: true,
@@ -28,19 +39,30 @@ const products = sequelize.define(
     },
     categoryId: {
       type: DataTypes.INTEGER,
-      allowNull: true,
+      allowNull: false,
       references: {
         model: categories,
         key: "categoryId",
-        onDelete: "SETNULL",
+        onDelete: "CASCADE",
+        onUpdate: "CASCADE"
       },
     },
   },
-  { tableName: "products" }
+  { tableName: "products",
+    timestamps: true, 
+  }
 );
 
 products.belongsToMany(suppliers, { through: "product_Supplier" });
-products.belongsToMany(grn, { through: "product_Stock" });
+
 products.belongsTo(categories, { foreignKey: "categoryId" });
+products.belongsTo(branches, { foreignKey: "branchId" });
+
+
+export const setupProductGRNAssociations = () => {
+  products.belongsToMany(grn, { through: "product_GRN" });
+};
+
+
 
 export default products;

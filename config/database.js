@@ -1,8 +1,12 @@
-import Sequelize from 'sequelize';
-const { DATABASE_HOST, DATABASE_USERNAME, DATABASE_PASSWORD, DATABASE_NAME } = process.env;
+import dotenv from "dotenv";
+import  Sequelize  from 'sequelize';
+dotenv.config();
+const {DATABASE_HOST, DATABASE_USERNAME, DATABASE_PASSWORD, DATABASE_NAME } = process.env;
 
-const sequelize = new Sequelize('cms', 'root', 'AcHa@1220', {
-  host: 'localhost',
+console.log(process.env.DATABASE_HOST);
+
+const sequelize = new Sequelize(DATABASE_NAME,DATABASE_USERNAME,DATABASE_PASSWORD,  {
+  host: DATABASE_HOST,
   dialect: 'mysql',
 });
 

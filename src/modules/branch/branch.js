@@ -1,5 +1,6 @@
 import { DataTypes } from "sequelize";
 import sequelize from "../../../config/database.js";
+import suppliers from "../supplier/supplier.js";
 
 
 const branches = sequelize.define('branches',{
@@ -13,11 +14,31 @@ const branches = sequelize.define('branches',{
         type:DataTypes.STRING,
         allowNull:false
     },
+    address: {
+        type: DataTypes.STRING,
+        allowNull: false,
+    },
+    email: {
+        type: DataTypes.STRING,
+        allowNull: false,
+    },
     contactNumber:{
         type: DataTypes.STRING(15)
     }
 },
 
-{tableName:'branches'});
+ {   
+    tableName:'branches', 
+    
+ }
+
+ 
+);
+
+export const setupBranchSupplierAssociations = () => {
+    branches.belongsToMany(suppliers, { through: "branch_Supplier" });
+  };
+
+ 
 
 export default branches;
