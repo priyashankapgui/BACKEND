@@ -72,16 +72,7 @@ export const searchSuppliersByProductName = async (productId) => {
   }
 };
 
-// Function to add a new supplier to the database
-// export const addSupplier = async (supplierData) => {
-//   try {
-//     const newSupplier = await suppliers.create(supplierData);
-//     if(email)
-//     return newSupplier;
-//   } catch (error) {
-//     throw new Error("Error creating supplier: " + error.message);
-//   }
-// };
+
 
 // Function to update a supplier by its ID
 export const updateSupplierById = async (supplierId, updatedSupplierData) => {
@@ -154,3 +145,29 @@ export const addSupplier = async (supplierName, regNo, email, address, contactNo
     throw new Error(error.message);
   }
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// Function to add a new supplier to the database
+// export const addSupplier = async (supplierData) => {
+//   try {
+//     const newSupplier = await suppliers.create(supplierData);
+//     if(email)
+//     return newSupplier;
+//   } catch (error) {
+//     throw new Error("Error creating supplier: " + error.message);
+//   }
+// };

@@ -142,6 +142,32 @@ export const deleteSupplier = async (req, res) => {
 };
 
 
+
+export const createSupplier = async (req, res) => {
+  const { supplierName, regNo, email, address, contactNo, branchName } = req.body;
+
+  try {
+    // Call service function to add supplier
+    await addSupplier(supplierName, regNo, email, address, contactNo, branchName);
+    
+    res.status(201).json({ message: 'Supplier added successfully' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
 // const addSupplier = async (req, res) => {
 //   const { supplierName, regNo, email, address, contactNo, branchName } = req.body;
 
@@ -171,17 +197,3 @@ export const deleteSupplier = async (req, res) => {
 // };
 
 // export default addSupplier;
-
-
-export const createSupplier = async (req, res) => {
-  const { supplierName, regNo, email, address, contactNo, branchName } = req.body;
-
-  try {
-    // Call service function to add supplier
-    await addSupplier(supplierName, regNo, email, address, contactNo, branchName);
-    
-    res.status(201).json({ message: 'Supplier added successfully' });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-};

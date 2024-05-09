@@ -1,8 +1,12 @@
-// import express from "express";
-// import { createProductGRN } from "../product_GRN/controller.js";
+import express from "express";
+import { getBatchDetailsByProductNameController, getAvailableQuantityByBranchAndProduct, adjustProductQuantity } from "../product_GRN/controller.js";
 
-// const productGRNRouter = express.Router();
+const productGRNRouter = express.Router();
 
-// productGRNRouter.post("/product-GRN", createProductGRN);
+productGRNRouter.get( "/product-GRN", getBatchDetailsByProductNameController);
+productGRNRouter.get("/active-stockBatchWise", getAvailableQuantityByBranchAndProduct);
+productGRNRouter.get("/adjust-stock", adjustProductQuantity);
 
-// export default productGRNRouter; 
+//productGRNRouter.get('/expired-stock', getExpiredStockController);
+
+export default productGRNRouter; 

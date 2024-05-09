@@ -2,19 +2,19 @@ import suppliers from "../modules/supplier/supplier.js";
 import grn from "../modules/GRN/grn.js";
 import branches from "../modules/branch/branch.js"
 import products from "../modules/product/product.js";
+// import stockReqIn from "./stockTransfer/stockReqIn/stockReqIn.js";
+// import stockReqOut from "./stockTransfer/stockReqOut/stockReqOut.js";
 
 export const setupAssociations = () => {
-  //setupProductSupplierAssociations(products, suppliers);
+
   setupGRNSupplierAssociations(grn, suppliers);
-  //setupProductGRNAssociations(grn, products);
-  //setupBranchSupplierAssociations(branches, suppliers);
   setupProductBranchAssociations(branches, products);
   setupGRNBranchAssociations(grn, branches);
+  // setupBranchStockReqInAssociations();
+  // setupBranchStockReqOutAssociations();
 };
 
-// const setupProductSupplierAssociations = (productsModel, suppliersModel) => {
-//   suppliersModel.belongsToMany(productsModel, { through: "product_Supplier" });
-// };
+
 
 const setupGRNSupplierAssociations = (grn, suppliers) => {
   suppliers.hasMany(grn, { foreignKey: "supplierId", as: "grn" }); 
@@ -25,12 +25,16 @@ const setupGRNBranchAssociations = (grn, branches) => {
 };
 
 
-
 const setupProductBranchAssociations = (branches, products) => {
   branches.hasMany(products, { foreignKey: "productId", as: "products" }); 
 };
 
 
-// const setupProductGRNAssociations = (grnModel, productsModel) => {
-//   grnModel.belongsToMany(productsModel, { through: "product_GRN" });
+// export const setupBranchStockReqInAssociations = () => {
+//   branches.hasMany(stockReqIn, { foreignKey: "STNIn_No", as: "stockReqIn" });
 // };
+
+// export const setupBranchStockReqOutAssociations = () => {
+//   branches.hasMany(stockReqOut, { foreignKey: "STNOut_No", as: "stockReqOut" });
+// };
+
