@@ -58,7 +58,7 @@ export const createEmployee = async (employee) => {
   // Validate password
   if (!/^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,20}$/.test(password)) {
     throw new Error("Invalid password format");
-  }
+  } 
 
 
   // Validate phone number

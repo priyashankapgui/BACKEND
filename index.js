@@ -7,6 +7,7 @@ import productSupplier from './src/modules/product_Supplier/product_Supplier.js'
 import Productrouter from "./src/modules/product/routes.js";
 import categoryRouter from "./src/modules/category/routes.js";
 import EmployeeRouter from './src/modules/employee/routes.js';
+import CustomerRouter from './src/modules/customer/routes.js';
 import supplierRouter from "./src/modules/supplier/routes.js";
 import GRNRouter from "./src/modules/GRN/routes.js";
 import productSupplierRouter from './src/modules/product_Supplier/routes.js';
@@ -36,9 +37,10 @@ app.use("/", supplierRouter);
 app.use("/", GRNRouter);
 app.use('/', productSupplierRouter);
 //app.use('/', productGRNRouter);
-app.use('/',Branchrouter);
+app.use('/', Branchrouter);
 app.use('/', branchSupplierRouter);
 app.use('/', EmployeeRouter);
+app.use('/', CustomerRouter)
 
 app.use("/api", Productrouter);  
 app.use("/api", categoryRouter);
@@ -46,6 +48,7 @@ app.use("/api", supplierRouter);
 app.use("/api", GRNRouter);
 app.use('/api', productSupplierRouter);
 app.use('/api', EmployeeRouter);
+app.use('/api', CustomerRouter);
 //app.use('/api', productGRNRouter);
 
 app.use('/Images', express.static('.src/Images'))
