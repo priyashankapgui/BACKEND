@@ -12,7 +12,7 @@ export const registerNewCustomer = async (req, res) => {
             customer: newCustomer,
         });
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        res.status(error.statusCode || 400).json({ message: error.message });
     }
 };
 

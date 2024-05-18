@@ -13,7 +13,7 @@ import{
 
 const CustomerRouter = express.Router();
 
-CustomerRouter.post("/api/customers", registerNewCustomer);
+CustomerRouter.post("/api/customers/registercustomer", registerNewCustomer);
 CustomerRouter.post("/api/customers/login", handleLoginCustomer);
 CustomerRouter.post("/api/customers/login/forgotpw", forgotPasswordCustomer);
 CustomerRouter.post("/api/customers/login/forgotpw/resetpw", resetPasswordCustomer);

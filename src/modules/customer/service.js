@@ -8,7 +8,7 @@ import emailjs from "@emailjs/nodejs";
 
 
 export const registerCustomer = async (customer) => {
-    const {email, password, phone} = customer;
+    const { email,password,phone } = customer;
 
     // Check if the email already exists
     // const existingCustomer = await Customer.findOne({ where: { email: email } });
@@ -25,6 +25,7 @@ export const registerCustomer = async (customer) => {
     // Validate password
     if (!/^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,20}$/.test(password)) {
         throw new Error("Invalid password format");
+        
     }
 
     // Validate phone number
@@ -40,7 +41,12 @@ export const registerCustomer = async (customer) => {
         }catch(error){
             throw new Error("Error creating customer: " + error.message);
         }
+        
+
     };
+
+
+
 
 // Function to handle login
 export const handleLoginCustomer = async (req, res) => {
@@ -138,7 +144,7 @@ export const handleLoginCustomer = async (req, res) => {
         };
   
         // Send email using EmailJS with the  template
-        emailjs.send("service_kqwt4xi", "template_hbmw31c", templateParams).then(
+        emailjs.send("service_kqwt4xi", "template_p2h8p9n", templateParams).then(
           (response) => {
             console.log("SUCCESS!", response.status, response.text);
             return res.status(200).json({
