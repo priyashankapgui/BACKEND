@@ -1,8 +1,11 @@
-// import express from "express";
-// import { createProductGRN } from "../product_GRN/controller.js";
+import express from "express";
+import { getBatchDetailsByProductNameController, adjustProductQuantity } from "../product_GRN/controller.js";
 
-// const productGRNRouter = express.Router();
+const productGRNRouter = express.Router();
 
-// productGRNRouter.post("/product-GRN", createProductGRN);
+productGRNRouter.get( "/product-GRN", getBatchDetailsByProductNameController);
+productGRNRouter.get("/adjust-stock", adjustProductQuantity);
 
-// export default productGRNRouter; 
+
+
+export default productGRNRouter; 

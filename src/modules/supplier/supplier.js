@@ -1,8 +1,6 @@
 import { DataTypes } from "sequelize";
 import sequelize from "../../../config/database.js";
-import products from "../product/product.js";
-import branches from "../branch/branch.js";
-//import grn from "../GRN/grn.js";
+
 
 const suppliers = sequelize.define(
   "suppliers",
@@ -40,15 +38,6 @@ const suppliers = sequelize.define(
   }
 );
 
-export const setupProductSupplierAssociations = () => {
-  suppliers.belongsToMany(products, { through: "product_Supplier" });
-};
 
-suppliers.belongsToMany(branches, { through: "branch_Supplier" });
-
-
-// export const setupGRNSUPPLIERAssociations = () => {
-//   suppliers.hasMany(grn, { foreignKey: "GRN_NO", as: "grn" });
-// };
 
 export default suppliers;
