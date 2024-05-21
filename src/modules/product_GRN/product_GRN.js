@@ -6,12 +6,6 @@ import grn from '../GRN/grn.js';
 const productGRN = sequelize.define(
   "product_GRN",
   {
-    // id: {
-    //   type: DataTypes.INTEGER,
-    //   primaryKey: true,
-    //   allowNull: false,
-    //   autoIncrement: true
-    // },
     productId: { 
       type: DataTypes.INTEGER,
       allowNull: false,
@@ -86,6 +80,10 @@ const productGRN = sequelize.define(
       type: DataTypes.FLOAT,
       allowNull: true,
     },
+    availableQty: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+    },
     comment: {
       type: DataTypes.STRING,
       allowNull: true, 
@@ -94,11 +92,17 @@ const productGRN = sequelize.define(
   {
     tableName: "product_GRN",
     timestamps: true,
+    hooks: {
+      // Before creating a new record in product_GRN
+      beforeCreate: async (productGRNInstance, options) => {
+        
+        productGRNInstance.availableQty = productGRNInstance.totalQty;
+      }
+    }
   }
 );
 
-productGRN.belongsTo(products, { foreignKey: 'productId' });
-productGRN.belongsTo(grn, { foreignKey: 'GRN_NO' });
+
 
 export default productGRN;
 

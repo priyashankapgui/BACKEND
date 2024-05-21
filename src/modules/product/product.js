@@ -37,6 +37,14 @@ const products = sequelize.define(
       type: DataTypes.STRING,
       allowNull: true,
     },
+    barcode: { 
+      type: DataTypes.STRING, 
+      allowNull: true,
+    },
+    qty: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+    },
     categoryId: {
       type: DataTypes.INTEGER,
       allowNull: false,
@@ -47,21 +55,14 @@ const products = sequelize.define(
         onUpdate: "CASCADE"
       },
     },
+    
   },
   { tableName: "products",
     timestamps: true, 
   }
 );
 
-products.belongsToMany(suppliers, { through: "product_Supplier" });
 
-products.belongsTo(categories, { foreignKey: "categoryId" });
-products.belongsTo(branches, { foreignKey: "branchId" });
-
-
-export const setupProductGRNAssociations = () => {
-  products.belongsToMany(grn, { through: "product_GRN" });
-};
 
 
 

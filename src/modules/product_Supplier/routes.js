@@ -8,6 +8,37 @@ productSupplierRouter.get("/products/:productName", getProductDetailsByProductNa
 
 export default productSupplierRouter;
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // import express from 'express'; 
 // import productSupplier from '../product_Supplier/product_Supplier.js';
 // const productSupplierRouter = express.Router();
