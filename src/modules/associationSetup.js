@@ -2,6 +2,8 @@ import suppliers from "../modules/supplier/supplier.js";
 import grn from "../modules/GRN/grn.js";
 import branches from "../modules/branch/branch.js"
 import products from "../modules/product/product.js";
+import Customer from "./customer/customer.js";
+import ShoppingCart from "./Cart_Customer/shoppingcart.js";
 
 export const setupAssociations = () => {
   //setupProductSupplierAssociations(products, suppliers);
@@ -10,6 +12,8 @@ export const setupAssociations = () => {
   //setupBranchSupplierAssociations(branches, suppliers);
   setupProductBranchAssociations(branches, products);
   setupGRNBranchAssociations(grn, branches);
+  setupCartCustomerAssociations(ShoppingCart,Customer);
+  setupCartProductAssociations(ShoppingCart,products);
 };
 
 // const setupProductSupplierAssociations = (productsModel, suppliersModel) => {
@@ -34,3 +38,12 @@ const setupProductBranchAssociations = (branches, products) => {
 // const setupProductGRNAssociations = (grnModel, productsModel) => {
 //   grnModel.belongsToMany(productsModel, { through: "product_GRN" });
 // };
+const setupCartCustomerAssociations = (ShoppingCart,Customer) => {
+  ShoppingCart.hasOne(Customer);
+  Customer.belongsTo(ShoppingCart, {    foreignKey: 'customerId'  });
+}
+
+export const setupCartProductAssociations = (ShoppingCart,products) => {
+  ShoppingCart.belongsToMany(products, { through: "cart_Product" });
+products.belongsToMany(ShoppingCart, { through: "cart_Product" });
+};

@@ -2,7 +2,7 @@ import sequelize from "./config/database.js";
 import express from "express";
 import cors from "cors"; 
 import dotenv from "dotenv";
-import products, {setupProductGRNAssociations} from "./src/modules/product/product.js";
+import products, { setupProductGRNAssociations } from "./src/modules/product/product.js";
 import productSupplier from './src/modules/product_Supplier/product_Supplier.js';
 import Productrouter from "./src/modules/product/routes.js";
 import categoryRouter from "./src/modules/category/routes.js";
@@ -11,35 +11,32 @@ import feedbackRouter from './src/modules/feedback/routes.js';
 import supplierRouter from "./src/modules/supplier/routes.js";
 import GRNRouter from "./src/modules/GRN/routes.js";
 import productSupplierRouter from './src/modules/product_Supplier/routes.js';
-//import categories from "./src/modules/category/category.js";
-import suppliers, {setupProductSupplierAssociations} from "./src/modules/supplier/supplier.js";
+import suppliers, { setupProductSupplierAssociations } from "./src/modules/supplier/supplier.js";
 import grn from "./src/modules/GRN/grn.js";
 import feedback from "./src/modules/feedback/feedback.js";
-//import invoices, {setupInvoiceAssociations,} from "./src/modules/invoice/invoice.js";
 import { getProducts } from "./src/modules/product/controller.js";
 import { getAllProducts } from "./src/modules/product/service.js";
-import categories, {setupCategoryAssociations} from "./src/modules/category/category.js";
-//import productGRNRouter from "./src/modules/product_GRN/routes.js";
+import categories, { setupCategoryAssociations } from "./src/modules/category/category.js";
 import { setupAssociations } from "./src/modules/associationSetup.js";
 import Branchrouter from "./src/modules/branch/routes.js";
 import branchSupplierRouter from "./src/modules/branch_Supplier/routes.js";
-import branches, {setupBranchSupplierAssociations} from "./src/modules/branch/branch.js";
- 
+import branches, { setupBranchSupplierAssociations } from "./src/modules/branch/branch.js";
+import Stripe from 'stripe';
+
 const app = express();
- 
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+
 app.use(cors());
 dotenv.config();
-
 app.use(express.json());  
-  
+
 app.use("/", Productrouter);
 app.use("/", categoryRouter);
 app.use("/", supplierRouter);
 app.use("/", GRNRouter);
 app.use('/', productSupplierRouter);
-//app.use('/', productGRNRouter);
-app.use('/',Branchrouter);
-app.use('/',feedbackRouter);
+app.use('/', Branchrouter);
+app.use('/', feedbackRouter);
 app.use('/', branchSupplierRouter);
 app.use('/', EmployeeRouter);
 
@@ -50,19 +47,14 @@ app.use("/api", GRNRouter);
 app.use("/api", feedbackRouter);
 app.use('/api', productSupplierRouter);
 app.use('/api', EmployeeRouter);
-//app.use('/api', productGRNRouter);
 
 app.use('/Images', express.static('.src/Images'))
 
 setupCategoryAssociations();
-//setupInvoiceAssociations();
 setupProductSupplierAssociations();
 setupProductGRNAssociations();
-//setupGRNSUPPLIERAssociations();
 setupBranchSupplierAssociations();
-
 setupAssociations();
-
 
 sequelize.sync({ alter: true }) // Using { alter: true } to automatically alter tables based on model changes
   .then(() => {
@@ -95,31 +87,33 @@ process.on('unhandledRejection', (err) => {
   console.error('Unhandled Promise Rejection:', err);
 });
 
+// Stripe Checkout Session Route
+app.post('/create-checkout-session', async (req, res) => {
+  const { items } = req.body;
 
-// sequelize 
-//   .sync()
-//   .then(() => {
-//     console.log("Database synchronized");
-//   })
-//   .catch((err) => {
-//     console.error("Error synchronizing database:", err);
-//   });
+  try {
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ['card'],
+      line_items: items.map(item => ({
+        price_data: {
+          currency: 'lkr',
+          product_data: {
+            name: item.name,
+          },
+          unit_amount: item.price * 100,
+        },
+        quantity: item.quantity,
+      })),
+      mode: 'payment',
+      success_url: 'http://localhost:3000/success',
+      cancel_url: 'http://localhost:3000/cancel',
+    });
 
-// app.listen(8080, () => {
-//   console.log("Connected to Backend!!");
-// });
+    res.json({ sessionId: session.id });
+  } catch (error) {
+    console.error('Error creating checkout session:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
 
-// process.on("SIGINT", () => {
-//   sequelize
-//     .close()
-//     .then(() => {
-//       console.log("Connection closed.");
-//       process.exit(0);
-//     })
-//     .catch((err) => {
-//       console.error("Error closing Sequelize connection:", err);
-//       process.exit(1);
-//     });
-// });
-
- export { sequelize, categories, suppliers, grn, feedback, products, branches };
+export { sequelize, categories, suppliers, grn, feedback, products, branches };
