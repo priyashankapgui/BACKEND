@@ -18,7 +18,12 @@ import { calculateTotalAmount, updateProductQty } from '../../modules/product_GR
 // Function to create GRN and Product_GRN
 export const createGRNAndProduct = async (req, res) => {
   try {
+    console.log('Request query parameters:', req.body);
     const { invoiceNo, supplierName, branchName, productId, batchNo, totalQty, purchasePrice, sellingPrice, freeQty, expDate, comment } = req.body;
+    
+    if (!branchName || typeof branchName !== 'string') {
+      return res.status(400).json({ error: "Invalid branchName" });
+    }
 
     const grnData = {
       invoiceNo,

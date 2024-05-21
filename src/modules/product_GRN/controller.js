@@ -1,15 +1,15 @@
 import sequelize from "../../../config/database.js";
 import products from "../product/product.js";
-import { getBatchDetailsByProductName,  getProductGRNAvailableQuantity, adjustProductGRNQuantity, updateProductQty } from "../product_GRN/service.js";
+import { getBatchDetailsByProductName,  adjustProductGRNQuantity, updateProductQty } from "../product_GRN/service.js";
 
 
 
 
-// Controller function to retrieve batch details by productName and branchNo
+// Controller function to retrieve batch details by productName and branchNo for check price 
 export const getBatchDetailsByProductNameController = async (req, res) => {
     try {
     
-      const { branchName, productName } = req.body;
+      const { branchName, productName } = req.query;
   
       if (!productName || !branchName) {
         throw new Error("Please provide both productName and branchName");
@@ -27,20 +27,62 @@ export const getBatchDetailsByProductNameController = async (req, res) => {
 
  
 
-  export const getAvailableQuantityByBranchAndProduct = async (req, res) => {
-    try {
-      const { branchName, productName } = req.body;
-  
-      
-      const availableQuantity = await getProductGRNAvailableQuantity(branchName, productName);
-  
-      res.status(200).json({ availableQuantity });
-    } catch (error) {
-      console.error("Error retrieving available quantity:", error);
-      res.status(500).json({ error: "Internal server error" });
-    }
-  };
+  // export const getAvailableQuantityByBranchAndProduct = async (req, res) => {
+  //   try {
+  //     const { branchName, productName } = req.query;
+  //     console.log('Received branchName:', branchName);
+  //     console.log('Received productName:', productName);
 
+  //     if (!productName || !branchName) {
+  //       throw new Error("Please provide both productName and branchName");
+  //     }
+      
+  //     const availableQuantity = await getProductGRNAvailableQuantity(branchName, productName);
+  
+  //     res.status(200).json({ availableQuantity });
+  //   } catch (error) {
+  //     console.error("Error retrieving available quantity:", error);
+  //     res.status(500).json({ error: "Internal server error" });
+  //   }
+  // };
+
+  // export const getAvailableQuantityByBranchAndProduct = async (req, res) => {
+  //   try {
+  //     const { branchName, productName } = req.query;
+  //     console.log('Received branchName:', branchName);
+  //     console.log('Received productName:', productName);
+
+  //     if (!productName || !branchName) {
+  //       throw new Error("Please provide both productName and branchName");
+  //     }
+      
+  //     const availableQuantity = await getProductGRNAvailableQuantity(branchName, productName);
+  
+  //     res.status(200).json({ availableQuantity });
+  //   } catch (error) {
+  //     console.error("Error retrieving available quantity:", error);
+  //     res.status(500).json({ error: "Internal server error" });
+  //   }
+  // };
+
+  // export const getAvailableQuantityByBranchAndProduct = async (req, res) => {
+  //   try {
+  //     const { branchName, productName } = req.query;
+  //     console.log('Received branchName:', branchName);
+  //     console.log('Received productName:', productName);
+  
+  //     if (!productName || !branchName) {
+  //       throw new Error("Please provide both productName and branchName");
+  //     }
+      
+  //     const availableQuantity = await getProductGRNAvailableQuantity(branchName, productName);
+  
+  //     res.status(200).json({ availableQuantity });
+  //   } catch (error) {
+  //     console.error("Error retrieving available quantity:", error);
+  //     res.status(500).json({ error: "Internal server error" });
+  //   }
+  // };
 
 
   export const adjustProductQuantity = async (req, res) => {

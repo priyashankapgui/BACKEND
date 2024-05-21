@@ -3,6 +3,7 @@ import sequelize from "../../../config/database.js";
 import suppliers from "../supplier/supplier.js";
 
 
+
 const branches = sequelize.define('branches',{
     branchId:{
         type: DataTypes.INTEGER,
@@ -35,10 +36,9 @@ const branches = sequelize.define('branches',{
  
 );
 
-export const setupBranchSupplierAssociations = () => {
-    branches.belongsToMany(suppliers, { through: "branch_Supplier" });
-  };
+
 
  
 
 export default branches;
+

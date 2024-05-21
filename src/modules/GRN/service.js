@@ -11,6 +11,11 @@ import branches from "../branch/branch.js";
 // Function to generate GRN number
 const generateGRNNumber = async (branchName) => {
   try {
+
+    if (!branchName || typeof branchName !== 'string') {
+      throw new Error("Invalid branchName: " + branchName);
+    }
+
     // Extract the first three letters of the branch name
     const branchCode = branchName.substring(0, 3).toUpperCase();
 
@@ -74,20 +79,23 @@ const extractCounterFromGRN = (GRN_NO) => {
 
 
 
-// Function to add a GRN
 export const addGRN = async (grnData, supplierName, branchName) => {
   try {
-    const GRN_NO = await generateGRNNumber(grnData.branchName); // Generate GRN number
+    if (!branchName || typeof branchName !== 'string') {
+      throw new Error("Invalid branchName: " + branchName);
+    }
+
+    const GRN_NO = await generateGRNNumber(branchName); // Generate GRN number
     grnData.GRN_NO = GRN_NO; // Assign GRN number to grnData
 
     const supplierId = await mapSupplierNameToId(supplierName);
     if (!supplierId) {
-      return res.status(404).json({ error: "Supplier not found" });
+      throw new Error("Supplier not found");
     }
-  
+
     const branchId = await mapBranchNameToId(branchName);
     if (!branchId) {
-      return res.status(404).json({ error: "Supplier not found" });
+      throw new Error("Branch not found");
     }
 
     grnData.supplierId = supplierId;
@@ -301,6 +309,38 @@ export const getDetailsByInvoiceNoService = async (invoiceNo) => {
 //   } catch (error) {
 //     console.error("Error retrieving stock details:", error);
 //     throw new Error("Error retrieving stock details");
+//   }
+// };
+
+
+
+// Function to add a GRN
+// export const addGRN = async (grnData, supplierName, branchName) => {
+//   try {
+    
+
+     
+//     const GRN_NO = await generateGRNNumber(grnData.branchName); // Generate GRN number
+//     grnData.GRN_NO = GRN_NO; // Assign GRN number to grnData
+
+//     const supplierId = await mapSupplierNameToId(supplierName);
+//     if (!supplierId) {
+//       return res.status(404).json({ error: "Supplier not found" });
+//     }
+  
+//     const branchId = await mapBranchNameToId(branchName);
+//     if (!branchId) {
+//       return res.status(404).json({ error: "Supplier not found" });
+//     }
+
+//     grnData.supplierId = supplierId;
+//     grnData.branchId = branchId;
+
+//     const newGRN = await grn.create(grnData); // Assuming 'grn' model has a 'create' method
+//     return newGRN;
+//   } catch (error) {
+//     console.error("Error creating GRN:", error);
+//     throw new Error("Error creating GRN: " + error.message);
 //   }
 // };
 

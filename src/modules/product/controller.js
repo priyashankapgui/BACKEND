@@ -1,5 +1,11 @@
 import express from "express";
+import path from "path";
+import multer from "multer";
 import products from "../product/product.js";
+import { validateProduct } from "./validator.js";
+import { mapCategoryNameToId } from "../../modules/category/service.js";
+import { mapBranchNameToId } from "../../modules/branch/service.js";
+import { getProductTotalQuantity } from "../../modules/product_GRN/service.js"
 import {
   getAllProducts,
   getProductById,
@@ -11,10 +17,10 @@ import {
   getProductIdByProductNameService,
   searchSuppliersByProductName,
 } from "../product/service.js";
-import { mapCategoryNameToId } from "../../modules/category/service.js";
-import multer from "multer";
-import path from "path";
-import { getProductTotalQuantity } from "../../modules/product_GRN/service.js"
+
+
+
+ 
 
 
 
@@ -119,6 +125,11 @@ export const createProduct = async (req, res) => {
       return res.status(404).json({ error: "Category not found" });
     }
 
+    const branchId = await mapBranchNameToId(branchName);
+    if (!branchId) {
+      return res.status(404).json({ error: "Branch not found" });
+    }
+
    const image = req.file.path;
 
     // upload(req, res, async (err) => {
@@ -129,7 +140,7 @@ export const createProduct = async (req, res) => {
       // Access the uploaded file using req.file
       
       const newProduct = await addProduct({
-        branchName,
+        branchId,
         productName,
         description,
         categoryId,
@@ -248,7 +259,7 @@ export const getProductAndSuppliersDetailsByProductName = async (req, res) => {
 
 export const getTotalQuantityByBranchAndProduct = async (req, res) => {
   try {
-    const { branchName, productName } = req.body;
+    const { branchName, productName } = req.query;
     const totalQuantity = await getProductTotalQuantity(branchName, productName);
 
     res.status(200).json({ totalQuantity });

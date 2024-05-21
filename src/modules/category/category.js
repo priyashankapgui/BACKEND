@@ -25,9 +25,7 @@ const categories = sequelize.define(
   }
 );
 
-// Function to setup associations for Category model
-export const setupCategoryAssociations = () => {
-  categories.hasMany(products, { foreignKey: "productId", as: "products" });
-};
+
+
 
 export default categories;
