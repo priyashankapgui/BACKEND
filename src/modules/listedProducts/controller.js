@@ -1,4 +1,4 @@
-import { getlistedProducts, getlistedProductByIdService, addlistedProductService, deleteListedProductByIdService } from "../listedProducts/service.js";
+import { getlistedProducts, getlistedProductByIdService, addlistedProductService, getlistedProductBybarcodeService, deleteListedProductByIdService } from "../listedProducts/service.js";
 
 export const getAlllistedProducts = async (req, res) => {
     try {
@@ -8,6 +8,7 @@ export const getAlllistedProducts = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
+
 
 export const getlistedProduct = async (req, res) => {
     const productId = req.params.productId;
@@ -21,6 +22,20 @@ export const getlistedProduct = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
+
+export const getlistedProductBybarcode = async (req, res) => {
+    const barcode = req.params.barcode;
+    try {
+        const listedProduct = await getlistedProductBybarcodeService(barcode);
+        if (!listedProduct) {
+            return res.status(404).json({ error: 'No Product Found' });
+        }
+        res.status(200).json(listedProduct);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
 
 export const addlistedProduct = async (req, res) => {
     const listedProductData = req.body;

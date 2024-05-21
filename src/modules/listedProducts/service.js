@@ -21,6 +21,14 @@ export const getlistedProductByIdService = async (productId) => {
     }
 };
 
+export const getlistedProductBybarcodeService = async (barcode) => {
+    try {
+        const productByBarcode = await ListedProducts.findOne({ where: { barcode: barcode } });
+        return productByBarcode;
+    } catch (error) {
+        throw new Error('Error fetching product by barcode: ' + error.message);
+    }
+};
 
 export const addlistedProductService = async (listedProductData) => {
     try {

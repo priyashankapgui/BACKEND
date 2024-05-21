@@ -2,11 +2,16 @@ import { DataTypes } from 'sequelize';
 import sequelize from '../../../config/database.js';
 
 const ListedProducts = sequelize.define('listedProducts', {
+
   productId: {
     type: DataTypes.INTEGER,
-    allowNull: false, 
+    allowNull: false,
     primaryKey: true,
     autoIncrement: true,
+  },
+  barcode: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
   },
   productName: {
     type: DataTypes.STRING,
