@@ -2,6 +2,7 @@ import sequelize from "./config/database.js";
 import express from "express";
 import cors from "cors"; 
 import grn from "./src/modules/GRN/grn.js";
+import dotenv from "./config/database.js";
 import products from "./src/modules/product/product.js";
 import suppliers from "./src/modules/supplier/supplier.js";
 import categories from "./src/modules/category/category.js";
