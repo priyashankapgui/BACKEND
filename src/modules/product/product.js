@@ -62,15 +62,7 @@ const products = sequelize.define(
   }
 );
 
-products.belongsToMany(suppliers, { through: "product_Supplier" });
 
-products.belongsTo(categories, { foreignKey: "categoryId" });
-products.belongsTo(branches, { foreignKey: "branchId" });
-
-
-export const setupProductGRNAssociations = () => {
-  products.belongsToMany(grn, { through: "product_GRN" });
-};
 
 
 

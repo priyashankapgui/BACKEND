@@ -32,8 +32,7 @@ const productSupplier = sequelize.define(
   }
 );
 
-productSupplier.belongsTo(products, { foreignKey: 'productId' });
-productSupplier.belongsTo(suppliers, { foreignKey: 'supplierId' });
+
 
 export default productSupplier;
  

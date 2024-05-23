@@ -8,7 +8,7 @@ import branches from "../branch/branch.js";
 import categories from '../category/category.js';
 
 
-
+//create product_GRN
 export const createProductGRNService = async ({
   productId, GRN_NO, batchNo, totalQty, purchasePrice, sellingPrice, freeQty, expDate, amount, comment
 }) => {
@@ -60,13 +60,13 @@ export const calculateTotalAmount = async (invoiceNo) => {
 
 
 
-// Service function to retrieve batch details by productName and branchNo
+// Service function to retrieve batch details by productName and branchNo for check price
 export const getBatchDetailsByProductName = async (productName, branchName) => {
   try {
 
     const branchId = await mapBranchNameToId(branchName);
     if (!branchId) {
-      return res.status(404).json({ error: "Supplier not found" });
+      return res.status(404).json({ error: "Branch not found" });
     }
 
     const product = await products.findOne({
@@ -81,11 +81,21 @@ export const getBatchDetailsByProductName = async (productName, branchName) => {
       where: { productId: product.productId },
     });
 
+     // Fetch branch details to get the branchName
+     const branch = await branches.findOne({
+      where: { branchId },
+    });
+
+    if (!branch) {
+      throw new Error("Branch not found");
+    }
+
     // Extract batch details from the product GRNs
     const batchDetails = productGRNs.map((productGRN) => ({
-      branchName: branches.branchName,
+      branchName: branch.branchName,
       batchNo: productGRN.batchNo,
       expDate: productGRN.expDate,
+      availableQty: productGRN.availableQty,
       sellingPrice: productGRN.sellingPrice,
     }));
 
@@ -94,6 +104,7 @@ export const getBatchDetailsByProductName = async (productName, branchName) => {
     throw new Error("Error retrieving batch details: " + error.message);
   }
 }; 
+
 
 
 
@@ -165,42 +176,74 @@ export const getProductTotalQuantity = async (branchName, productName) => {
 
 
 
-export const getProductGRNAvailableQuantity = async (branchName, productName) => {
-  try {
-    const productGRNDetails = await productGRN.findAll({
-      where: { 
-        batchNo: { [Op.ne]: null }, // Exclude records with null batchNo
-        expDate: { [Op.gte]: new Date() }, // Filter out records with expired stock
-      },
-      include: [
-        {
-          model: products,
-          where: { productName },
-          include: {
-            model: branches,
-            where: { branchName },
-          },
-        },
-      ],
-    });
+// export const getProductGRNAvailableQuantity = async (branchName, productName) => {
+//   try {
+//     const productGRNDetails = await productGRN.findAll({
+//       where: { 
+//         batchNo: { [Op.ne]: null }, // Exclude records with null batchNo
+//         expDate: { [Op.gte]: new Date() }, // Filter out records with expired stock
+//       },
+//       include: [
+//         {
+//           model: products,
+//           where: { productName },
+//           include: {
+//             model: branches,
+//             where: { branchName },
+//           },
+//         },
+//       ],
+//     });
 
-    // Prepare an array to hold batch-wise availability details
-    const availabilityDetails = [];
+//     // Prepare an array to hold batch-wise availability details
+//     const availabilityDetails = [];
 
-    // Iterate over product_GRN records to calculate available quantity per batch
-    for (const productGRN of productGRNDetails) {
-      availabilityDetails.push({
-        batchNo: productGRN.batchNo,
-        expDate: productGRN.expDate,
-        availableQty: productGRN.availableQty,
-      });
-    }
+//     // Iterate over product_GRN records to calculate available quantity per batch
+//     for (const productGRN of productGRNDetails) {
+//       availabilityDetails.push({
+//         batchNo: productGRN.batchNo,
+//         expDate: productGRN.expDate,
+//         availableQty: productGRN.availableQty,
+//       });
+//     }
 
-    return availabilityDetails;
-  } catch (error) {
-    throw error;
-  }
-};
+//     return availabilityDetails;
+//   } catch (error) {
+//     throw error;
+//   }
+// };
+
+// export const getProductGRNAvailableQuantity = async (branchName, productName) => {
+//   try {
+//     const productGRNDetails = await productGRN.findAll({
+//       where: { 
+//         batchNo: { [Op.ne]: null }, // Exclude records with null batchNo
+//         expDate: { [Op.gte]: new Date() }, // Filter out records with expired stock
+//       },
+//       include: [
+//         {
+//           model: products,
+//           where: { productName },
+//           include: {
+//             model: branches,
+//             where: { branchName },
+//           },
+//         },
+//       ],
+//     });
+
+//     // Calculate total available quantity
+//     let totalQuantity = 0;
+//     for (const productGRN of productGRNDetails) {
+//       totalQuantity += productGRN.availableQty;
+//     }
+
+//     return { totalQuantity };
+//   } catch (error) {
+//     throw error;
+//   }
+// };
+
 
 
 
@@ -237,3 +280,42 @@ export const adjustProductGRNQuantity = async (productName, branchName, batchNo,
     throw error;
   }
 };
+
+
+
+// export const getProductGRNAvailableQuantity = async (branchName, productName) => {
+//   try {
+//     const productGRNDetails = await productGRN.findAll({
+//       where: { 
+//         batchNo: { [Op.ne]: null }, // Exclude records with null batchNo
+//         expDate: { [Op.gte]: new Date() }, // Filter out records with expired stock
+//       },
+//       include: [
+//         {
+//           model: products,
+//           where: { productName },
+//           include: {
+//             model: branches,
+//             where: { branchName },
+//           },
+//         },
+//       ],
+//     });
+
+//     // Prepare an array to hold batch-wise availability details
+//     const availabilityDetails = [];
+
+//     // Iterate over product_GRN records to calculate available quantity per batch
+//     for (const productGRN of productGRNDetails) {
+//       availabilityDetails.push({
+//         batchNo: productGRN.batchNo,
+//         expDate: productGRN.expDate,
+//         availableQty: productGRN.availableQty,
+//       });
+//     }
+
+//     return availabilityDetails;
+//   } catch (error) {
+//     throw error;
+//   }
+// };
