@@ -16,6 +16,10 @@ import productSupplierRouter from './src/modules/product_Supplier/routes.js';
 import productGRNRouter from "./src/modules/product_GRN/routes.js";
 import branchSupplierRouter from "./src/modules/branch_Supplier/routes.js";
 import { setupAssociations } from "./src/modules/associationSetup.js";
+import listedProductsRouter from "./src/modules/listedProducts/routes.js";
+import billRouter from "./src/modules/bill/routes.js";
+
+
 //import categories from "./src/modules/category/category.js";
 // import productSupplier from './src/modules/product_Supplier/product_Supplier.js';
 //import invoices, {setupInvoiceAssociations,} from "./src/modules/invoice/invoice.js";
@@ -37,6 +41,10 @@ app.use('/', productSupplierRouter);
 app.use('/', productGRNRouter);
 app.use('/',Branchrouter);
 app.use('/', branchSupplierRouter);
+app.use('/', listedProductsRouter);
+app.use('/', billRouter);
+
+
 
 app.use("/api", Productrouter);  
 app.use("/api", categoryRouter);
@@ -44,6 +52,9 @@ app.use("/api", supplierRouter);
 app.use("/api", GRNRouter);
 app.use('/api', productSupplierRouter);
 app.use('/api', productGRNRouter);
+app.use('/api', listedProductsRouter);
+app.use('/api', billRouter);
+
 
 app.use('/Images', express.static('.src/Images'))
 
