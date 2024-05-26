@@ -21,16 +21,8 @@ EmployeeRouter.post("/api/login", handleLogin);
 EmployeeRouter.post("/api/login/fp", forgotPassword);
 EmployeeRouter.post("/api/login/resetpw", passwordReset);
 
-// EmployeeRouter.get("/api/employees/verify", authenticateToken, (req, res) => {
-//     res.status(200).json({
-//         status: "success",
-//         message: "User Verified",
-//     });
-// });
 
 EmployeeRouter.get("/api/employees/verify", authenticateToken,verify);
-
-
 EmployeeRouter.get("/api/employees/verifyAdmin", authenticateToken,verifyAdmin);
 EmployeeRouter.get("/api/employees/verifySuperAdmin", authenticateToken,verifySuperAdmin);
     

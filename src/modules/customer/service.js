@@ -72,8 +72,8 @@ export const handleLoginCustomer = async (req, res) => {
       if (passwordMatch) {
         const accessToken = jwt.sign(
           {
-            employeeId: user.employeeId,
-            role: user.role,
+            customerId: user.customerId,
+            email: user.email,
           },
           ACCESS_TOKEN,
           {
