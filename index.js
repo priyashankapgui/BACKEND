@@ -20,7 +20,8 @@ import branchSupplierRouter from "./src/modules/branch_Supplier/routes.js";
 import { setupAssociations } from "./src/modules/associationSetup.js";
 import listedProductsRouter from "./src/modules/listedProducts/routes.js";
 import billRouter from "./src/modules/bill/routes.js";
-
+import feedback from "./src/modules/feedback/feedback.js";
+import feedbackrouter from "./src/modules/feedback/routes.js";
 
 //import categories from "./src/modules/category/category.js";
 // import productSupplier from './src/modules/product_Supplier/product_Supplier.js';
@@ -47,6 +48,8 @@ app.use('/', EmployeeRouter);
 app.use('/', CustomerRouter)
 app.use('/', listedProductsRouter);
 app.use('/', billRouter);
+app.use('/', feedbackrouter);
+
 
 
 
@@ -60,6 +63,8 @@ app.use('/api', CustomerRouter);
 app.use('/api', productGRNRouter);
 app.use('/api', listedProductsRouter);
 app.use('/api', billRouter);
+app.use('/api', feedback);
+
 
 
 app.use('/Images', express.static('.src/Images'))
@@ -101,4 +106,4 @@ process.on('unhandledRejection', (err) => {
 
 
 
- export { sequelize, categories, suppliers, grn, products, branches };
+ export { sequelize, categories, suppliers, grn, products, branches,feedback };
