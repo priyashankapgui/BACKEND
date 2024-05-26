@@ -5,11 +5,11 @@ const {DATABASE_HOST, DATABASE_USERNAME, DATABASE_PASSWORD, DATABASE_NAME } = pr
 
 console.log(process.env.DATABASE_HOST);
 
-const sequelize = new Sequelize('cms','root','pass123',  {
+const sequelize = new Sequelize(DATABASE_NAME,DATABASE_USERNAME,DATABASE_PASSWORD,  {
   host: DATABASE_HOST,
   dialect: 'mysql',
 });
- 
+
 
 
 export default sequelize;

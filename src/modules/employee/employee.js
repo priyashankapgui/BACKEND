@@ -26,6 +26,11 @@ const Employee = sequelize.define('employee', {
         type: DataTypes.STRING,
         allowNull: false,
       },
+
+    branchName: {
+        type: DataTypes.STRING,
+        allowNull: false,
+    },
     
     phone: {
         type: DataTypes.STRING,
