@@ -12,18 +12,16 @@ import supplierRouter from "./src/modules/supplier/routes.js";
 import GRNRouter from "./src/modules/GRN/routes.js";
 import productSupplierRouter from './src/modules/product_Supplier/routes.js';
 import suppliers from "./src/modules/supplier/supplier.js";
-
 import grn from "./src/modules/GRN/grn.js";
 import feedback from "./src/modules/feedback/feedback.js";
-
 import { getProducts } from "./src/modules/product/controller.js";
 import { getAllProducts } from "./src/modules/product/service.js";
 import categories from "./src/modules/category/category.js";
-
 import { setupAssociations } from "./src/modules/associationSetup.js";
 import Branchrouter from "./src/modules/branch/routes.js";
 import branchSupplierRouter from "./src/modules/branch_Supplier/routes.js";
 import branches from "./src/modules/branch/branch.js";
+import cartProductRoutes from "./src/modules/cart_Product/routes.js"
 import Stripe from 'stripe';
 
 const app = express();
@@ -41,9 +39,9 @@ app.use("/", GRNRouter);
 app.use('/', productSupplierRouter);
 app.use('/', Branchrouter);
 app.use('/', feedbackRouter);
-
 app.use('/', branchSupplierRouter);
 app.use('/', EmployeeRouter);
+app.use('/', cartProductRoutes);
 
 app.use("/api", Productrouter);  
 app.use("/api", categoryRouter);
@@ -52,6 +50,7 @@ app.use("/api", GRNRouter);
 app.use("/api", feedbackRouter);
 app.use('/api', productSupplierRouter);
 app.use('/api', EmployeeRouter);
+app.use("/api", cartProductRoutes);
 
 
 app.use('/Images', express.static('.src/Images'))
@@ -120,11 +119,6 @@ app.post('/create-checkout-session', async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
-
-
-
-
-
 
 
 export { sequelize, categories, suppliers, grn, feedback, products, branches };

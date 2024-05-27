@@ -3,12 +3,13 @@ import sequelize from "../../../config/database.js";
 import ShoppingCart from "../cart_Customer/shoppingcart.js";
 import products from "../product/product.js";
 
-const cartProduct = sequelize.define(
-  "cartProducts",
+const cart_Product = sequelize.define(
+  "cart_Product",
   {
     shoppingcartCartId: {
       type: DataTypes.INTEGER,
       allowNull: false,
+      primaryKey: true,
       references: {
         model: ShoppingCart,
         key: 'cartId'
@@ -17,6 +18,7 @@ const cartProduct = sequelize.define(
     productProductId: {
       type: DataTypes.INTEGER,
       allowNull: false,
+      primaryKey: true,
       references: {
         model: products,
         key: 'productId'
@@ -35,7 +37,7 @@ const cartProduct = sequelize.define(
 );
 
 // Correctly define the associations
-cartProduct.belongsTo(ShoppingCart, { foreignKey: 'shoppingcartCartId' });
-cartProduct.belongsTo(products, { foreignKey: 'productProductId' });
+cart_Product.belongsTo(ShoppingCart, { foreignKey: 'shoppingcartCartId' });
+cart_Product.belongsTo(products, { foreignKey: 'productProductId' });
 
-export default cartProduct;
+export default cart_Product;
