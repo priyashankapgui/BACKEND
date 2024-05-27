@@ -7,45 +7,45 @@ import categories from "./category/category.js";
 
 
 const setupGRNSupplierAssociations = (grn, suppliers) => {
-  suppliers.hasMany(grn, { foreignKey: "GRN_NO", as: "grn" }); 
-  grn.belongsTo(suppliers, { foreignKey: "supplierId" });
+  suppliers.hasMany(grn, { foreignKey: "supplierId", as: "grn" }); 
+  grn.belongsTo(suppliers);
 };
 
 
 const setupGRNBranchAssociations = (grn, branches) => {
-  branches.hasMany(grn, { foreignKey: "GRN_NO", as: "grn" }); 
-  grn.belongsTo(branches, { foreignKey: "branchId"} );
+  branches.hasMany(grn, { foreignKey: "branchId", as: "grn" }); 
+  grn.belongsTo(branches );
 };
 
 
 const setupProductBranchAssociations = (branches, products) => {
-  branches.hasMany(products, { foreignKey: "productId", as: "products" }); 
-  products.belongsTo(branches, { foreignKey: "branchId" });
+  branches.hasMany(products, { foreignKey: "branchId", as: "products" }); 
+  products.belongsTo(branches);
 };
 
 
 const setupCategoryAssociations = (categories, products) => {
-  categories.hasMany(products, { foreignKey: "productId", as: "products" });
-  products.belongsTo(categories, { foreignKey: "categoryId" });
+  categories.hasMany(products, { foreignKey: "categoryId", as: "products" });
+  products.belongsTo(categories);
 };
 
 
 const setupProductSupplierAssociations = (suppliers, products) => {
-  suppliers.belongsToMany(products, { through: "product_Supplier" });
-  products.belongsToMany(suppliers, { through: "product_Supplier" });
+  suppliers.belongsToMany(products, { through: "product_Supplier", foreignKey: 'supplierId' });
+  products.belongsToMany(suppliers, { through: "product_Supplier"});
 };
-
+ 
 const setupProductGRNAssociations = (products, grn) => {
-  products.belongsToMany(grn, { through: "product_GRN" });
-  grn.belongsToMany(products, { through: "product_GRN" });
+  products.belongsToMany(grn, { through: "product_GRN"});
+  grn.belongsToMany(products, { through: "product_GRN"}); 
 };
 
 
 const setupBranchSupplierAssociations = (branches, suppliers) => {
-  branches.belongsToMany(suppliers, { through: "branch_Supplier" });
-  suppliers.belongsToMany(branches, { through: "branch_Supplier" });
+  branches.belongsToMany(suppliers, { through: "branch_Supplier", foreignKey: 'branchId' });
+  suppliers.belongsToMany(branches, { through: "branch_Supplier", foreignKey: 'supplierId' });
 };
-
+ 
 
 
 

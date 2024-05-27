@@ -37,22 +37,51 @@ export const getSupplier = async (req, res) => {
 
 
 //Controller function to get a specific supplier by SupplierName
-export const getSupplierBySupplierName = async (req, res) => {
-  const { supplierName } = req.params;
+// export const getSupplierBySupplierName = async (req, res) => {
+//   const { supplierName } = req.params;
   
+//   try {
+//     if (!supplierName) {
+//       res.status(400).json({ error: "Supplier name is required" });
+//       return;
+//     }
+  
+//     const searchResults = await searchSupplierByName(supplierName);
+//     res.status(200).json(searchResults);
+//   } catch (error) {
+//     console.error("Error searching suppliers:", error);
+//     res.status(500).json({ error: "Internal server error" });
+//   }
+// };
+
+export const getSupplierBySupplierName = async (req, res) => {
+  const {  branchName, supplierId } = req.query;
+  console.log("branchName",branchName);
+  console.log("product",supplierId);
+
   try {
-    if (!supplierName) {
-      res.status(400).json({ error: "Supplier name is required" });
+    // Map branchName to branchId
+    const branchId = await mapBranchNameToId(branchName);
+
+    if (!branchId) {
+      res.status(404).json({ error: "Branch not found" });
       return;
     }
-  
-    const searchResults = await searchSupplierByName(supplierName);
-    res.status(200).json(searchResults);
+
+    // Fetch product by productId and branchId
+    const result= await searchSupplierByName(supplierId, branchId);
+    if (!result) {
+      res.status(404).json({ error: "supplier data not found" });
+      return;
+    }
+
+    res.status(200).json(result);
   } catch (error) {
-    console.error("Error searching suppliers:", error);
+    console.error("Error fetching product:", error);
     res.status(500).json({ error: "Internal server error" });
   }
 };
+
 
 
 export const getSuppliersByProductId = async (req, res) => {
@@ -70,6 +99,8 @@ export const getSuppliersByProductId = async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 };
+
+
 
 export const getSuppliersByProductName = async (req, res) => {
   const { productName } = req.params;

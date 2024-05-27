@@ -6,7 +6,6 @@ import suppliers from '../supplier/supplier.js';
 const productSupplier = sequelize.define(
   'product_Supplier',
   {
-  
     productId: {
       type: DataTypes.INTEGER,
       allowNull: false,
@@ -17,22 +16,19 @@ const productSupplier = sequelize.define(
       }
     },
     supplierId: {
-      type: DataTypes.INTEGER,  
+      type: DataTypes.INTEGER,
       allowNull: false,
       primaryKey: true,
       references: {
-        model: suppliers, 
+        model: suppliers,
         key: 'supplierId'
       }
     },
-  }, 
-  {
+  },
+  { 
     tableName: 'product_Supplier',
     timestamps: true,
   }
 );
 
-
-
 export default productSupplier;
- 

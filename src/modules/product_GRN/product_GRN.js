@@ -27,7 +27,8 @@ const productGRN = sequelize.define(
     batchNo: { 
       type: DataTypes.STRING,
       allowNull: false,
-    },
+      primaryKey: true,
+    }, 
     totalQty: {
       type: DataTypes.INTEGER,
       allowNull: false,
@@ -50,35 +51,7 @@ const productGRN = sequelize.define(
     },
     amount: {
       type: DataTypes.FLOAT,
-      allowNull: true,
-    },
-    batchNo: {
-      type: DataTypes.STRING,
       allowNull: false,
-    },
-    totalQty: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-    },
-    purchasePrice: {
-      type: DataTypes.FLOAT,
-      allowNull: false,
-    },
-    sellingPrice: {
-      type: DataTypes.FLOAT,
-      allowNull: false,
-    },
-    freeQty: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-    },
-    expDate: {
-      type: DataTypes.DATE,
-      allowNull: true,
-    },
-    amount: {
-      type: DataTypes.FLOAT,
-      allowNull: true,
     },
     availableQty: {
       type: DataTypes.INTEGER,
@@ -95,14 +68,11 @@ const productGRN = sequelize.define(
     hooks: {
       // Before creating a new record in product_GRN
       beforeCreate: async (productGRNInstance, options) => {
-        
-        productGRNInstance.availableQty = productGRNInstance.totalQty;
+        productGRNInstance.availableQty = productGRNInstance.totalQty; 
       }
     }
   }
 );
 
-
-
 export default productGRN;
-
+ 
