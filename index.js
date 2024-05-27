@@ -15,20 +15,7 @@ import supplierRouter from "./src/modules/supplier/routes.js";
 import Branchrouter from "./src/modules/branch/routes.js";
 import GRNRouter from "./src/modules/GRN/routes.js";
 import productSupplierRouter from './src/modules/product_Supplier/routes.js';
-<<<<<<< Updated upstream
 import productGRNRouter from "./src/modules/product_GRN/routes.js";
-=======
-//import categories from "./src/modules/category/category.js";
-import suppliers, {setupProductSupplierAssociations} from "./src/modules/supplier/supplier.js";
-import grn from "./src/modules/GRN/grn.js";
-//import invoices, {setupInvoiceAssociations,} from "./src/modules/invoice/invoice.js";
-import { getProducts } from "./src/modules/product/controller.js";
-import { getAllProducts } from "./src/modules/product/service.js"; 
-import categories, {setupCategoryAssociations} from "./src/modules/category/category.js";
-//import productGRNRouter from "./src/modules/product_GRN/routes.js";
-import { setupAssociations } from "./src/modules/associationSetup.js";
-import Branchrouter from "./src/modules/branch/routes.js";
->>>>>>> Stashed changes
 import branchSupplierRouter from "./src/modules/branch_Supplier/routes.js";
 import { setupAssociations } from "./src/modules/associationSetup.js";
 import listedProductsRouter from "./src/modules/listedProducts/routes.js";
@@ -36,11 +23,7 @@ import billRouter from "./src/modules/bill/routes.js";
 import feedback from "./src/modules/feedback/feedback.js";
 import feedbackrouter from "./src/modules/feedback/routes.js";
 
-//import categories from "./src/modules/category/category.js";
-// import productSupplier from './src/modules/product_Supplier/product_Supplier.js';
-//import invoices, {setupInvoiceAssociations,} from "./src/modules/invoice/invoice.js";
-// import { getProducts } from "./src/modules/product/controller.js";
-// import { getAllProducts } from "./src/modules/product/service.js";
+
 
  
 const app = express();
