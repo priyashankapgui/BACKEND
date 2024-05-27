@@ -6,7 +6,7 @@ import {
   deleteProduct,
   updateProduct,
   getStocksByProductName,
-  getProductsByCategoryName,
+  getProductsByCategoryAndBranch,
   getProductIdByProductNameController,
   getProductAndSuppliersDetailsByProductName,
   upload,
@@ -18,10 +18,10 @@ import {
 const Productrouter = express.Router();
 
 Productrouter.post("/products", upload, createProduct);
-Productrouter.get("/products", getProducts);
-Productrouter.get("/products/:productId", getProduct);
+Productrouter.get("/product", getProducts);
+Productrouter.get("/products", getProduct);
 Productrouter.get("/products/productName/:productName", getStocksByProductName);
-Productrouter.get("/products/category/:categoryName", getProductsByCategoryName);
+Productrouter.get("/products/category", getProductsByCategoryAndBranch);
 Productrouter.delete("/products/:productId", deleteProduct);
 Productrouter.put("/products/:productId", updateProduct);
 Productrouter.get("/products/productId/:productName", getProductIdByProductNameController);

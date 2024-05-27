@@ -2,6 +2,7 @@ import { Op } from "sequelize";
 import sequelize from "../../../config/database.js";
 import suppliers from "../supplier/supplier.js";
 import { mapBranchNameToId } from "../../modules/branch/service.js";
+import branchSupplier from "../branch_Supplier/branch_Supplier.js";
 
 //import products from "../product/product.js";
 //import productSupplier from "../product_Supplier/product_Supplier.js";
@@ -27,21 +28,60 @@ export const getSupplierById = async (supplierId) => {
 };
 
 // Function to retrieve a supplier by its supplierName
-export const searchSupplierByName = async (supplierName) => {
+// export const searchSupplierByName = async (supplierName) => {
+//   try {
+//     const searchResults = await suppliers.findAll({
+//       where: {
+//         supplierName: {
+//           [Op.like]: `%${supplierName}%`, // Using Sequelize's like operator to search for partial matches
+//         },
+//       },
+//     });
+//     return searchResults;
+//   } catch (error) {
+//     console.error("Error searching suppliers:", error);
+//     throw new Error("Error searching suppliers");
+//   }
+// };
+
+export const searchSupplierByName = async (supplierId, branchId) => {
   try {
-    const searchResults = await suppliers.findAll({
-      where: {
-        supplierName: {
-          [Op.like]: `%${supplierName}%`, // Using Sequelize's like operator to search for partial matches
-        },
-      },
+
+    const branchSupplierdata = await branchSupplier.findOne({
+      where: { branchId },
     });
-    return searchResults;
+
+    if (!branchSupplierdata) {
+      throw new Error("Supplier not found for the branch");
+    }
+
+    const supplierdata = await suppliers.findOne({
+      where: { supplierId: branchSupplierdata.supplierId },
+    });
+
+    if (!supplierdata) {
+      throw new Error("Supplier not found");
+    }
+
+
+    // Extract product details from the product GRNs
+    const result = {
+      supplierId: supplierdata.supplierId,
+      supplierName: supplierdata.supplierName,
+      regNo: supplierdata.regNo,
+      email: supplierdata.email,
+      address: supplierdata.address,
+      contactNo: supplierdata.contactNo,
+      
+    };
+
+    return result;
   } catch (error) {
-    console.error("Error searching suppliers:", error);
-    throw new Error("Error searching suppliers");
+    throw new Error("Error retrieving product details: " + error.message);
   }
 };
+
+
 
 export const searchSuppliersByProductId = async (productId) => {
   try {
