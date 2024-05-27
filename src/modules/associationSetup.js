@@ -4,6 +4,7 @@ import branches from "../modules/branch/branch.js"
 import products from "../modules/product/product.js";
 import categories from "./category/category.js";
 import bill from "./bill/bill.js";
+//import Employee from "./employee/employee.js";
 
 
 const setupGRNSupplierAssociations = (grn, suppliers) => {
@@ -50,6 +51,10 @@ const setupBranchBillAssociations = (branches, bill) => {
   bill.belongsTo(branches, { foreignKey: "branchId" });
 };
 
+// const seupEmployeeBranchAssociations = (Employee, branches) => {
+//   branches.hasMany(Employee, { foreignKey: "branchId", as: "Employee" });
+//   Employee.belongsTo(branches, { foreignKey: "branchId" });
+// };
 
 
 export const setupAssociations = () => {
@@ -61,5 +66,6 @@ export const setupAssociations = () => {
   setupProductGRNAssociations(products, grn);
   setupBranchSupplierAssociations(branches, suppliers);
   setupBranchBillAssociations(branches, bill);
+  // seupEmployeeBranchAssociations(Employee, branches);
 
 };
