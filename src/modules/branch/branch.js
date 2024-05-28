@@ -29,7 +29,8 @@ const branches = sequelize.define('branches', {
         type: 'TIMESTAMP',
         defaultValue: DataTypes.NOW,
         allowNull: false
-    }
+    },
+    updatedAt
 },
 {
     tableName: 'branches',
