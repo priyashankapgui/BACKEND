@@ -7,6 +7,7 @@ import products from "./src/modules/product/product.js";
 import suppliers from "./src/modules/supplier/supplier.js";
 import categories from "./src/modules/category/category.js";
 import branches from "./src/modules/branch/branch.js";
+import SuperAdmin from "./src/modules/superAdmin/superAdmin.js";
 import Productrouter from "./src/modules/product/routes.js";
 import categoryRouter from "./src/modules/category/routes.js";
 import EmployeeRouter from './src/modules/employee/routes.js';
@@ -22,6 +23,7 @@ import listedProductsRouter from "./src/modules/listedProducts/routes.js";
 import billRouter from "./src/modules/bill/routes.js";
 import feedback from "./src/modules/feedback/feedback.js";
 import feedbackrouter from "./src/modules/feedback/routes.js";
+import SuperAdminRouter from "./src/modules/superAdmin/routes.js";
 
 //import categories from "./src/modules/category/category.js";
 // import productSupplier from './src/modules/product_Supplier/product_Supplier.js';
@@ -49,7 +51,7 @@ app.use('/', CustomerRouter)
 app.use('/', listedProductsRouter);
 app.use('/', billRouter);
 app.use('/', feedbackrouter);
-
+app.use('/', SuperAdminRouter);
 
 
 
@@ -74,7 +76,7 @@ setupAssociations();
 
 
 
-sequelize.sync({ alter: true }) 
+sequelize.sync({alter: true}) 
   .then(() => {
     console.log("Database synchronized");
     app.listen(8080, () => {
@@ -106,4 +108,4 @@ process.on('unhandledRejection', (err) => {
 
 
 
- export { sequelize, categories, suppliers, grn, products, branches,feedback };
+ export { sequelize, categories, suppliers, grn, products, branches,feedback, SuperAdmin };

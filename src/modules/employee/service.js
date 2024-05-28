@@ -124,7 +124,6 @@ export const handleLogin = async (req, res) => {
   try {
     // Find the user in the database based on the provided empID
     const user = await Employee.findOne({ where: { employeeId: employeeId } });
-
     if (!user) {
       return res.status(404).json({ message: "Invalid Credentials" });
     }
