@@ -4,13 +4,17 @@ import branches from "../modules/branch/branch.js"
 import products from "../modules/product/product.js";
 import categories from "./category/category.js";
 import bill from "./bill/bill.js";
-//import Employee from "./employee/employee.js";
 
+const setupBranchBillAssociations = (branches, bill) => {
+  branches.hasMany(bill, { foreignKey: "branchId", as: "bill" });
+  bill.belongsTo(branches, { foreignKey: "branchId" });
+};
 
 const setupGRNSupplierAssociations = (grn, suppliers) => {
   suppliers.hasMany(grn, { foreignKey: "supplierId", as: "grn" });
   grn.belongsTo(suppliers);
 };
+
 
 const setupGRNBranchAssociations = (grn, branches) => {
   branches.hasMany(grn, { foreignKey: "branchId", as: "grn" });
@@ -31,7 +35,7 @@ const setupCategoryAssociations = (categories, products) => {
 
 
 const setupProductSupplierAssociations = (suppliers, products) => {
-  suppliers.belongsToMany(products, { through: "product_Supplier" });
+  suppliers.belongsToMany(products, { through: "product_Supplier", foreignKey: 'supplierId' });
   products.belongsToMany(suppliers, { through: "product_Supplier" });
 };
 
@@ -42,19 +46,11 @@ const setupProductGRNAssociations = (products, grn) => {
 
 
 const setupBranchSupplierAssociations = (branches, suppliers) => {
-  branches.belongsToMany(suppliers, { through: "branch_Supplier" });
-  suppliers.belongsToMany(branches, { through: "branch_Supplier" });
+  branches.belongsToMany(suppliers, { through: "branch_Supplier", foreignKey: 'branchId' });
+  suppliers.belongsToMany(branches, { through: "branch_Supplier", foreignKey: 'supplierId' });
 };
 
-const setupBranchBillAssociations = (branches, bill) => {
-  branches.hasMany(bill, { foreignKey: "branchId", as: "bill" });
-  bill.belongsTo(branches, { foreignKey: "branchId" });
-};
 
-// const seupEmployeeBranchAssociations = (Employee, branches) => {
-//   branches.hasMany(Employee, { foreignKey: "branchId", as: "Employee" });
-//   Employee.belongsTo(branches, { foreignKey: "branchId" });
-// };
 
 
 export const setupAssociations = () => {
@@ -66,6 +62,5 @@ export const setupAssociations = () => {
   setupProductGRNAssociations(products, grn);
   setupBranchSupplierAssociations(branches, suppliers);
   setupBranchBillAssociations(branches, bill);
-  // seupEmployeeBranchAssociations(Employee, branches);
 
 };

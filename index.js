@@ -24,16 +24,14 @@ import billRouter from "./src/modules/bill/routes.js";
 import feedback from "./src/modules/feedback/feedback.js";
 import feedbackrouter from "./src/modules/feedback/routes.js";
 import SuperAdminRouter from "./src/modules/superAdmin/routes.js";
+import cartProductRoutes from "./src/modules/cart_Product/routes.js"
+import Stripe from 'stripe';
 
-//import categories from "./src/modules/category/category.js";
-// import productSupplier from './src/modules/product_Supplier/product_Supplier.js';
-//import invoices, {setupInvoiceAssociations,} from "./src/modules/invoice/invoice.js";
-// import { getProducts } from "./src/modules/product/controller.js";
-// import { getAllProducts } from "./src/modules/product/service.js";
+
 
  
 const app = express();
- 
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 app.use(cors());
 
 app.use(express.json());  
@@ -66,7 +64,7 @@ app.use('/api', productGRNRouter);
 app.use('/api', listedProductsRouter);
 app.use('/api', billRouter);
 app.use('/api', feedback);
-
+app.use('/api/cart', cartProductRoutes);
 
 
 app.use('/Images', express.static('.src/Images'))
@@ -105,7 +103,34 @@ process.on('unhandledRejection', (err) => {
   console.error('Unhandled Promise Rejection:', err);
 });
 
+// Stripe Checkout Session Route
+app.post('/create-checkout-session', async (req, res) => {
+  const { items } = req.body;
 
+  try {
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ['card'],
+      line_items: items.map(item => ({
+        price_data: {
+          currency: 'lkr',
+          product_data: {
+            name: item.name,
+          },
+          unit_amount: item.price * 100,
+        },
+        quantity: item.quantity,
+      })),
+      mode: 'payment',
+      success_url: 'http://localhost:3000/success',
+      cancel_url: 'http://localhost:3000/cancel',
+    });
+
+    res.json({ sessionId: session.id });
+  } catch (error) {
+    console.error('Error creating checkout session:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
 
 
  export { sequelize, categories, suppliers, grn, products, branches,feedback, SuperAdmin };

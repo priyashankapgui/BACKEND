@@ -29,6 +29,7 @@ const products = sequelize.define(
         onUpdate: "CASCADE"
       },
     },
+    
     description: {
       type: DataTypes.STRING,
       allowNull: true,

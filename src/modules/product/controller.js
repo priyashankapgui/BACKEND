@@ -8,10 +8,10 @@ import { mapBranchNameToId } from "../../modules/branch/service.js";
 import { getProductTotalQuantity } from "../../modules/product_GRN/service.js"
 import {
   getAllProducts,
-  getProductById,
+  getProductByIdAndBranchName,
   addProduct,
   searchProductsByName,
-  searchProductsByCategoryName,
+  getProductsByCategoryNameAndBranchName,
   deleteProductById,
   updateProductById,
   getProductIdByProductNameService,
@@ -37,15 +37,45 @@ export const getProducts = async (req, res) => {
 
 
 // Controller function to get a product by its ID
+// export const getProduct = async (req, res) => {
+//   const productId = req.params.productId;
+//   try {
+//     const productbyId = await getProductById(productId);
+//     if (!productbyId) {
+//       res.status(404).json({ error: "Product not found" });
+//       return;
+//     }
+//     res.status(200).json(productbyId);
+//   } catch (error) {
+//     console.error("Error fetching product:", error);
+//     res.status(500).json({ error: "Internal server error" });
+//   }
+// };
+
+
+
 export const getProduct = async (req, res) => {
-  const productId = req.params.productId;
+  const {  branchName, productId } = req.query;
+  console.log("branchName",branchName);
+  console.log("product",productId);
+
   try {
-    const productbyId = await getProductById(productId);
-    if (!productbyId) {
+    // Map branchName to branchId
+    const branchId = await mapBranchNameToId(branchName);
+
+    if (!branchId) {
+      res.status(404).json({ error: "Branch not found" });
+      return;
+    }
+
+    // Fetch product by productId and branchId
+    const result= await getProductByIdAndBranchName(productId, branchId);
+    if (!result) {
       res.status(404).json({ error: "Product not found" });
       return;
     }
-    res.status(200).json(productbyId);
+
+    res.status(200).json(result);
   } catch (error) {
     console.error("Error fetching product:", error);
     res.status(500).json({ error: "Internal server error" });
@@ -75,23 +105,50 @@ export const getStocksByProductName = async (req, res) => {
 
 
 // Controller function to get products by category name
-export const getProductsByCategoryName = async (req, res) => {
-  const { categoryName } = req.params;
+// export const getProductsByCategoryName = async (req, res) => {
+//   const { categoryName } = req.params;
+
+//   try {
+//     if (!categoryName) {
+//       res.status(400).json({ error: "Category name is required" });
+//       return;
+//     }
+  
+//     const products = await searchProductsByCategoryName(categoryName);
+//     res.status(200).json(products);
+//   } catch (error) {
+//     console.error("Error fetching products by category name:", error);
+//     res.status(500).json({ error: "Internal server error" });
+//   }
+// };
+
+export const getProductsByCategoryAndBranch = async (req, res) => {
+  const { categoryName, branchName } = req.query;
+  console.log("branchName", branchName);
+  console.log("categoryName", categoryName);
 
   try {
-    if (!categoryName) {
-      res.status(400).json({ error: "Category name is required" });
+    // Map branchName to branchId
+    const branchId = await mapBranchNameToId(branchName);
+
+    if (!branchId) {
+      res.status(404).json({ error: "Branch not found" });
       return;
     }
-  
-    const products = await searchProductsByCategoryName(categoryName);
-    res.status(200).json(products);
+
+    // Fetch products by categoryName and branchId
+    const results = await getProductsByCategoryNameAndBranchName(categoryName, branchId);
+    if (!results || results.length === 0) {
+      res.status(404).json({ error: "No products found" });
+      return;
+    }
+
+    res.status(200).json(results);
   } catch (error) {
-    console.error("Error fetching products by category name:", error);
+    console.error("Error fetching products:", error);
     res.status(500).json({ error: "Internal server error" });
   }
 };
-
 
 
 // Controller function to update a product
