@@ -27,6 +27,4 @@ const BranchSupplier = sequelize.define('BranchSupplier', {
   timestamps: true,
 });
 
-
-
 export default BranchSupplier;
