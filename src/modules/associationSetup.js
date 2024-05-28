@@ -1,10 +1,12 @@
 import suppliers from "../modules/supplier/supplier.js";
 import grn from "../modules/GRN/grn.js";
-import branches from "../modules/branch/branch.js"
+import branches from "../modules/branch/branch.js";
 import products from "../modules/product/product.js";
 import categories from "./category/category.js";
+import Customer from "./customer/customer.js";
+import ShoppingCart from "./cart_Customer/shoppingcart.js";
 import bill from "./bill/bill.js";
-
+import cart_Product from "./cart_Product/cartProduct.js"; // Make sure to use the correct path
 
 const setupGRNSupplierAssociations = (grn, suppliers) => {
   suppliers.hasMany(grn, { foreignKey: "supplierId", as: "grn" });
@@ -16,18 +18,15 @@ const setupGRNBranchAssociations = (grn, branches) => {
   grn.belongsTo(branches);
 };
 
-
 const setupProductBranchAssociations = (branches, products) => {
   branches.hasMany(products, { foreignKey: "branchId", as: "products" });
   products.belongsTo(branches);
 };
 
-
 const setupCategoryAssociations = (categories, products) => {
   categories.hasMany(products, { foreignKey: "categoryId", as: "products" });
   products.belongsTo(categories);
 };
-
 
 const setupProductSupplierAssociations = (suppliers, products) => {
   suppliers.belongsToMany(products, { through: "product_Supplier" });
@@ -39,7 +38,6 @@ const setupProductGRNAssociations = (products, grn) => {
   grn.belongsToMany(products, { through: "product_GRN" });
 };
 
-
 const setupBranchSupplierAssociations = (branches, suppliers) => {
   branches.belongsToMany(suppliers, { through: "branch_Supplier" });
   suppliers.belongsToMany(branches, { through: "branch_Supplier" });
@@ -50,7 +48,15 @@ const setupBranchBillAssociations = (branches, bill) => {
   bill.belongsTo(branches, { foreignKey: "branchId" });
 };
 
+const setupCartCustomerAssociations = (ShoppingCart, Customer) => {
+  ShoppingCart.hasOne(Customer);
+  Customer.belongsTo(ShoppingCart, { foreignKey: 'customerId' });
+};
 
+const setupCartProductAssociations = (ShoppingCart, products, cart_Product) => {
+  ShoppingCart.belongsToMany(products, { through: cart_Product });
+  products.belongsToMany(ShoppingCart, { through: cart_Product });
+};
 
 export const setupAssociations = () => {
   setupGRNSupplierAssociations(grn, suppliers);
@@ -61,5 +67,6 @@ export const setupAssociations = () => {
   setupProductGRNAssociations(products, grn);
   setupBranchSupplierAssociations(branches, suppliers);
   setupBranchBillAssociations(branches, bill);
-
+  setupCartProductAssociations(ShoppingCart, products, cart_Product);
+  setupCartCustomerAssociations(ShoppingCart, Customer);
 };

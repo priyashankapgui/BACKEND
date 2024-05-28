@@ -32,11 +32,9 @@ const cart_Product = sequelize.define(
   },
   {
     tableName: "cart_Product",
-    timestamps: true,
   }
 );
 
-// Correctly define the associations
 cart_Product.belongsTo(ShoppingCart, { foreignKey: 'shoppingcartCartId' });
 cart_Product.belongsTo(products, { foreignKey: 'productProductId' });
 
