@@ -3,7 +3,7 @@ import sequelize from '../../../config/database.js';
 import Branch from '../branch/branch.js';
 import Supplier from '../supplier/supplier.js';
 
-const BranchSupplier = sequelize.define('BranchSupplier', {
+const BranchSupplier = sequelize.define('branch_Supplier', {
   branchId: {
     type: DataTypes.INTEGER,
     allowNull: false,
