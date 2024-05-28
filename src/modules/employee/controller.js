@@ -7,7 +7,8 @@ import {
   deleteEmployeeById,
 } from "../employee/service.js";
 import { SECRET } from "../../../config/config.js";
-const { SECRET_KEY: ACCESS_TOKEN } = SECRET;
+import jwt from "jsonwebtoken";
+const ACCESS_TOKEN = SECRET.SECRET_KEY;
 
 export const getEmployees = async (req, res) => {
   try {
@@ -45,17 +46,20 @@ export const createNewEmployee = async (req, res) => {
   }
 };
 
-
 export const updateEmployee = async (req, res) => {
+  const authHeader = req.headers["authorization"];
+  const token = authHeader.split(" ")[1];
+  const decoded = jwt.verify(token, ACCESS_TOKEN);
+  const role = decoded.role;
+  const branch = decoded.branchName;
   const employeeId = req.params.employeeId;
   const updatedEmployeeData = req.body;
-
-  console.log(employeeId);
-
   try {
     const updatedEmployee = await updateEmployeeById(
       employeeId,
-      updatedEmployeeData
+      updatedEmployeeData,
+      role,
+      branch
     );
     if (!updatedEmployee) {
       res.status(404).json({ error: "Employee not found" });
@@ -63,38 +67,39 @@ export const updateEmployee = async (req, res) => {
     }
     res.status(200).json(updatedEmployee);
   } catch (error) {
+    if(error.message === "Unauthorized"){
+      res.status(403).json({ error: error.message });
+    }
+    else{
     res.status(500).json({ error: error.message });
+    }
   }
 };
 
-
-
 export const deleteEmployee = async (req, res) => {
+  const authHeader = req.headers["authorization"];
+  const token = authHeader.split(" ")[1];
+  const decoded = jwt.verify(token, ACCESS_TOKEN);
+  const role = decoded.role;
+  const branch = decoded.branchName;
+  if (role != "superadmin" && role != "admin") {
+    return res.status(403).json({ message: "Unauthorized" });
+  }
   const employeeId = req.params.employeeId;
   try {
-    const deletedEmployee = await deleteEmployeeById(employeeId);
+    const deletedEmployee = await deleteEmployeeById(employeeId, role, branch);
     if (!deletedEmployee) {
       res.status(404).json({ error: "Employee not found" });
       return;
     }
     res.status(200).json({ message: "Employee deleted successfully" });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    if(error.message === "Unauthorized"){
+      res.status(403).json({ error: error.message });
+    }
+    else{
+      res.status(500).json({ error: error.message });
+    }
   }
 };
 
-// export const forgotPassword = async (req, res) => {
-//   const { token } = req.query;
-
-//   // Verify the token
-//   try {
-//     const decoded = jwt.verify(token, RESET_TOKEN_SECRET);
-//     const { email } = decoded;
-
-//     // Check if the token matches the one associated with the user's account
-//     const user = await Employee.findOne({ email });
-//     if (!user) {
-//       return res.status(404).json({ message: "User not found" });
-//     }
-//   } catch (error) {}
-// };

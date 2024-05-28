@@ -7,15 +7,14 @@ const grn = sequelize.define(
   "grn",
   {
     GRN_NO: {
-      type: DataTypes.STRING, 
+      type: DataTypes.STRING,
       allowNull: false,
       primaryKey: true,
     },
     invoiceNo: {
       type: DataTypes.STRING,
-      allowNull: false,  
+      allowNull: false,
     },
-   
     branchId: {
       type: DataTypes.INTEGER,
       allowNull: false,
@@ -27,7 +26,7 @@ const grn = sequelize.define(
       },
     },
     supplierId: {
-      type: DataTypes.INTEGER, 
+      type: DataTypes.INTEGER,
       allowNull: false,
       references: {
         model: suppliers,
@@ -35,15 +34,13 @@ const grn = sequelize.define(
         onDelete: "CASCADE",
         onUpdate: "CASCADE"
       },
-    }, 
+    },
   },
   {
     tableName: "grn",
     timestamps: true,
   }
 );
-
-
 
 
 export default grn;

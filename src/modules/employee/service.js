@@ -48,7 +48,6 @@ export const createEmployee = async (employee) => {
     throw new Error("Invalid role");
   }
  
-
   // Validate email
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!emailRegex.test(email)) {
@@ -58,15 +57,13 @@ export const createEmployee = async (employee) => {
   // Validate password
   if (!/^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,20}$/.test(password)) {
     throw new Error("Invalid password format");
-  }
-
+  } 
 
   // Validate phone number
   const phoneRegex = /^[0-9]{10}$/;
   if (!phoneRegex.test(phone)) {
     throw new Error("Invalid phone number");
   }
-
 
   try {
     const newEmployee = await Employee.create(employee);
@@ -76,29 +73,41 @@ export const createEmployee = async (employee) => {
   }
 };
 
-export const updateEmployeeById = async (employeeId, employeeData) => {
-  try {
-    const employee = await Employee.findByPk(employeeId);
-    if (!employee) {
-      return null;
-    }
+export const updateEmployeeById = async (employeeId, employeeData, role, branch) => {
+  const employee = await Employee.findByPk(employeeId);
+  if (!employee) {
+    throw new Error("Employee not found");
+  }
+  if (
+    role === "superadmin" ||
+    (role === "admin" &&
+      employee.branchName === branch &&
+      employee.role !== "admin" &&
+      employee.role !== "superadmin")
+  ) {
     const updatedEmployee = await employee.update(employeeData);
     return updatedEmployee;
-  } catch (error) {
-    throw new Error("Error updating employee: " + error.message);
+  } else {
+    throw new Error("Unauthorized");
   }
 };
 
-export const deleteEmployeeById = async (employeeId) => {
-  try {
-    const employee = await Employee.findByPk(employeeId);
-    if (!employee) {
-      return null;
-    }
+export const deleteEmployeeById = async (employeeId, role, branch) => {
+  const employee = await Employee.findByPk(employeeId);
+  if (!employee) {
+    return null;
+  }
+  if (
+    role === "superadmin" ||
+    (role === "admin" &&
+      employee.branchName === branch &&
+      employee.role !== "admin" &&
+      employee.role !== "superadmin")
+  ) {
     await employee.destroy();
     return employee;
-  } catch (error) {
-    throw new Error("Error deleting employee: " + error.message);
+  } else {
+    throw new Error("Unauthorized");
   }
 };
 
@@ -128,6 +137,7 @@ export const handleLogin = async (req, res) => {
         {
           employeeId: user.employeeId,
           role: user.role,
+          branchName: user.branchName,
         },
         ACCESS_TOKEN,
         {
@@ -143,6 +153,7 @@ export const handleLogin = async (req, res) => {
         token: accessToken,
         user: {
           employeeId: user.employeeId,
+          branchName: user.branchName,
           employeeName: user.employeeName,
           email: user.email,
           role: user.role,
