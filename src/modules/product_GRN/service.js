@@ -6,26 +6,101 @@ import products from "../product/product.js";
 import { mapBranchNameToId } from "../../modules/branch/service.js";
 import branches from "../branch/branch.js";
 import categories from '../category/category.js';
+import suppliers from "../supplier/supplier.js";
+
 
 
 //create product_GRN
-export const createProductGRNService = async ({
-  productId, GRN_NO, batchNo, totalQty, purchasePrice, sellingPrice, freeQty, expDate, amount, comment
-}) => {
-  try {
-    const newProductGRN = await productGRN.create({
-      productId, GRN_NO, batchNo, totalQty, purchasePrice, sellingPrice, freeQty, expDate, amount, comment
-    });
-    return newProductGRN;
-  } catch (error) {
-    if (error.name === 'SequelizeValidationError') {
-      throw new Error("Validation error: " + error.message);
-    } else {
-      throw new Error("Error creating product supplier: " + error.message);
-    }
-  }
-}; 
+// export const createProductGRNService = async ({
+//   productId, GRN_NO, batchNo, totalQty, purchasePrice, sellingPrice, freeQty, expDate, amount, comment
+// }) => {
+//   try {
+//     const newProductGRN = await productGRN.create({
+//       productId, GRN_NO, batchNo, totalQty, purchasePrice, sellingPrice, freeQty, expDate, amount, comment
+//     });
+//     return newProductGRN;
+//   } catch (error) {
+//     if (error.name === 'SequelizeValidationError') {
+//       throw new Error("Validation error: " + error.message);
+//     } else {
+//       throw new Error("Error creating product supplier: " + error.message);
+//     }
+//   }
+// }; 
 
+// export const createProductGRNService = async (productGRNEntries) => {
+//   try {
+//     if (!Array.isArray(productGRNEntries)) {
+//       throw new Error("productGRNEntries should be an array");
+//     }
+
+//     const newProductGRNs = await Promise.all(productGRNEntries.map(async (entry) => {
+//       return await productGRN.create(entry);
+//     }));
+//     return newProductGRNs;
+//   } catch (error) {
+//     if (error.name === 'SequelizeValidationError') {
+//       console.error("Validation error details:", error.errors);
+//       throw new Error("Validation error: " + JSON.stringify(error.errors));
+//     } else {
+//       throw new Error("Error creating product supplier: " + error.message);
+//     }
+//   }
+// };
+
+// export const createProductGRNService = async (productGRNEntries) => {
+//   try {
+//     if (!Array.isArray(productGRNEntries)) {
+//       throw new Error("productGRNEntries should be an array");
+//     }
+
+//     const newProductGRNs = await Promise.all(productGRNEntries.map(async (entry) => {
+//       return await productGRN.create(entry);
+//     }));
+//     return newProductGRNs;
+//   } catch (error) {
+//     if (error.name === 'SequelizeValidationError') {
+//       console.error("Validation error details:", error.errors);
+//       throw new Error("Validation error: " + JSON.stringify(error.errors));
+//     } else {
+//       throw new Error("Error creating product supplier: " + error.message);
+//     }
+//   }
+// };
+
+// 
+
+ //Function to create GRN 
+export const createProductGRNService = async (productGRNs) => {
+  try {
+    if (!Array.isArray(productGRNs)) {
+      throw new Error("productGRNEntries should be an array");
+    }
+
+    const newProductGRNs = [];
+
+    for (const entry of productGRNs) {
+      try {
+        const result = await productGRN.create(entry);
+        newProductGRNs.push(result);
+        console.log("Successfully created entry:", result);
+      } catch (error) {
+        if (error.name === 'SequelizeValidationError') {
+          console.error("Validation error for entry:", entry, error.errors);
+          throw error; // Throw the validation error to catch it in the controller
+        } else {
+          console.error("Error creating entry:", entry, error);
+          throw error; // Re-throw other errors
+        }
+      }
+    }
+
+    return { success: true, newProductGRNs };
+  } catch (error) {
+    console.error("Error creating product GRN:", error.message);
+    throw new Error("Error creating product GRN: " + error.message);
+  }
+};
 
 
 
@@ -48,7 +123,7 @@ export const calculateTotalAmount = async (invoiceNo) => {
 
       // Calculate total amount from the product GRNs and add to the overall total
       for (const productGRN of productGRNs) {
-        totalAmount += (productGRN.totalQty - productGRN.freeQty) * productGRN.purchasePrice;
+        totalAmount += productGRN.amount;
       }
     }
 
@@ -106,9 +181,70 @@ export const getBatchDetailsByProductName = async (productName, branchName) => {
 }; 
 
 
+export const getGRNDetailsByProductId = async (productId) => {
+  try {
+    // Get GRN_NOs associated with the productId from productGRN table
+    const productGRNs = await productGRN.findAll({
+      where: { productId },
+      attributes: ['GRN_NO'], // Select only the GRN_NO column
+      raw: true, // Return plain objects
+    });
+
+    // Fetch details for each GRN_NO
+    const results = await Promise.all(productGRNs.map(async (productGRNItem) => {
+      const { GRN_NO } = productGRNItem;
+
+      // Get details from grn table for the current GRN_NO
+      const grnItem = await grn.findOne({
+        where: { GRN_NO },
+        attributes: ['GRN_NO', 'createdAt', 'branchId', 'supplierId', 'invoiceNo'],
+        raw: true,
+      });
+
+      if (!grnItem) {
+        throw new Error(`GRN not found for GRN_NO: ${GRN_NO}`);
+      }
+
+      // Get supplier details
+      const supplier = await suppliers.findOne({
+        where: { supplierId: grnItem.supplierId },
+        attributes: ['supplierName'],
+        raw: true,
+      });
+
+      if (!supplier) {
+        throw new Error(`Supplier not found for supplierId: ${grnItem.supplierId}`);
+      }
+
+      // Get branch details
+      const branch = await branches.findOne({
+        where: { branchId: grnItem.branchId },
+        attributes: ['branchName'],
+        raw: true,
+      });
+
+      if (!branch) {
+        throw new Error(`Branch not found for branchId: ${grnItem.branchId}`);
+      }
+
+      return {
+        GRN_NO: grnItem.GRN_NO,
+        createdAt: grnItem.createdAt,
+        branchName: branch.branchName,
+        supplierName: supplier.supplierName,
+        invoiceNo: grnItem.invoiceNo,
+      };
+    }));
+
+    return results;
+  } catch (error) {
+    console.error('Error fetching GRN details by productId:', error);
+    throw new Error('Error fetching GRN details by productId: ' + error.message);
+  }
+};
 
 
-//update the qty column in thr product table
+//update the totalqty column in thr product table
 export const updateProductQty = async (productId) => {
   try {
     const productGRNs = await productGRN.findAll({

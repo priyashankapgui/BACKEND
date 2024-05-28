@@ -25,11 +25,7 @@ import feedbackrouter from "./src/modules/feedback/routes.js";
 import cartProductRoutes from "./src/modules/cart_Product/routes.js"
 import Stripe from 'stripe';
 
-//import categories from "./src/modules/category/category.js";
-// import productSupplier from './src/modules/product_Supplier/product_Supplier.js';
-//import invoices, {setupInvoiceAssociations,} from "./src/modules/invoice/invoice.js";
-// import { getProducts } from "./src/modules/product/controller.js";
-// import { getAllProducts } from "./src/modules/product/service.js";
+
 
  
 const app = express();

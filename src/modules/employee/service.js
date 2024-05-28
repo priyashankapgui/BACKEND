@@ -48,7 +48,6 @@ export const createEmployee = async (employee) => {
     throw new Error("Invalid role");
   }
  
-
   // Validate email
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!emailRegex.test(email)) {
@@ -60,13 +59,11 @@ export const createEmployee = async (employee) => {
     throw new Error("Invalid password format");
   } 
 
-
   // Validate phone number
   const phoneRegex = /^[0-9]{10}$/;
   if (!phoneRegex.test(phone)) {
     throw new Error("Invalid phone number");
   }
-
 
   try {
     const newEmployee = await Employee.create(employee);
