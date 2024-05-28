@@ -30,7 +30,7 @@ const branches = sequelize.define('branches', {
         defaultValue: DataTypes.NOW,
         allowNull: false
     },
-    updatedAt
+    
 },
 {
     tableName: 'branches',
