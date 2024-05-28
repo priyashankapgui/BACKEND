@@ -44,7 +44,7 @@ const setupProductGRNAssociations = (products, grn) => {
 const setupBranchSupplierAssociations = (branches, suppliers) => {
   branches.belongsToMany(suppliers, { through: "branch_Supplier", foreignKey: 'branchId' });
   suppliers.belongsToMany(branches, { through: "branch_Supplier", foreignKey: 'supplierId' });
-};
+}; 
  
 
 
