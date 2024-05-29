@@ -1,24 +1,24 @@
 import { DataTypes } from "sequelize";
 import sequelize from "../../../config/database.js";
-import ShoppingCart from "../cart_Customer/shoppingcart.js";
+import ShoppingCart from "../Cart_Customer/shoppingcart.js";
 import products from "../product/product.js";
 
 const cart_Product = sequelize.define(
   "cart_Product",
   {
-    shoppingcartCartId: {
+    cartId: {
       type: DataTypes.INTEGER,
       allowNull: false,
-      primaryKey: true,
+      primaryKey:true,
       references: {
         model: ShoppingCart,
         key: 'cartId'
       }
     },
-    productProductId: {
+    productId: {
       type: DataTypes.INTEGER,
       allowNull: false,
-      primaryKey: true,
+      primaryKey:true,
       references: {
         model: products,
         key: 'productId'
@@ -32,10 +32,8 @@ const cart_Product = sequelize.define(
   },
   {
     tableName: "cart_Product",
+    // primaryKey: ['cartId', 'productId'], // Define composite primary key
   }
 );
-
-cart_Product.belongsTo(ShoppingCart, { foreignKey: 'shoppingcartCartId' });
-cart_Product.belongsTo(products, { foreignKey: 'productProductId' });
 
 export default cart_Product;

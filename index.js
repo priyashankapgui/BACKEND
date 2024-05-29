@@ -23,6 +23,7 @@ import billRouter from "./src/modules/bill/routes.js";
 import feedback from "./src/modules/feedback/feedback.js";
 import feedbackrouter from "./src/modules/feedback/routes.js";
 import cartProductRoutes from "./src/modules/cart_Product/routes.js"
+import ShoppingCart from "./src/modules/Cart_Customer/shoppingcart.js";
 import Stripe from 'stripe';
 
 
@@ -47,7 +48,7 @@ app.use('/', CustomerRouter)
 app.use('/', listedProductsRouter);
 app.use('/', billRouter);
 app.use('/', feedbackrouter);
-
+app.use('/', cartProductRoutes);
 
 
 
@@ -62,7 +63,7 @@ app.use('/api', productGRNRouter);
 app.use('/api', listedProductsRouter);
 app.use('/api', billRouter);
 app.use('/api', feedback);
-app.use('/api/cart', cartProductRoutes);
+app.use('/api', cartProductRoutes);
 
 
 app.use('/Images', express.static('.src/Images'))
@@ -131,4 +132,4 @@ app.post('/create-checkout-session', async (req, res) => {
 });
 
 
- export { sequelize, categories, suppliers, grn, products, branches,feedback };
+ export { sequelize, categories, suppliers, grn, products, branches,feedback,ShoppingCart};
