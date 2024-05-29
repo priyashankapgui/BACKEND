@@ -8,7 +8,18 @@ import branches from "../branch/branch.js";
 import categories from '../category/category.js';
 import suppliers from "../supplier/supplier.js";
 
-
+//=================================================
+export const getAllProductGRN = async () => {
+  try{
+      const branchReq = await productGRN.findAll();
+      console.log(branchReq);
+      return branchReq;
+  }catch (error) {
+      console.error('Error retrieving branches:', error);
+      throw new Error('Error retrieving branches');
+  }
+};
+//===============================================
 
 //create product_GRN
 // export const createProductGRNService = async ({

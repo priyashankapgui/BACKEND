@@ -1,8 +1,17 @@
 import sequelize from "../../../config/database.js";
 import products from "../product/product.js";
-import { getBatchDetailsByProductName,  adjustProductGRNQuantity, updateProductQty } from "../product_GRN/service.js";
+import { getBatchDetailsByProductName,  adjustProductGRNQuantity, updateProductQty,getAllProductGRN } from "../product_GRN/service.js";
 
-
+//=============================================
+export const getproductGRN = async (req, res) => {
+  try {
+    const branchesList = await getAllProductGRN(); 
+    res.status(200).json(branchesList);  
+  } catch (error) {
+    res.status(500).json({ error: error.message }); 
+  }
+};
+//=================================================
 
 
 // Controller function to retrieve batch details by productName and branchNo for check price 
@@ -24,6 +33,8 @@ export const getBatchDetailsByProductNameController = async (req, res) => {
       res.status(500).json({ error: "Internal server error" });
     }
   };
+
+
 
  
 

@@ -11,7 +11,7 @@ import {
   getProductAndSuppliersDetailsByProductName,
   upload,
   getTotalQuantityByBranchAndProduct,
-  
+  getproductsweb,
 } from "../product/controller.js";
 
 
@@ -27,6 +27,8 @@ Productrouter.put("/products/:productId", updateProduct);
 Productrouter.get("/products/productId/:productName", getProductIdByProductNameController);
 Productrouter.get('/product/:productName', getProductAndSuppliersDetailsByProductName);
 Productrouter.get('/active-stock', getTotalQuantityByBranchAndProduct);
+//==============================
+Productrouter.get("/productweb", getproductsweb);
 
 
 
