@@ -1,18 +1,18 @@
 import cartProduct from "../cart_Product/cartProduct.js";
 
-const createCartProduct = async (shoppingcartCartId, productProductId, quantity) => {
+const createCartProductservice = async (shoppingcartCartId, productProductId, quantity) => {
   return await cartProduct.create({ shoppingcartCartId, productProductId, quantity });
 };
 
-const getCartProducts = async () => {
+const getCartProductsservice = async () => {
   return await cartProduct.findAll();
 };
 
-const getCartProductById = async (id) => {
+const getCartProductByIdservice = async (id) => {
   return await cartProduct.findByPk(id);
 };
 
-const updateCartProduct = async (id, quantity) => {
+const updateCartProductservice = async (id, quantity) => {
   const cartProductToUpdate = await cartProduct.findByPk(id);
   if (!cartProductToUpdate) return null;
   cartProductToUpdate.quantity = quantity;
@@ -20,7 +20,7 @@ const updateCartProduct = async (id, quantity) => {
   return cartProductToUpdate;
 };
 
-const deleteCartProduct = async (id) => {
+const deleteCartProductservice = async (id) => {
   const cartProductToDelete = await cartProduct.findByPk(id);
   if (!cartProductToDelete) return null;
   await cartProductToDelete.destroy();
@@ -28,9 +28,9 @@ const deleteCartProduct = async (id) => {
 };
 
 export default {
-  createCartProduct,
-  getCartProducts,
-  getCartProductById,
-  updateCartProduct,
-  deleteCartProduct,
+  createCartProductservice,
+  getCartProductsservice,
+  getCartProductByIdservice,
+  updateCartProductservice,
+  deleteCartProductservice,
 };

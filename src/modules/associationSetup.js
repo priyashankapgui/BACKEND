@@ -4,6 +4,8 @@ import branches from "../modules/branch/branch.js"
 import products from "../modules/product/product.js";
 import categories from "./category/category.js";
 import bill from "./bill/bill.js";
+import Customer from "./customer/customer.js";
+import ShoppingCart from "./Cart_Customer/shoppingcart.js";
 
 const setupBranchBillAssociations = (branches, bill) => {
   branches.hasMany(bill, { foreignKey: "branchId", as: "bill" });
@@ -50,6 +52,15 @@ const setupBranchSupplierAssociations = (branches, suppliers) => {
   suppliers.belongsToMany(branches, { through: "branch_Supplier", foreignKey: 'supplierId' });
 };
 
+const setupCartCustomerAssociations = (ShoppingCart,Customer) => {
+  ShoppingCart.hasOne(Customer);
+  Customer.belongsTo(ShoppingCart, {    foreignKey: 'customerId'  });
+}
+
+const setupCartProductAssociations = (ShoppingCart, products) => {
+  ShoppingCart.belongsToMany(products, { through: "cart_Product", foreignKey: 'cartId' });
+  products.belongsToMany(ShoppingCart, { through: "cart_Product", foreignKey: 'productId' });
+}
 
 
 
@@ -62,5 +73,7 @@ export const setupAssociations = () => {
   setupProductGRNAssociations(products, grn);
   setupBranchSupplierAssociations(branches, suppliers);
   setupBranchBillAssociations(branches, bill);
+  setupCartCustomerAssociations(ShoppingCart,Customer);
+  setupCartProductAssociations(ShoppingCart,products);
 
 };
