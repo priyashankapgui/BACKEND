@@ -10,17 +10,17 @@ const products = sequelize.define(
   "products",
   {
     productId: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.STRING,
       allowNull: false,
       primaryKey: true,
-      autoIncrement: true,
+      
     },
     productName: {
       type: DataTypes.STRING,
       allowNull: false,
     },
     branchId: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.STRING,
       allowNull: true,
       references: {
         model: branches,
@@ -47,7 +47,7 @@ const products = sequelize.define(
       allowNull: true,
     },
     categoryId: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.STRING,
       allowNull: false,
       references: {
         model: categories,
@@ -55,6 +55,11 @@ const products = sequelize.define(
         onDelete: "CASCADE",
         onUpdate: "CASCADE"
       },
+    },
+    createdAt: {
+      type: 'TIMESTAMP',
+      defaultValue: DataTypes.NOW,
+      allowNull: false
     },
     
   },

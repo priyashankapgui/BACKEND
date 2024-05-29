@@ -43,7 +43,7 @@ export const createNewBranch = async (req, res) => {
   }
 };
 
-// Function to update a branch by ID
+// Function to update a branch by ID 
 export const updateBranch = async (req, res) => {
   const branchId = req.params.branchId;
   const updatedBranchData = req.body;

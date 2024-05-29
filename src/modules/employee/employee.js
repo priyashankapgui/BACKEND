@@ -6,13 +6,13 @@ import branches from '../branch/branch.js';
 
 const Employee = sequelize.define('employee', {
     employeeId: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.STRING,
         allowNull: false,
         primaryKey: true,
       },
     
     employeeName: {
-        type: DataTypes.STRING,
+        type: DataTypes.INTEGER,
         allowNull: false,
     },
     email: {
@@ -29,7 +29,7 @@ const Employee = sequelize.define('employee', {
       },
     
     branchId: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.STRING,
         allowNull: false,
         references: {
             model: branches,

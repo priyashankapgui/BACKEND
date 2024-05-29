@@ -15,7 +15,7 @@ const bill_Product = sequelize.define('bill_Product', {
         }
     },
     productId: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.STRING,
         allowNull: false,
         primaryKey: true,
         references: {

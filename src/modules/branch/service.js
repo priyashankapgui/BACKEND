@@ -1,5 +1,35 @@
 import branches from '../branch/branch.js'
 
+export const generateBranchId = async () => {
+  try {
+    // Fetch the latest branch ID
+    const latestBranch = await branches.findOne({
+      order: [['branchId', 'DESC']],
+      attributes: ['branchId'],
+    });
+
+    let newBranchId;
+
+    if (latestBranch && latestBranch.branchId) {
+      // Extract the numeric part of the latest branch ID and increment it
+      const numericPart = parseInt(latestBranch.branchId.substring(1), 10);
+      const incrementedNumericPart = numericPart + 1;
+
+      // Format the new branch ID with leading zeros
+      newBranchId = `B${incrementedNumericPart.toString().padStart(4, '0')}`;
+    } else {
+      // If there are no existing branches, start with B0001
+      newBranchId = 'B0001';
+    }
+
+    return newBranchId;
+  } catch (error) {
+    console.error('Error generating new branch ID:', error);
+    throw new Error('Could not generate new branch ID');
+  }
+}
+
+
 
 export const getAllBranches = async () => {
     try{
@@ -21,13 +51,16 @@ export const getBranchById = async (branchId) => {
     }
 };
 
-export const createBranch = async (Branch) => {
-    try {
-      const newBranch = await branches.create(Branch);
-      return newBranch;
-    } catch (error) {
-      throw new Error('Error creating branch: ' + error.message);
-    }
+export const createBranch = async (branchData) => {
+  try {
+    const branchId = await generateBranchId();
+    
+    // Ensure branchData includes the generated branchId
+    const newBranch = await branches.create({ branchId, ...branchData });
+    return newBranch;
+  } catch (error) {
+    throw new Error('Error creating branch: ' + error.message);
+  }
 };
 
 export const updateBranchById = async (branchId, branchData) => { 

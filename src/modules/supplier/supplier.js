@@ -6,10 +6,10 @@ const suppliers = sequelize.define(
   "suppliers",
   {
     supplierId: {
-      type: DataTypes.INTEGER, 
+      type: DataTypes.STRING, 
       allowNull: false,
       primaryKey: true,
-      autoIncrement: true,
+      
     },
     supplierName: {
       type: DataTypes.STRING,
@@ -30,6 +30,11 @@ const suppliers = sequelize.define(
     contactNo: {
       type: DataTypes.STRING,
       allowNull: false,
+    },
+    createdAt: {
+      type: 'TIMESTAMP',
+      defaultValue: DataTypes.NOW,
+      allowNull: false
     },
   },
   {
