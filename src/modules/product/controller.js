@@ -17,6 +17,7 @@ import {
   getProductIdByProductNameService,
   searchSuppliersByProductName,
 } from "../product/service.js";
+import { mapSupplierNameToId } from "../supplier/service.js";
 
 
 
@@ -33,24 +34,6 @@ export const getProducts = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
-
-
-
-// Controller function to get a product by its ID
-// export const getProduct = async (req, res) => {
-//   const productId = req.params.productId;
-//   try {
-//     const productbyId = await getProductById(productId);
-//     if (!productbyId) {
-//       res.status(404).json({ error: "Product not found" });
-//       return;
-//     }
-//     res.status(200).json(productbyId);
-//   } catch (error) {
-//     console.error("Error fetching product:", error);
-//     res.status(500).json({ error: "Internal server error" });
-//   }
-// };
 
 
 
@@ -171,7 +154,7 @@ export const updateProduct = async (req, res) => {
 
 // Controller function to create a new product
 export const createProduct = async (req, res) => {
-  const { branchName, productName, description, categoryName, barcode } = req.body;
+  const { branchName, productName, description, categoryName, barcode, supplierName } = req.body;
   try {
     // Check if a file is uploaded
     if (!req.file) {
@@ -182,9 +165,10 @@ export const createProduct = async (req, res) => {
       return res.status(404).json({ error: "Category not found" });
     }
 
-    const branchId = await mapBranchNameToId(branchName);
-    if (!branchId) {
-      return res.status(404).json({ error: "Branch not found" });
+    const supplierId = await mapSupplierNameToId(supplierName);
+    console.log("supplier",supplierId);
+    if (!supplierId) {
+      return res.status(404).json({ error: "supplier not found" });
     }
 
    const image = req.file.path;
@@ -197,10 +181,11 @@ export const createProduct = async (req, res) => {
       // Access the uploaded file using req.file
       
       const newProduct = await addProduct({
-        branchId,
+        branchName,
         productName,
         description,
         categoryId,
+        supplierId,
         image,
         barcode,
     });

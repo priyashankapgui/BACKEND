@@ -7,6 +7,65 @@ import branchSupplier from "../branch_Supplier/branch_Supplier.js";
 //import products from "../product/product.js";
 //import productSupplier from "../product_Supplier/product_Supplier.js";
 
+
+//Function to generate supplieId
+const generateSupplierID = async (branchName) => {
+  try {
+    if (!branchName || typeof branchName !== 'string') {
+      throw new Error('Invalid branchName: ' + branchName);
+    }
+
+    // Extract the first three letters of the branch name
+    const branchCode = branchName.substring(0, 3).toUpperCase();
+
+    // Get the last supplier ID for the specific branch from the database
+    const lastSupplierID = await getLastSupplierID(branchCode);
+    let lastNumber = 0; // Default to 0 if no previous supplier ID exists
+
+    if (lastSupplierID) {
+      lastNumber = parseInt(lastSupplierID.split('SUP')[1]); // Extract the number part
+      if (isNaN(lastNumber)) {
+        throw new Error('Invalid supplier ID format');
+      }
+    }
+
+    // Increment the last number
+    lastNumber++;
+
+    // Pad the number with leading zeros
+    const paddedNumber = lastNumber.toString().padStart(5, '0');
+
+    // Construct the supplier ID
+    const supplierID = `${branchCode}-SUP${paddedNumber}`;
+
+    return supplierID;
+  } catch (error) {
+    throw new Error('Error generating supplier ID: ' + error.message);
+  }
+};
+
+const getLastSupplierID = async (branchCode) => {
+  try {
+    const latestSupplier = await suppliers.findOne({
+      where: {
+        supplierId: {
+          [Op.like]: `${branchCode}-SUP%`, // Match the supplier IDs starting with the branch code
+        },
+      },
+      order: [['createdAt', 'DESC']], // Order by creation date in descending order to get the latest entry
+    });
+
+    return latestSupplier ? latestSupplier.supplierId : null; // Return null if there are no supplier entries for the branch
+  } catch (error) {
+    throw new Error('Error getting last supplier ID: ' + error.message);
+  }
+};
+
+
+
+
+
+
 // Function to retrieve all suppliers from the database
 export const getAllSuppliers = async () => {
   try {
@@ -163,12 +222,24 @@ export const mapSupplierNameToId = async (supplierName) => {
 
 export const addSupplier = async (supplierName, regNo, email, address, contactNo, branchName) => {
   try {
+    
+
+    const supplierId = await generateSupplierID(branchName);
+    
+
     // Map branch name to branchId
     const branchId = await mapBranchNameToId(branchName);
     
 
+    if (!branchId) {
+      res.status(404).json({ error: "Branch not found" });
+      return;
+    }
+    
+
     // Create new supplier record
     const newSupplier = await suppliers.create({
+      supplierId,
       supplierName,
       regNo,
       email,

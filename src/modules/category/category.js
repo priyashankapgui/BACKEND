@@ -6,22 +6,28 @@ const categories = sequelize.define(
   "categories",
   {
     categoryId: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.  STRING,
       allowNull: false,
       primaryKey: true,
-      autoIncrement: true,
+      
     },
     categoryName: {
       type: DataTypes.STRING,
       allowNull: false,
     },
-    description: {
-      type: DataTypes.STRING,
-      allowNull: true,
+    createdAt: {
+      type: 'TIMESTAMP',
+      defaultValue: DataTypes.NOW,
+      allowNull: false
     },
+  //   updatedAt: {
+  //     type: 'TIMESTAMP',
+  //     defaultValue: DataTypes.NOW,
+  //     allowNull: false
+  // },
+    
   },
   { tableName: "categories",
-    timestamps: true,
   }
 );
 

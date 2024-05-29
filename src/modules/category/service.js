@@ -1,8 +1,40 @@
 import categories from "../category/category.js";
 import sequelize from "../../../config/database.js";
 
+
+ const generateCategoryId = async () => {
+  try {
+    // Fetch the latest category ID
+    const latestCategory = await categories.findOne({
+      order: [['categoryId', 'DESC']],
+      attributes: ['categoryId'],
+    });
+
+    let newCategoryId;
+
+    if (latestCategory && latestCategory.categoryId) {
+      // Extract the numeric part of the latest category ID and increment it
+      const numericPart = parseInt(latestCategory.categoryId.substring(3), 10);
+      const incrementedNumericPart = numericPart + 1;
+
+      // Format the new category ID with leading zeros
+      newCategoryId = `CAT${incrementedNumericPart.toString().padStart(5, '0')}`;
+    } else {
+      // If there are no existing categories, start with CAT00001
+      newCategoryId = 'CAT00001';
+    }
+
+    return newCategoryId;
+  } catch (error) {
+    console.error('Error generating new category ID:', error);
+    throw new Error('Could not generate new category ID');
+  }
+}
+
+
+
 // Function to get all categories
-export const getAllCategories = async () => {
+ const getAllCategories = async () => {
   try {
     const categoryReq = await categories.findAll();
     return categoryReq;
@@ -12,7 +44,7 @@ export const getAllCategories = async () => {
 };
 
 // Function to get a category by its ID
-export const getCategoryById = async (categoryId) => {
+ const getCategoryById = async (categoryId) => {
   try {
     const category = await categories.findByPk(categoryId);
     return category;
@@ -22,9 +54,13 @@ export const getCategoryById = async (categoryId) => {
 };
 
 // Function to add a new category
-export const addCategory = async (categoryData) => {
+ const addCategory = async (categoryData) => {
   try {
-    const newCategory = await categories.create(categoryData);
+    const categoryId = await generateCategoryId();
+    
+    // Ensure branchData includes the generated branchId
+    const newCategory = await categories.create({ categoryId, ...categoryData });
+    
     return newCategory;
   } catch (error) {
     throw new Error("Error creating category: " + error.message);
@@ -32,7 +68,7 @@ export const addCategory = async (categoryData) => {
 };
 
 // Function to update a category by its ID
-export const updateCategoryById = async (categoryId, updatedCategoryData) => {
+ const updateCategoryById = async (categoryId, updatedCategoryData) => {
   try {
     const category = await categories.findByPk(categoryId);
     if (!category) {
@@ -46,7 +82,7 @@ export const updateCategoryById = async (categoryId, updatedCategoryData) => {
 };
 
 // Function to delete a category by its ID
-export const deleteCategoryById = async (categoryId) => {
+ const deleteCategoryById = async (categoryId) => {
   try {
     const category = await categories.findByPk(categoryId);
     if (!category) {
@@ -60,7 +96,7 @@ export const deleteCategoryById = async (categoryId) => {
 };
 
 // Function to map a category name to its ID
-export const mapCategoryNameToId = async (categoryName) => {
+ const mapCategoryNameToId = async (categoryName) => {
   if (!categoryName) {
     throw new Error('Category name is required');
 }
@@ -78,4 +114,17 @@ export const mapCategoryNameToId = async (categoryName) => {
     console.error("Error mapping category name to ID:", error);
     throw new Error("Error mapping category name to ID: " + error.message);
   }
+};
+
+
+
+
+export {
+  generateCategoryId,
+  getAllCategories,
+  getCategoryById,
+  addCategory,
+  updateCategoryById,
+  deleteCategoryById,
+  mapCategoryNameToId,
 };

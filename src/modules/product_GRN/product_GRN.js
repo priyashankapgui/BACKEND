@@ -7,7 +7,7 @@ const productGRN = sequelize.define(
   "product_GRN",
   {
     productId: { 
-      type: DataTypes.INTEGER,
+      type: DataTypes.STRING,
       allowNull: false,
       primaryKey: true,
       references: {
@@ -60,6 +60,11 @@ const productGRN = sequelize.define(
     comment: {
       type: DataTypes.STRING,
       allowNull: true, 
+    },
+    createdAt: {
+      type: 'TIMESTAMP',
+      defaultValue: DataTypes.NOW,
+      allowNull: false
     },
   },
   {

@@ -5,10 +5,10 @@ import bill from "../bill/bill.js"
 
 const branches = sequelize.define('branches', {
     branchId: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.STRING,
         allowNull: false,
         primaryKey: true,
-        autoIncrement: true
+       
     },
     branchName: {
         type: DataTypes.STRING,

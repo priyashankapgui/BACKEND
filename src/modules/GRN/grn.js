@@ -16,7 +16,7 @@ const grn = sequelize.define(
       allowNull: false,
     },
     branchId: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.STRING,
       allowNull: false,
       references: {
         model: branches,
@@ -26,7 +26,7 @@ const grn = sequelize.define(
       },
     },
     supplierId: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.STRING,
       allowNull: false,
       references: {
         model: suppliers,
@@ -34,6 +34,11 @@ const grn = sequelize.define(
         onDelete: "CASCADE",
         onUpdate: "CASCADE"
       },
+    },
+    createdAt: {
+      type: 'TIMESTAMP',
+      defaultValue: DataTypes.NOW,
+      allowNull: false
     },
   },
   {

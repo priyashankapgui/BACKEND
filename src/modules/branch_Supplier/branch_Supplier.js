@@ -5,7 +5,7 @@ import Supplier from '../supplier/supplier.js';
 
 const BranchSupplier = sequelize.define('branch_Supplier', {
   branchId: {
-    type: DataTypes.INTEGER,
+    type: DataTypes.STRING,
     allowNull: false,
     primaryKey: true,
     references: {
@@ -14,13 +14,18 @@ const BranchSupplier = sequelize.define('branch_Supplier', {
     },
   },
   supplierId: {
-    type: DataTypes.INTEGER,
+    type: DataTypes.STRING,
     allowNull: false,
     primaryKey: true,
     references: {
       model: Supplier,
       key: 'supplierId',
     },
+  },
+  createdAt: {
+    type: 'TIMESTAMP',
+    defaultValue: DataTypes.NOW,
+    allowNull: false
   },
 }, {
   tableName: 'branch_Supplier',
