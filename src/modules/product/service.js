@@ -6,7 +6,61 @@ import sequelize from "../../../config/database.js";
 import suppliers from "../supplier/supplier.js";
 import branches from "../branch/branch.js";
 import productSupplier from "../product_Supplier/product_Supplier.js";
+import { mapBranchNameToId } from "../branch/service.js";
 
+
+
+export const generateProductID = async (branchName) => {
+  try {
+    if (!branchName || typeof branchName !== 'string') {
+      throw new Error('Invalid branchName: ' + branchName);
+    }
+
+    // Extract the first three letters of the branch name
+    const branchCode = branchName.substring(0, 3).toUpperCase();
+
+    // Get the last product ID for the specific branch from the database
+    const lastProductID = await getLastProductID(branchCode);
+    let lastNumber = 0; // Default to 0 if no previous product ID exists
+
+    if (lastProductID) {
+      lastNumber = parseInt(lastProductID.split('P')[1]); // Extract the number part
+      if (isNaN(lastNumber)) {
+        throw new Error('Invalid product ID format');
+      }
+    }
+
+    // Increment the last number
+    lastNumber++;
+
+    // Pad the number with leading zeros
+    const paddedNumber = lastNumber.toString().padStart(5, '0');
+
+    // Construct the product ID
+    const productID = `${branchCode}-P${paddedNumber}`;
+
+    return productID;
+  } catch (error) {
+    throw new Error('Error generating product ID: ' + error.message);
+  }
+};
+
+const getLastProductID = async (branchCode) => {
+  try {
+    const latestProduct = await products.findOne({
+      where: {
+        productId: {
+          [Op.like]: `${branchCode}-P%`, // Match the product IDs starting with the branch code
+        },
+      },
+      order: [['createdAt', 'DESC']], // Order by creation date in descending order to get the latest entry
+    });
+
+    return latestProduct ? latestProduct.productId : null; // Return null if there are no product entries for the branch
+  } catch (error) {
+    throw new Error('Error getting last product ID: ' + error.message);
+  }
+};
 
 
 // Function to retrieve all products with their associated categories
@@ -33,96 +87,7 @@ export const getAllProducts = async () => {
 
 
 
-// Function to retrieve a product by its ID with its associated category
-// export const getProductById = async (productId) => {
-//   try {
-//     const productbyId = await products.findByPk(productId, {
-//       include: {
-//         model: categories,
-//         as: "category",
-//         attributes: ["categoryName", "description"],
-//       },
-//     });
-//     return productbyId;
-//   } catch (error) {
-//     throw new Error("Error fetching product: " + error.message);
-//   }
-// };
 
-// export const getProductByIdAndBranchName = async (  productId, branchId) => {
-//   try {
-   
-//     const product = await products.findOne({
-//       where: { productId, branchId },
-      
-//     });
-//     if (!product) {
-//       throw new Error("Product not found");
-//     }
-
-//     return product;
-//   } catch (error) {
-//     throw new Error("Error fetching product: " + error.message);
-//   }
-// };
-
-
-
-
-
-
-
-// export const getProductByIdAndBranchName = async (productId, branchId) => {
-//   try {
- 
-
-//     // Step 2: Find the product with associations
-//     const product = await products.findOne({
-//       where: { productId, branchId },
-//       include: [
-//         {
-//           model: categories,
-//           as: 'category',
-//           attributes: ['categoryName'],
-//         },
-//         {
-//           model: suppliers,
-//           as: 'suppliers',
-//           attributes: ['supplierName'],
-//           through: { attributes: [] } // To remove the intermediate table attributes
-//         }
-//       ]
-//     });
-
-//     if (!product) {
-//       throw new Error("Product not found");
-//     }
-
-//     // Step 3: Extract category name and supplier names
-//     const categoryName = product.category ? product.category.categoryName : null;
-//     const supplierNames = product.suppliers.map(supplier => supplier.supplierName);
-
-//     // Step 4: Prepare the final product object with category name and supplier names
-//     const result = {
-//       productId: product.productId,
-//       productName: product.productName,
-//       branchId: product.branchId,
-//       description: product.description,
-//       image: product.image,
-//       barcode: product.barcode,
-//       qty: product.qty,
-//       categoryId: product.categoryId,
-//       createdAt: product.createdAt,
-//       updatedAt: product.updatedAt,
-//       categoryName: categoryName,
-//       supplierNames: supplierNames
-//     };
-
-//     return result;
-//   } catch (error) {
-//     throw new Error("Error fetching product: " + error.message);
-//   }
-// };
 
 
 export const getProductByIdAndBranchName = async (productId, branchId) => {
@@ -310,14 +275,34 @@ export const getProductsByCategoryNameAndBranchName = async (categoryName, branc
 
 
 
-
+ 
 // Function to add a new product
 export const addProduct = async (productData) => {
   try {
-    const newProduct = await products.create(productData);
-    return newProduct;
-  } catch (error) {
-    throw new Error("Error creating product: " + error.message);
+    const branchName = productData.branchName;
+    console.log("Branch",branchName);
+    const productId = await generateProductID(branchName);
+
+    const branchId = await mapBranchNameToId(branchName);
+    
+
+    if (!branchId) {
+      res.status(404).json({ error: "Branch not found" });
+      return;
+    }
+    
+    
+    // Ensure branchData includes the generated branchId
+    const newProduct = await products.create({ productId,branchId, ...productData });
+  
+
+ // Create new record in product_Supplier table
+ await productSupplier.create({
+  supplierId: productData.supplierId ,
+  productId: newProduct.productId
+});
+} catch (error) {
+throw new Error(error.message);
   }
 };
 
@@ -391,7 +376,96 @@ export const searchSuppliersByProductName = async (productId) => {
 
 
 
+// Function to retrieve a product by its ID with its associated category
+// export const getProductById = async (productId) => {
+//   try {
+//     const productbyId = await products.findByPk(productId, {
+//       include: {
+//         model: categories,
+//         as: "category",
+//         attributes: ["categoryName", "description"],
+//       },
+//     });
+//     return productbyId;
+//   } catch (error) {
+//     throw new Error("Error fetching product: " + error.message);
+//   }
+// };
 
+// export const getProductByIdAndBranchName = async (  productId, branchId) => {
+//   try {
+   
+//     const product = await products.findOne({
+//       where: { productId, branchId },
+      
+//     });
+//     if (!product) {
+//       throw new Error("Product not found");
+//     }
+
+//     return product;
+//   } catch (error) {
+//     throw new Error("Error fetching product: " + error.message);
+//   }
+// };
+
+
+
+
+
+
+
+// export const getProductByIdAndBranchName = async (productId, branchId) => {
+//   try {
+ 
+
+//     // Step 2: Find the product with associations
+//     const product = await products.findOne({
+//       where: { productId, branchId },
+//       include: [
+//         {
+//           model: categories,
+//           as: 'category',
+//           attributes: ['categoryName'],
+//         },
+//         {
+//           model: suppliers,
+//           as: 'suppliers',
+//           attributes: ['supplierName'],
+//           through: { attributes: [] } // To remove the intermediate table attributes
+//         }
+//       ]
+//     });
+
+//     if (!product) {
+//       throw new Error("Product not found");
+//     }
+
+//     // Step 3: Extract category name and supplier names
+//     const categoryName = product.category ? product.category.categoryName : null;
+//     const supplierNames = product.suppliers.map(supplier => supplier.supplierName);
+
+//     // Step 4: Prepare the final product object with category name and supplier names
+//     const result = {
+//       productId: product.productId,
+//       productName: product.productName,
+//       branchId: product.branchId,
+//       description: product.description,
+//       image: product.image,
+//       barcode: product.barcode,
+//       qty: product.qty,
+//       categoryId: product.categoryId,
+//       createdAt: product.createdAt,
+//       updatedAt: product.updatedAt,
+//       categoryName: categoryName,
+//       supplierNames: supplierNames
+//     };
+
+//     return result;
+//   } catch (error) {
+//     throw new Error("Error fetching product: " + error.message);
+//   }
+// };
 
 
 

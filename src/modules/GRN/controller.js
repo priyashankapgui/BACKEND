@@ -3,13 +3,12 @@ import {
   getAllGRNs,
   getGRNById,
   getGRNByInvoiceNo,
-  //getGRNDetails,
   updateGRNById,
   deleteGRNById,
   getGRNBySupplierId,
   getDetailsByInvoiceNoService,
-  getGRNByBranchId
-  //getTotalAmountByInvoiceNoService
+  getGRNByBranchId,
+  getGRNsByBranchAndSupplier
 } from "../GRN/service.js";
 import { createProductGRNService, getGRNDetailsByProductId } from "../../modules/product_GRN/service.js";
 import { calculateTotalAmount, updateProductQty } from '../../modules/product_GRN/service.js'; 
@@ -18,93 +17,6 @@ import branches from "../branch/branch.js";
 
 
 
-// Function to create GRN and Product_GRN
-// export const createGRNAndProduct = async (req, res) => {
-//   try {
-//     console.log('Request query parameters:', req.body);
-//     const { invoiceNo, supplierName, branchName, productId, batchNo, totalQty, purchasePrice, sellingPrice, freeQty, expDate, comment } = req.body;
-    
-//     if (!branchName || typeof branchName !== 'string') {
-//       return res.status(400).json({ error: "Invalid branchName" });
-//     }
-
-//     const grnData = {
-//       invoiceNo,
-//       supplierName,
-//       branchName
-//     };
-//     const newGRN = await addGRN(grnData, supplierName, branchName); 
-//     const GRN_NO = newGRN.GRN_NO; 
-
-//     const productGRNData = {
-//       productId,
-//       GRN_NO,
-//       batchNo,
-//       totalQty,
-//       purchasePrice,
-//       sellingPrice,
-//       freeQty,
-//       expDate,
-//       amount: (totalQty - freeQty) * purchasePrice, 
-//       comment
-//     };
-//     const newProductGRN = await createProductGRNService(productGRNData); 
-
-    
-//     await updateProductQty(productId);
-    
-//     res.status(201).json({
-//       GRN: newGRN,
-//       Product_GRN: newProductGRN
-//     });
-//   } catch (error) {
-//     console.error("Error creating GRN and Product_GRN:", error);
-//     res.status(500).json({ error: "Internal server error" });
-//   }
-// };
-
-// export const createGRNAndProduct = async (req, res) => {
-//   const { invoiceNo, supplierName, branchName, entries } = req.body;
-
-//   console.log('Received supplierName from:', supplierName);
-//     console.log('Received branchName from:', branchName);
-
-//   if (!branchName || typeof branchName !== 'string') {
-//           return res.status(400).json({ error: "Invalid branchName" });
-//         }
-//         const grnData = {
-//                 invoiceNo,
-//                 supplierName,
-//                 branchName
-//               };
-
-//   try {
-    
-
-//     console.log('Received supplierName from 2:', supplierName);
-//     console.log('Received branchName from 2:', branchName);
-//     console.log('Received branchName from 2:', invoiceNo);
-
-//     const newGRN = await addGRN({ grnData});
-
-//     // Add GRN_NO to each entry
-//     const productGRNEntries = entries.map(entry => ({
-//       ...entry,
-//       GRN_NO: newGRN.GRN_NO
-//     }));
-
-//     // Create Product GRNs
-//     await createProductGRNService(productGRNEntries);
-
-//     res.status(201).json({ message: 'GRN and Product GRNs created successfully' });
-//   } catch (error) {
-//     console.error("Error creating GRN and Product_GRN:", error);
-//     res.status(500).json({ message: error.message });
-//   }
-// };
-
-
-// 
 
 //Function to create GRN 
 export const createGRNAndProduct = async (req, res) => {
@@ -135,8 +47,6 @@ export const createGRNAndProduct = async (req, res) => {
     console.log('ProductGRNs to insert:', productGRNs);
 
     const result = await createProductGRNService(productGRNs);
-
-    
 
     if (result.success) {
 
@@ -170,6 +80,7 @@ export const getGRNs = async (req, res) => {
 };
 
 
+
 // Controller function to get a GRN by its GRN_NO
 export const getGRN = async (req, res) => {
   const GRN_NO = req.params.GRN_NO;
@@ -188,6 +99,7 @@ export const getGRN = async (req, res) => {
 };
 
 
+
 // Controller function to get GRNs by invoice number
 export const getGRNByInvoiceNoController = async (req, res) => {
   const invoiceNo = req.params.invoiceNo;
@@ -199,25 +111,6 @@ export const getGRNByInvoiceNoController = async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 };
-
-
-
-
-// export const getGRNByProduct = async (req, res) => {
-//   try {
-//     const { productId } = req.query;
-//     let grnData;
-    
-//     if (productId) {
-//       // If productId is provided, search for GRN_NO related to that productId
-//       grnData = await getGRNByProductId(productId);
-     
-
-//     catch (error) {
-//     console.error("Error fetching GRN data:", error);
-//     res.status(500).json({ error: "Internal server error" });
-//   }
-// };
 
 
 
@@ -235,6 +128,7 @@ export const getGRNBySupplier = async (req, res) => {
 };
 
 
+
 //Function to get GRN by productId
 export const getGRNDetailsByProductIdController = async (req, res) => {
   const { productId } = req.params;
@@ -248,6 +142,7 @@ export const getGRNDetailsByProductIdController = async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 };
+
 
 
 //Function to get GRN by branchId
@@ -281,6 +176,7 @@ export const updateGRN = async (req, res) => {
 
 
 
+
 // Controller function to delete a GRN
 export const deleteGRN = async (req, res) => {
   const GRN_NO = req.params.GRN_NO;
@@ -294,6 +190,27 @@ export const deleteGRN = async (req, res) => {
   }
 };
 
+
+
+//Function to get GRN data using branchName and supplierId
+export const getGRNsByBranchAndSupplierController = async (req, res) => {
+  try {
+    const branchName = req.params.branchName;
+    const supplierId = req.params.supplierId;
+    //const { branchName, supplierId } = req.body; // Assuming you are sending branchName and supplierId in the request body
+
+    if (!branchName || !supplierId) {
+      return res.status(400).json({ message: ' branchName and supplierId are required' });
+    }
+
+    const grnData = await getGRNsByBranchAndSupplier(branchName, supplierId);
+
+    res.status(200).json(grnData);
+  } catch (error) {
+    console.error('Error fetching GRNs by branch and supplier:', error);
+    res.status(500).json({ message: 'Failed to fetch GRNs by branch and supplier' });
+  }
+};
 
 
 

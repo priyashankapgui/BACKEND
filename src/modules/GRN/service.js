@@ -80,97 +80,6 @@ const extractCounterFromGRN = (GRN_NO) => {
 
 
 
-// export const addGRN = async (grnData) => {
-//   try {
-//     console.log('Received grndara:', grnData);
-   
-//     const branchName = grnData.branchName;
-//     const supplierName = grnData.supplierName;
-//     console.log('Received branch:', branchName);
-//     console.log('Received supplier:', supplierName);
-   
-//     if (!branchName || typeof branchName !== 'string') {
-//       throw new Error("Invalid branchName: " + branchName);
-//     }
-
-//     const GRN_NO = await generateGRNNumber(branchName); // Generate GRN number
-//     grnData.GRN_NO = GRN_NO; // Assign GRN number to grnData
-
-//     const supplierId = await mapSupplierNameToId(supplierName);
-//     if (!supplierId) {
-//       throw new Error("Supplier not found");
-//     }
-
-//     const branchId = await mapBranchNameToId(branchName);
-//     if (!branchId) {
-//       throw new Error("Branch not found");
-//     }
-
-//     grnData.supplierId = supplierId;
-//     grnData.branchId = branchId;
-
-//     const newGRN = await grn.create(grnData); // Assuming 'grn' model has a 'create' method
-//     return newGRN;
-//   } catch (error) {
-//     console.error("Error creating GRN:", error);
-//     throw new Error("Error creating GRN: " + error.message);
-//   }
-// };
-
-// export const addGRN = async (grnData) => {
-//   try {
-//     console.log('Received grnData:', grnData);
-
-//     const { branchName, supplierName } = grnData;
-//     console.log('Received branch:', branchName);
-//     console.log('Received supplier:', supplierName);
-
-//     if (!branchName || typeof branchName !== 'string') {
-//       throw new Error("Invalid branchName: " + branchName);
-//     }
-
-//     const GRN_NO = await generateGRNNumber(branchName); // Generate GRN number
-//     grnData.GRN_NO = GRN_NO; // Assign GRN number to grnData
-
-//     const supplierId = await mapSupplierNameToId(supplierName);
-//     if (!supplierId) {
-//       throw new Error("Supplier not found");
-//     }
-
-//     const branchId = await mapBranchNameToId(branchName);
-//     if (!branchId) {
-//       throw new Error("Branch not found");
-//     }
-
-//     grnData.supplierId = supplierId;
-//     grnData.branchId = branchId;
-
-//     const newGRN = await grn.create(grnData); // Assuming 'grn' model has a 'create' method
-//     return newGRN;
-//   } catch (error) {
-//     console.error("Error creating GRN:", error);
-//     throw new Error("Error creating GRN: " + error.message);
-//   }
-// };
-
-
-// export const addGRN = async ({ invoiceNo, branchId, supplierId }) => {
-//   try {
-//     const newGRN = await grn.create({
-//       GRN_NO: generateGRNNumber(),
-//       invoiceNo,
-//       branchId,
-//       supplierId,
-//       createdAt: new Date(),
-//       updatedAt: new Date()
-//     });
-//     return newGRN;
-//   } catch (error) {
-//     console.error("Error creating GRN:", error);
-//     throw new Error("Error creating GRN: " + error.message);
-//   }
-// };
-
 
 //Function to create GRN 
 export const addGRN = async (invoiceNo, supplierId, branchName) => {
@@ -197,6 +106,7 @@ export const addGRN = async (invoiceNo, supplierId, branchName) => {
     throw new Error('Error creating GRN entry: ' + error.message);
   }
 };
+
 
 
 // Function to get all GRNs
@@ -240,22 +150,6 @@ export const getAllGRNs = async () => {
 
 
 
-
-// Function to get a GRN by its ID
-// export const getGRNById = async (GRN_NO) => {
-//   try {
-//     const grnData = await grn.findByPk(GRN_NO, {
-//       include: [
-//         { model: branches, as: 'branch', attributes: ['branchName'] },
-//         { model: suppliers, as: 'supplier', attributes: ['supplierName'] }
-//       ]});
-//     return grnData;
-//   } catch (error) {
-//     throw new Error("Error fetching stock: " + error.message);
-//   }
-// };
-
-
 //Function to get GRN by GRN_NO
 export const getGRNById = async (GRN_NO) => {
   
@@ -297,6 +191,7 @@ export const getGRNById = async (GRN_NO) => {
     throw new Error("Error fetching GRN: " + error.message);
   }
 };
+
 
 
 
@@ -345,10 +240,6 @@ export const getGRNByInvoiceNo = async (invoiceNo) => {
 
 
 
-
-
-
-
 // Function to query GRN data by supplierId
 export const getGRNBySupplierId = async (supplierId) => {
   try {
@@ -391,6 +282,8 @@ export const getGRNBySupplierId = async (supplierId) => {
     throw new Error("Error fetching GRNs: " + error.message);
   }
 };
+
+
 
 
 //Function to get GRN by branchId
@@ -451,6 +344,54 @@ export const getGRNByBranchId = async (branchId) => {
 
 
 
+
+//Function to get GRN data by branchName and supplierId
+export const getGRNsByBranchAndSupplier = async (branchName, supplierId) => {
+  try {
+    const branch = await branches.findOne({
+      where: { branchName }
+    });
+
+    if (!branch) {
+      throw new Error('Branch not found for branchName: ' + branchName);
+    }
+
+    const supplier = await suppliers.findOne({
+      where: { supplierId }
+    });
+
+    if (!supplier) {
+      throw new Error('Supplier not found for supplierId: ' + supplierId);
+    }
+
+    const grnItems = await grn.findAll({
+      where: {
+        branchId: branch.branchId,
+        supplierId: supplier.supplierId
+      }
+    });
+
+    if (!grnItems || grnItems.length === 0) {
+      throw new Error('No GRNs found for this branch and supplier');
+    }
+
+    const results = grnItems.map(grnItem => ({
+      GRN_NO: grnItem.GRN_NO,
+      createdAt: grnItem.createdAt,
+      branchName: branch.branchName,
+      supplierName: supplier.supplierName,
+      invoiceNo: grnItem.invoiceNo,
+    }));
+
+    return results;
+  } catch (error) {
+    throw new Error('Error fetching GRNs: ' + error.message);
+  }
+};
+
+
+
+
 // Function to update a GRN by its ID
 export const updateGRNById = async (GRN_NO, updatedStockData) => {
   try {
@@ -481,6 +422,8 @@ export const deleteGRNById = async (GRN_NO) => {
     throw new Error("Error deleting stock: " + error.message);
   }
 };
+
+
 
 
 // Service function to retrieve details by invoice number
@@ -524,74 +467,9 @@ export const getDetailsByInvoiceNoService = async (invoiceNo) => {
 
 
 
-// Function to get GRN details based on provided criteria
-// export const getGRNDetails = async ({
-//   invoiceNo,
-//   productId,
-//   productName,
-//   supplierId,
-//   supplierName,
-// }) => {
-//   try {
-//     let whereClause = {};
-
-//     for (const key in {
-//       invoiceNo,
-//       productId,
-//       productName,
-//       supplierId,
-//       supplierName,
-//     }) {
-//       switch (key) {
-//         case "invoiceNo":
-//         case "productId":
-//         case "productName":
-//         case "supplierId":
-//         case "supplierName":
-//           if (eval(key)) {
-//             whereClause[key] = eval(key);
-//           }
-//           break;
-//       }
-//     }
-
-//     const stockDetails = await grn.findAll({ where: whereClause });
-//     return stockDetails;
-//   } catch (error) {
-//     console.error("Error retrieving stock details:", error);
-//     throw new Error("Error retrieving stock details");
-//   }
-// };
 
 
 
-// Function to add a GRN
-// export const addGRN = async (grnData, supplierName, branchName) => {
-//   try {
-    
 
-     
-//     const GRN_NO = await generateGRNNumber(grnData.branchName); // Generate GRN number
-//     grnData.GRN_NO = GRN_NO; // Assign GRN number to grnData
 
-//     const supplierId = await mapSupplierNameToId(supplierName);
-//     if (!supplierId) {
-//       return res.status(404).json({ error: "Supplier not found" });
-//     }
-  
-//     const branchId = await mapBranchNameToId(branchName);
-//     if (!branchId) {
-//       return res.status(404).json({ error: "Supplier not found" });
-//     }
-
-//     grnData.supplierId = supplierId;
-//     grnData.branchId = branchId;
-
-//     const newGRN = await grn.create(grnData); // Assuming 'grn' model has a 'create' method
-//     return newGRN;
-//   } catch (error) {
-//     console.error("Error creating GRN:", error);
-//     throw new Error("Error creating GRN: " + error.message);
-//   }
-// };
 

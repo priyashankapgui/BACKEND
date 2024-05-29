@@ -1,5 +1,5 @@
 import express from 'express';
-import { createGRNAndProduct, getGRNs, getGRN, getGRNByInvoiceNoController, getGRNBySupplier, getGRNByBranch, updateGRN, deleteGRN, getTotalAmountByInvoiceNo, getDetailsByInvoiceNo, getGRNDetailsByProductIdController } from '../GRN/controller.js';
+import { createGRNAndProduct, getGRNs, getGRN, getGRNByInvoiceNoController, getGRNBySupplier, getGRNByBranch, updateGRN, deleteGRN, getTotalAmountByInvoiceNo, getDetailsByInvoiceNo, getGRNsByBranchAndSupplierController, getGRNDetailsByProductIdController } from '../GRN/controller.js';
 
 const GRNRouter = express.Router();
 
@@ -14,7 +14,7 @@ GRNRouter.get('/grn-supplier/:supplierId', getGRNBySupplier);
 GRNRouter.get('/grn-details/product/:productId', getGRNDetailsByProductIdController);
 GRNRouter.get('/grn-invoice-details', getDetailsByInvoiceNo);
 GRNRouter.get('/grn-branch/:branchId',getGRNByBranch);
-
+GRNRouter.get('/grn-branch-supplier',getGRNsByBranchAndSupplierController);
 
 
 export default GRNRouter;

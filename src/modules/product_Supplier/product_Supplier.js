@@ -7,7 +7,7 @@ const productSupplier = sequelize.define(
   'product_Supplier',
   {
     productId: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.STRING,
       allowNull: false,
       primaryKey: true,
       references: {
@@ -16,13 +16,18 @@ const productSupplier = sequelize.define(
       }
     },
     supplierId: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.STRING,
       allowNull: false,
       primaryKey: true,
       references: {
         model: suppliers,
         key: 'supplierId'
       }
+    },
+    createdAt: {
+      type: 'TIMESTAMP',
+      defaultValue: DataTypes.NOW,
+      allowNull: false
     },
   },
   { 
