@@ -12,7 +12,7 @@ const Employee = sequelize.define('employee', {
       },
     
     employeeName: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.STRING,
         allowNull: false,
     },
     email: {
