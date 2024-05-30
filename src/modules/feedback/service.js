@@ -5,16 +5,16 @@ import sequelize from '../../../config/database.js';
 
 
 export const getAllfeedback = async () => {
-    // try {
-    //   const productsReq = await feedback.findAll();
-    //   console.log(productsReq);
-    //   return productsReq;
-    // } catch (error) {
-    //   console.error('Error retrieving products:', error);
-    //   throw new Error('Error retrieving products');
-    // }
+    try {
+      const productsReq = await feedback.findAll();
+      console.log(productsReq);
+      return productsReq;
+    } catch (error) {
+      console.error('Error retrieving products:', error);
+      throw new Error('Error retrieving products');
+    }
 
-    console.log ('hello');
+    
   };
 
   export const addFeedback = async (feedbackData) => {
@@ -27,5 +27,23 @@ export const getAllfeedback = async () => {
 
     
   };
+
+  export const updateFeedbackAction = async (feedbackId, feedbackData) => {
+    try {
+        const feedbackToUpdate = await feedback.findByPk(feedbackId);
+        if (!feedbackToUpdate) {
+            throw new Error('Feedback not found');
+        }
+
+        Object.assign(feedbackToUpdate, feedbackData);
+        await feedbackToUpdate.save();
+
+        return feedbackToUpdate;
+    } catch (error) {
+        console.error('Error updating feedback:', error);
+        throw new Error('Error updating feedback');
+    }
+};
+
 
 
