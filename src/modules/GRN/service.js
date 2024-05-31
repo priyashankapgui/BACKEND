@@ -390,6 +390,55 @@ export const getGRNsByBranchAndSupplier = async (branchName, supplierId) => {
 };
 
 
+// //function to get grn by branchName and productId
+// export const getGRNsByBranchNameService = async (branchName) => {
+
+//   try {
+
+//     const branch = await branches.findOne({
+//       where: { branchName }
+//     });
+
+//     if (!branch) {
+//       throw new Error('Branch not found for branchName: ' + branchName);
+//     }
+//     // Fetch GRNs for the given branchName
+//     const grnItems = await grn.findAll({
+//         where: {
+//           branchId: branch.branchId,
+//          },
+//         attributes: ['GRN_NO', 'createdAt', 'supplierId', 'invoiceNo'],
+//         raw: true,
+//       });
+  
+//       if (!grnItems || grnItems.length === 0) {
+//         throw new Error(`No GRNs found for branchId: ${branchId}`);
+//       }
+  
+//       // Fetch details for each GRN_NO
+//       const results = await Promise.all(grnItems.map(async (grnItem) => {
+//         const { GRN_NO, supplierId } = grnItem;
+  
+//         // Get supplier details
+//         const supplier = await suppliers.findOne({
+//           where: { supplierId },
+//           attributes: ['supplierName'],
+//           raw: true,
+//         });
+  
+//         if (!supplier) {
+//           throw new Error(`Supplier not found for supplierId: ${supplierId}`);
+//         }
+      
+//     });
+
+//     return grnItems;
+//   } catch (error) {
+//     console.error('Error in getGRNsByBranchNameService:', error);
+//     throw new Error('Failed to fetch GRNs by branchName');
+//   }
+// };
+
 
 
 // Function to update a GRN by its ID
@@ -410,6 +459,13 @@ export const updateGRNById = async (GRN_NO, updatedStockData) => {
 
 
 
+
+
+
+
+
+
+
 // Function to delete a GRN by its ID
 export const deleteGRNById = async (GRN_NO) => {
   try {
@@ -427,39 +483,39 @@ export const deleteGRNById = async (GRN_NO) => {
 
 
 // Service function to retrieve details by invoice number
-export const getDetailsByInvoiceNoService = async (invoiceNo) => {
-  try {
-    // Assuming you have models for GRN and Product_GRN
-    const grnEntry = await grn.findOne({ where: { invoiceNo } });
+// export const getDetailsByInvoiceNoService = async (invoiceNo) => {
+//   try {
+//     // Assuming you have models for GRN and Product_GRN
+//     const grnEntry = await grn.findOne({ where: { invoiceNo } });
     
-    if (!grnEntry) {
-      throw new Error("GRN entry with the provided invoice number not found");
-    }
+//     if (!grnEntry) {
+//       throw new Error("GRN entry with the provided invoice number not found");
+//     }
     
-    // Find all product GRNs associated with the GRN entry
-    const productGRNs = await productGRN.findAll({ where: { GRN_NO: grnEntry.GRN_NO } });
+//     // Find all product GRNs associated with the GRN entry
+//     const productGRNs = await productGRN.findAll({ where: { GRN_NO: grnEntry.GRN_NO } });
     
-    // Map product GRNs to desired details
-    const details = productGRNs.map(productGRN => ({
-      invoiceNo: grnEntry.invoiceNo,
-      supplierName: grnEntry.supplierName,
-      branchName: grnEntry.branchName,
-      productId: productGRN.productId,
-      productName: productGRN.productName,
-      batchNo: productGRN.batchNo,
-      totalQty: productGRN.totalQty,
-      purchasePrice: productGRN.purchasePrice,
-      sellingPrice: productGRN.sellingPrice,
-      freeQty: productGRN.freeQty,
-      expDate: productGRN.expDate,
-      comment: productGRN.comment
-    }));
+//     // Map product GRNs to desired details
+//     const details = productGRNs.map(productGRN => ({
+//       invoiceNo: grnEntry.invoiceNo,
+//       supplierName: grnEntry.supplierName,
+//       branchName: grnEntry.branchName,
+//       productId: productGRN.productId,
+//       productName: productGRN.productName,
+//       batchNo: productGRN.batchNo,
+//       totalQty: productGRN.totalQty,
+//       purchasePrice: productGRN.purchasePrice,
+//       sellingPrice: productGRN.sellingPrice,
+//       freeQty: productGRN.freeQty,
+//       expDate: productGRN.expDate,
+//       comment: productGRN.comment
+//     }));
     
-    return details;
-  } catch (error) {
-    throw new Error("Error retrieving details by invoice number: " + error.message);
-  }
-};
+//     return details;
+//   } catch (error) {
+//     throw new Error("Error retrieving details by invoice number: " + error.message);
+//   }
+// };
 
 
 

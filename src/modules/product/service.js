@@ -5,62 +5,40 @@ import productRouter from "../product/routes.js";
 import sequelize from "../../../config/database.js";
 import suppliers from "../supplier/supplier.js";
 import branches from "../branch/branch.js";
-import productSupplier from "../product_Supplier/product_Supplier.js";
+//import productSupplier from "../product_Supplier/product_Supplier.js";
 import { mapBranchNameToId } from "../branch/service.js";
 
 
-
-export const generateProductID = async (branchName) => {
+//function to generate the productId
+export const generateProductID = async () => {
   try {
-    if (!branchName || typeof branchName !== 'string') {
-      throw new Error('Invalid branchName: ' + branchName);
-    }
-
-    // Extract the first three letters of the branch name
-    const branchCode = branchName.substring(0, 3).toUpperCase();
-
-    // Get the last product ID for the specific branch from the database
-    const lastProductID = await getLastProductID(branchCode);
-    let lastNumber = 0; // Default to 0 if no previous product ID exists
-
-    if (lastProductID) {
-      lastNumber = parseInt(lastProductID.split('P')[1]); // Extract the number part
-      if (isNaN(lastNumber)) {
-        throw new Error('Invalid product ID format');
-      }
-    }
-
-    // Increment the last number
-    lastNumber++;
-
-    // Pad the number with leading zeros
-    const paddedNumber = lastNumber.toString().padStart(5, '0');
-
-    // Construct the product ID
-    const productID = `${branchCode}-P${paddedNumber}`;
-
-    return productID;
-  } catch (error) {
-    throw new Error('Error generating product ID: ' + error.message);
-  }
-};
-
-const getLastProductID = async (branchCode) => {
-  try {
+    // Fetch the latest product ID
     const latestProduct = await products.findOne({
-      where: {
-        productId: {
-          [Op.like]: `${branchCode}-P%`, // Match the product IDs starting with the branch code
-        },
-      },
-      order: [['createdAt', 'DESC']], // Order by creation date in descending order to get the latest entry
+      order: [['productId', 'DESC']],
+      attributes: ['productId'],
     });
 
-    return latestProduct ? latestProduct.productId : null; // Return null if there are no product entries for the branch
+    let newProductId;
+
+    if (latestProduct && latestProduct.productId) {
+      // Extract the numeric part of the latest product ID and increment it
+      const numericPart = parseInt(latestProduct.productId.substring(1), 10);
+      const incrementedNumericPart = numericPart + 1;
+
+      // Format the new product ID with leading zeros
+      newProductId = `P${incrementedNumericPart.toString().padStart(4, '0')}`;
+    } else {
+      // If there are no existing products, start with P0001
+      newProductId = 'P0001';
+    }
+
+    return newProductId;
   } catch (error) {
-    throw new Error('Error getting last product ID: ' + error.message);
+    console.error('Error generating new product ID:', error);
+    throw new Error('Could not generate new product ID');
   }
-};
+}
+
 
 
 // Function to retrieve all products with their associated categories
@@ -73,7 +51,7 @@ export const getAllProducts = async () => {
         {
           model: categories,
           as: "category",
-          attributes: ["categoryId", "categoryName", "description"],
+          attributes: ["categoryId", "categoryName"],
         },
       ],
     });
@@ -87,14 +65,12 @@ export const getAllProducts = async () => {
 
 
 
-
-
-
-export const getProductByIdAndBranchName = async (productId, branchId) => {
+// function to get the products using product name
+export const getProductById = async (productId) => {
   try {
     // Fetch product details
     const product = await products.findOne({
-      where: { productId, branchId },
+      where: { productId},
     });
 
     if (!product) {
@@ -110,40 +86,14 @@ export const getProductByIdAndBranchName = async (productId, branchId) => {
       throw new Error("Category not found");
     }
 
-    // Fetch branch details
-    const branch = await branches.findOne({
-      where: { branchId },
-    });
-
-    if (!branch) {
-      throw new Error("Branch not found");
-    }
-
-    // Fetch supplier details
-    const productSupplierdata = await productSupplier.findOne({
-      where: { productId },
-    });
-
-    if (!productSupplierdata) {
-      throw new Error("Supplier not found for the product");
-    }
-
-    const supplier = await suppliers.findOne({
-      where: { supplierId: productSupplierdata.supplierId },
-    });
-
-    if (!supplier) {
-      throw new Error("Supplier not found");
-    }
 
     // Extract product details from the product GRNs
     const result = {
-      branchName: branch.branchName,
+
       productId: product.productId,
       productName: product.productName,
       categoryName: category.categoryName,
       description: product.description,
-      supplierName: supplier.supplierName,
     };
 
     return result;
@@ -175,38 +125,9 @@ export const searchProductsByName = async (productName) => {
 
 
 
-// Function to search products by category name
-// export const searchProductsByCategoryName = async (categoryName) => {
-//   try {
-//     const category = await categories.findOne({
-//       where: { categoryName },
-//     });
 
-//     if (!category) {
-//       return [];
-//     }
-//     const categoryId = category.categoryId;
-//     const productsInCategory = await products.findAll({
-//       where: { categoryId },
-//       attributes: [
-//         "productId",
-//         "productName",
-//         "description",
-//         "image",
-//         "barcode",
-//         "createdAt",
-//         "updatedAt",
-//       ],
-//     });
 
-//     return productsInCategory;
-//   } catch (error) {
-//     console.error("Error retrieving products by category name:", error);
-//     throw new Error("Error retrieving products by category name");
-//   }
-// };
-
-export const getProductsByCategoryNameAndBranchName = async (categoryName, branchId) => {
+export const getProductsByCategoryName = async (categoryName) => {
   try {
     // Fetch category details to get the categoryId
     const category = await categories.findOne({
@@ -221,7 +142,7 @@ export const getProductsByCategoryNameAndBranchName = async (categoryName, branc
 
     // Fetch products based on categoryId and branchId
     const productsList = await products.findAll({
-      where: { categoryId, branchId },
+      where: { categoryId},
     });
 
     if (!productsList || productsList.length === 0) {
@@ -229,40 +150,40 @@ export const getProductsByCategoryNameAndBranchName = async (categoryName, branc
     }
 
     // Fetch branch details
-    const branch = await branches.findOne({
-      where: { branchId },
-    });
+    // const branch = await branches.findOne({
+    //   where: { branchId },
+    // });
 
-    if (!branch) {
-      throw new Error("Branch not found");
-    }
+    // if (!branch) {
+    //   throw new Error("Branch not found");
+    // }
 
     // Fetch supplier details for each product
     const results = await Promise.all(
       productsList.map(async (product) => {
-        const productSupplierdata = await productSupplier.findOne({
-          where: { productId: product.productId },
-        });
+        // const productSupplierdata = await productSupplier.findOne({
+        //   where: { productId: product.productId },
+        // });
 
-        if (!productSupplierdata) {
-          throw new Error("Supplier not found for the product");
-        }
+        // if (!productSupplierdata) {
+        //   throw new Error("Supplier not found for the product");
+        // }
 
-        const supplier = await suppliers.findOne({
-          where: { supplierId: productSupplierdata.supplierId },
-        });
+        // const supplier = await suppliers.findOne({
+        //   where: { supplierId: productSupplierdata.supplierId },
+        // });
 
-        if (!supplier) {
-          throw new Error("Supplier not found");
-        }
+        // if (!supplier) {
+        //   throw new Error("Supplier not found");
+        // }
 
         return {
-          branchName: branch.branchName,
+          
           productId: product.productId,
           productName: product.productName,
           categoryName: category.categoryName,
           description: product.description,
-          supplierName: supplier.supplierName,
+          
         };
       })
     );
@@ -279,28 +200,19 @@ export const getProductsByCategoryNameAndBranchName = async (categoryName, branc
 // Function to add a new product
 export const addProduct = async (productData) => {
   try {
-    const branchName = productData.branchName;
-    console.log("Branch",branchName);
-    const productId = await generateProductID(branchName);
-
-    const branchId = await mapBranchNameToId(branchName);
     
+    const productId = await generateProductID();
 
-    if (!branchId) {
-      res.status(404).json({ error: "Branch not found" });
-      return;
-    }
-    
     
     // Ensure branchData includes the generated branchId
-    const newProduct = await products.create({ productId,branchId, ...productData });
+    const newProduct = await products.create({ productId, ...productData });
   
 
- // Create new record in product_Supplier table
- await productSupplier.create({
-  supplierId: productData.supplierId ,
-  productId: newProduct.productId
-});
+//  // Create new record in product_Supplier table
+//  await productSupplier.create({
+//   supplierId: productData.supplierId ,
+//   productId: newProduct.productId
+// });
 } catch (error) {
 throw new Error(error.message);
   }
@@ -517,5 +429,37 @@ export const searchSuppliersByProductName = async (productId) => {
 //   } catch (error) {
 //     console.error("Error fetching product details by productName:", error);
 //     throw new Error("Error fetching product details by productName");
+//   }
+// };
+
+
+// Function to search products by category name
+// export const searchProductsByCategoryName = async (categoryName) => {
+//   try {
+//     const category = await categories.findOne({
+//       where: { categoryName },
+//     });
+
+//     if (!category) {
+//       return [];
+//     }
+//     const categoryId = category.categoryId;
+//     const productsInCategory = await products.findAll({
+//       where: { categoryId },
+//       attributes: [
+//         "productId",
+//         "productName",
+//         "description",
+//         "image",
+//         "barcode",
+//         "createdAt",
+//         "updatedAt",
+//       ],
+//     });
+
+//     return productsInCategory;
+//   } catch (error) {
+//     console.error("Error retrieving products by category name:", error);
+//     throw new Error("Error retrieving products by category name");
 //   }
 // };

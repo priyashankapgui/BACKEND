@@ -36,7 +36,7 @@ const grn = sequelize.define(
       },
     },
     createdAt: {
-      type: 'TIMESTAMP',
+      type: DataTypes.DATE,
       defaultValue: DataTypes.NOW,
       allowNull: false
     },
@@ -47,7 +47,4 @@ const grn = sequelize.define(
   }
 );
 
-
 export default grn;
-
-

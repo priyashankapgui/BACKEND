@@ -1,37 +1,28 @@
 import { DataTypes } from "sequelize";
 import sequelize from "../../../config/database.js";
-import products from "../product/product.js";
 
 const categories = sequelize.define(
   "categories",
   {
     categoryId: {
-      type: DataTypes.  STRING,
+      type: DataTypes.STRING,
       allowNull: false,
       primaryKey: true,
-      
     },
     categoryName: {
       type: DataTypes.STRING,
       allowNull: false,
     },
     createdAt: {
-      type: 'TIMESTAMP',
+      type: DataTypes.DATE,
       defaultValue: DataTypes.NOW,
-      allowNull: false
+      allowNull: false, 
     },
-  //   updatedAt: {
-  //     type: 'TIMESTAMP',
-  //     defaultValue: DataTypes.NOW,
-  //     allowNull: false
-  // },
-    
   },
-  { tableName: "categories",
+  {
+    tableName: "categories",
+    timestamps: true,
   }
 );
-
-
-
 
 export default categories;
