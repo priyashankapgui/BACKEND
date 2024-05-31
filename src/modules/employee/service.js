@@ -26,7 +26,7 @@ export const getEmployeeById = async (employeeId) => {
 };
 
 export const createEmployee = async (employee) => {
-  const { employeeId,role,email, password ,phone} = employee;
+  const { employeeId,email, password ,phone} = employee;
 
   // Check if the employeeId already exists
   const existingEmployee = await Employee.findOne({ where: { employeeId: employeeId } });
@@ -42,11 +42,11 @@ export const createEmployee = async (employee) => {
     throw new Error("Email already exists");
   }
 
-  // Validate employee role
-  const roleRegex = /^(cashier|admin|superadmin)$/;
-  if (!roleRegex.test(role)) {
-    throw new Error("Invalid role");
-  }
+  // // Validate employee role
+  // const roleRegex = /^(cashier|admin|superadmin)$/;
+  // if (!roleRegex.test(role)) {
+  //   throw new Error("Invalid role");
+  // }
  
   // Validate email
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
