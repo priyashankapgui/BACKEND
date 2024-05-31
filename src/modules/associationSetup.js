@@ -6,51 +6,38 @@ import categories from "./category/category.js";
 import bill from "./bill/bill.js";
 import Customer from "./customer/customer.js";
 import ShoppingCart from "./Cart_Customer/shoppingcart.js";
+import productBatchSum from "./productBatchSum/productBatchSum.js";
+import productGRN from "./product_GRN/product_GRN.js";
 
 const setupBranchBillAssociations = (branches, bill) => {
   branches.hasMany(bill, { foreignKey: "branchId", as: "bill" });
   bill.belongsTo(branches, { foreignKey: "branchId" });
 };
 
-const setupGRNSupplierAssociations = (grn, suppliers) => {
-  suppliers.hasMany(grn, { foreignKey: "supplierId", as: "grn" });
-  grn.belongsTo(suppliers);
-};
+const setupGRNSupplierAssociations = (grn, suppliers) => { 
+  suppliers.hasMany(grn, { foreignKey: "supplierId", as: "grns" });
+  grn.belongsTo(suppliers, { foreignKey: "supplierId" });
+}; 
 
 
 const setupGRNBranchAssociations = (grn, branches) => {
-  branches.hasMany(grn, { foreignKey: "branchId", as: "grn" });
-  grn.belongsTo(branches);
-};
-
-
-const setupProductBranchAssociations = (branches, products) => {
-  branches.hasMany(products, { foreignKey: "branchId", as: "products" });
-  products.belongsTo(branches);
+  branches.hasMany(grn, { foreignKey: "branchId", as: "grns" });
+  grn.belongsTo(branches, { foreignKey: "branchId" });
 };
 
 
 const setupCategoryAssociations = (categories, products) => {
   categories.hasMany(products, { foreignKey: "categoryId", as: "products" });
-  products.belongsTo(categories);
+  products.belongsTo(categories, { foreignKey: "categoryId" });
 };
 
-
-const setupProductSupplierAssociations = (suppliers, products) => {
-  suppliers.belongsToMany(products, { through: "product_Supplier", foreignKey: 'supplierId' });
-  products.belongsToMany(suppliers, { through: "product_Supplier" });
-};
 
 const setupProductGRNAssociations = (products, grn) => {
-  products.belongsToMany(grn, { through: "product_GRN" });
-  grn.belongsToMany(products, { through: "product_GRN" });
-};
+  products.belongsToMany(grn, { through: productGRN });
+  grn.belongsToMany(products, { through: productGRN });
+}; 
 
 
-const setupBranchSupplierAssociations = (branches, suppliers) => {
-  branches.belongsToMany(suppliers, { through: "branch_Supplier", foreignKey: 'branchId' });
-  suppliers.belongsToMany(branches, { through: "branch_Supplier", foreignKey: 'supplierId' });
-};
 
 const setupCartCustomerAssociations = (ShoppingCart,Customer) => {
   ShoppingCart.hasOne(Customer);
@@ -63,17 +50,33 @@ const setupCartProductAssociations = (ShoppingCart, products) => {
 }
 
 
+const setupProductBatchSumAssociations = (productBatchSum, productGRN) => {
+  productBatchSum.belongsTo(productGRN, {
+    foreignKey: 'productId',
+    targetKey: 'productId',
+    as: 'productGRN',
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
+  });
+
+  productBatchSum.belongsTo(productGRN, {
+    foreignKey: 'batchNo',
+    targetKey: 'batchNo',
+    as: 'productBatch',
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
+  });
+};
+
 
 export const setupAssociations = () => {
   setupGRNSupplierAssociations(grn, suppliers);
-  setupProductBranchAssociations(branches, products);
   setupGRNBranchAssociations(grn, branches);
-  setupProductSupplierAssociations(suppliers, products);
   setupCategoryAssociations(categories, products);
   setupProductGRNAssociations(products, grn);
-  setupBranchSupplierAssociations(branches, suppliers);
   setupBranchBillAssociations(branches, bill);
   setupCartCustomerAssociations(ShoppingCart,Customer);
   setupCartProductAssociations(ShoppingCart,products);
+  setupProductBatchSumAssociations(productBatchSum, productGRN);
 
 };
