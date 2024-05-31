@@ -1,6 +1,7 @@
 import { DataTypes } from 'sequelize';
 import sequelize from '../../../config/database.js';
 import bcrypt from 'bcryptjs';
+import UserRole from '../userRole/userRole.js';
 
 const SuperAdmin = sequelize.define('superAdmin', {
     superAdminId: {
@@ -29,7 +30,16 @@ const SuperAdmin = sequelize.define('superAdmin', {
         type: DataTypes.STRING,
         allowNull: false,
     },
-
+    userRoleId: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        references: {
+            model: UserRole,
+            key: 'userRoleId',
+            onDelete: "CASCADE",
+            onUpdate: "CASCADE"
+        }
+    },
     
     }, 
     { 

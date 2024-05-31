@@ -28,7 +28,7 @@ export const handleSuperAdminLogin = async (superAdminId, password) => {
     const token = jwt.sign(
       {
         userID: superAdmin.superAdminId,
-        role: "superAdmin",
+        userRoleId: superAdmin.userRoleId,
       },
       ACCESS_TOKEN,
       {
