@@ -6,6 +6,9 @@ import categories from "./category/category.js";
 import bill from "./bill/bill.js";
 import Customer from "./customer/customer.js";
 import ShoppingCart from "./Cart_Customer/shoppingcart.js";
+import bill_Product from "./bill_Product/bill_Product.js";
+import productBatchSum from "./productBatchSum/productBatchSum.js";
+import productGRN from "./product_GRN/product_GRN.js";
 
 const setupBranchBillAssociations = (branches, bill) => {
   branches.hasMany(bill, { foreignKey: "branchId", as: "bill" });
@@ -62,6 +65,24 @@ const setupCartProductAssociations = (ShoppingCart, products) => {
   products.belongsToMany(ShoppingCart, { through: "cart_Product", foreignKey: 'productId' });
 }
 
+const setupBill_ProductProductAssoociation = (bill_Product, products) => {
+  products.belongsToMany(bill, { through: bill_Product, foreignKey: 'productId' });
+  bill_Product.belongsToMany(products, { through: bill_Product, foreignKey: 'billNo' });
+}
+
+const productBatchSumBillAssocialtion = () => {
+  productBatchSum.belongsToMany(bill, { through: bill_Product, foreignKey: 'batchNo' });
+  bill.belongsToMany(productBatchSum, { through: bill_Product, foreignKey: 'billNo' });
+}
+
+const  productGRNBillAssociation = () => {
+  productGRN.belongsToMany(bill, { through: bill_Product, foreignKey: 'GRN_NO' });
+  bill.belongsToMany(productGRN, { through: bill_Product, foreignKey: 'billNo' }); 
+  
+}
+
+
+
 
 
 export const setupAssociations = () => {
@@ -75,5 +96,6 @@ export const setupAssociations = () => {
   setupBranchBillAssociations(branches, bill);
   setupCartCustomerAssociations(ShoppingCart,Customer);
   setupCartProductAssociations(ShoppingCart,products);
+  setupBill_ProductProductAssoociation(bill_Product, products);
 
 };

@@ -73,7 +73,22 @@ const bill_Product = sequelize.define('bill_Product', {
     paymentMethod: {
         type: DataTypes.STRING,
         allowNull: false,
-    }
+    },
+
+},
+{
+    hooks: {
+        async beforeCreate(bill_Product) {
+            await products.findOne({
+                where: {
+                    productId: products.productId
+                }
+            }).then((product) => {
+                bill_Product.productName = product.productName;
+            });
+        },
+        
+    },
 });
 
 export default bill_Product;
