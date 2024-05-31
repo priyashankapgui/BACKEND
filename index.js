@@ -8,6 +8,9 @@ import suppliers from "./src/modules/supplier/supplier.js";
 import categories from "./src/modules/category/category.js";
 import branches from "./src/modules/branch/branch.js";
 import SuperAdmin from "./src/modules/superAdmin/superAdmin.js";
+import PageAccess from "./src/modules/pageAccess/pageAccess.js";
+import UserRole from "./src/modules/userRole/userRole.js";
+import Permission from "./src/modules/permission/permission.js";
 import Productrouter from "./src/modules/product/routes.js";
 import categoryRouter from "./src/modules/category/routes.js";
 import EmployeeRouter from './src/modules/employee/routes.js';
@@ -25,7 +28,10 @@ import feedback from "./src/modules/feedback/feedback.js";
 import feedbackrouter from "./src/modules/feedback/routes.js";
 import SuperAdminRouter from "./src/modules/superAdmin/routes.js";
 import cartProductRoutes from "./src/modules/cart_Product/routes.js"
+import PermissionRouter from "./src/modules/permission/routes.js";
+import UserRoleRouter from "./src/modules/userRole/routes.js";
 import Stripe from 'stripe';
+import PageAccessRouter from "./src/modules/pageAccess/routes.js";
 
 
 
@@ -50,6 +56,9 @@ app.use('/', listedProductsRouter);
 app.use('/', billRouter);
 app.use('/', feedbackrouter);
 app.use('/', SuperAdminRouter);
+app.use('/', PermissionRouter);
+app.use('/', UserRoleRouter);
+app.use('/', PageAccessRouter)
 
 
 
@@ -74,7 +83,7 @@ setupAssociations();
 
 
 
-sequelize.sync({alter: true}) 
+sequelize.sync({ force: true }) 
   .then(() => {
     console.log("Database synchronized");
     app.listen(8080, () => {
