@@ -2,65 +2,41 @@ import { Op } from "sequelize";
 import sequelize from "../../../config/database.js";
 import suppliers from "../supplier/supplier.js";
 import { mapBranchNameToId } from "../../modules/branch/service.js";
-import branchSupplier from "../branch_Supplier/branch_Supplier.js";
+//import branchSupplier from "../branch_Supplier/branch_Supplier.js";
 
 //import products from "../product/product.js";
 //import productSupplier from "../product_Supplier/product_Supplier.js";
 
 
 //Function to generate supplieId
-const generateSupplierID = async (branchName) => {
+export const generateSupplierID = async () => {
   try {
-    if (!branchName || typeof branchName !== 'string') {
-      throw new Error('Invalid branchName: ' + branchName);
-    }
-
-    // Extract the first three letters of the branch name
-    const branchCode = branchName.substring(0, 3).toUpperCase();
-
-    // Get the last supplier ID for the specific branch from the database
-    const lastSupplierID = await getLastSupplierID(branchCode);
-    let lastNumber = 0; // Default to 0 if no previous supplier ID exists
-
-    if (lastSupplierID) {
-      lastNumber = parseInt(lastSupplierID.split('SUP')[1]); // Extract the number part
-      if (isNaN(lastNumber)) {
-        throw new Error('Invalid supplier ID format');
-      }
-    }
-
-    // Increment the last number
-    lastNumber++;
-
-    // Pad the number with leading zeros
-    const paddedNumber = lastNumber.toString().padStart(5, '0');
-
-    // Construct the supplier ID
-    const supplierID = `${branchCode}-SUP${paddedNumber}`;
-
-    return supplierID;
-  } catch (error) {
-    throw new Error('Error generating supplier ID: ' + error.message);
-  }
-};
-
-const getLastSupplierID = async (branchCode) => {
-  try {
+    // Fetch the latest supplier ID
     const latestSupplier = await suppliers.findOne({
-      where: {
-        supplierId: {
-          [Op.like]: `${branchCode}-SUP%`, // Match the supplier IDs starting with the branch code
-        },
-      },
-      order: [['createdAt', 'DESC']], // Order by creation date in descending order to get the latest entry
+      order: [['supplierId', 'DESC']],
+      attributes: ['supplierId'],
     });
 
-    return latestSupplier ? latestSupplier.supplierId : null; // Return null if there are no supplier entries for the branch
+    let newSupplierId;
+
+    if (latestSupplier && latestSupplier.supplierId) {
+      // Extract the numeric part of the latest supplier ID and increment it
+      const numericPart = parseInt(latestSupplier.supplierId.substring(1), 10);
+      const incrementedNumericPart = numericPart + 1;
+
+      // Format the new supplier ID with leading zeros
+      newSupplierId = `S${incrementedNumericPart.toString().padStart(4, '0')}`;
+    } else {
+      // If there are no existing suppliers, start with S0001
+      newSupplierId = 'S0001';
+    }
+
+    return newSupplierId;
   } catch (error) {
-    throw new Error('Error getting last supplier ID: ' + error.message);
+    console.error('Error generating new supplier ID:', error);
+    throw new Error('Could not generate new supplier ID');
   }
 };
-
 
 
 
@@ -75,6 +51,8 @@ export const getAllSuppliers = async () => {
     throw new Error("Error retrieving suppliers: " + error.message);
   }
 };
+
+
 
 // Function to retrieve a supplier by its ID
 export const getSupplierById = async (supplierId) => {
@@ -103,73 +81,73 @@ export const getSupplierById = async (supplierId) => {
 //   }
 // };
 
-export const searchSupplierByName = async (supplierId, branchId) => {
-  try {
+// export const searchSupplierByName = async (supplierId, branchId) => {
+//   try {
 
-    const branchSupplierdata = await branchSupplier.findOne({
-      where: { branchId },
-    });
+//     const branchSupplierdata = await branchSupplier.findOne({
+//       where: { branchId },
+//     });
 
-    if (!branchSupplierdata) {
-      throw new Error("Supplier not found for the branch");
-    }
+//     if (!branchSupplierdata) {
+//       throw new Error("Supplier not found for the branch");
+//     }
 
-    const supplierdata = await suppliers.findOne({
-      where: { supplierId: branchSupplierdata.supplierId },
-    });
+//     const supplierdata = await suppliers.findOne({
+//       where: { supplierId: branchSupplierdata.supplierId },
+//     });
 
-    if (!supplierdata) {
-      throw new Error("Supplier not found");
-    }
+//     if (!supplierdata) {
+//       throw new Error("Supplier not found");
+//     }
 
 
-    // Extract product details from the product GRNs
-    const result = {
-      supplierId: supplierdata.supplierId,
-      supplierName: supplierdata.supplierName,
-      regNo: supplierdata.regNo,
-      email: supplierdata.email,
-      address: supplierdata.address,
-      contactNo: supplierdata.contactNo,
+//     // Extract product details from the product GRNs
+//     const result = {
+//       supplierId: supplierdata.supplierId,
+//       supplierName: supplierdata.supplierName,
+//       regNo: supplierdata.regNo,
+//       email: supplierdata.email,
+//       address: supplierdata.address,
+//       contactNo: supplierdata.contactNo,
       
-    };
+//     };
 
-    return result;
-  } catch (error) {
-    throw new Error("Error retrieving product details: " + error.message);
-  }
-};
+//     return result;
+//   } catch (error) {
+//     throw new Error("Error retrieving product details: " + error.message);
+//   }
+// };
 
 
 
-export const searchSuppliersByProductId = async (productId) => {
-  try {
-    const supplierDetails = await productSupplier.findAll({
-      where: { productId },
-      include: [{ model: suppliers, attributes: ['branchName', 'supplierId', 'supplierName', 'regNo', 'email', 'address', 'contactNo'] }]
-    });
-    return supplierDetails;
-  } catch (error) {
-    console.error("Error searching suppliers by product ID:", error);
-    throw new Error("Error getting suppliers by product ID");
-  }
-};
+// export const searchSuppliersByProductId = async (productId) => {
+//   try {
+//     const supplierDetails = await productSupplier.findAll({
+//       where: { productId },
+//       include: [{ model: suppliers, attributes: ['branchName', 'supplierId', 'supplierName', 'regNo', 'email', 'address', 'contactNo'] }]
+//     });
+//     return supplierDetails;
+//   } catch (error) {
+//     console.error("Error searching suppliers by product ID:", error);
+//     throw new Error("Error getting suppliers by product ID");
+//   }
+// };
 
-export const searchSuppliersByProductName = async (productId) => {
-  try {
-    // Query the productSupplier model to find suppliers for the given productId
-    const suppliersDetails = await productSupplier.findAll({
-      where: { productId },
-      include: [{ model: suppliers, attributes: ['branchName', 'supplierId', 'supplierName', 'regNo', 'email', 'address', 'contactNo'] }]
-    });
+// export const searchSuppliersByProductName = async (productId) => {
+//   try {
+//     // Query the productSupplier model to find suppliers for the given productId
+//     const suppliersDetails = await productSupplier.findAll({
+//       where: { productId },
+//       include: [{ model: suppliers, attributes: ['branchName', 'supplierId', 'supplierName', 'regNo', 'email', 'address', 'contactNo'] }]
+//     });
 
-    return suppliersDetails;
-  } catch (error) {
-    // Log and throw any errors that occur during the process
-    console.error("Error searching suppliers by product ID:", error);
-    throw new Error("Error getting suppliers by product ID");
-  }
-};
+//     return suppliersDetails;
+//   } catch (error) {
+//     // Log and throw any errors that occur during the process
+//     console.error("Error searching suppliers by product ID:", error);
+//     throw new Error("Error getting suppliers by product ID");
+//   }
+// };
 
 
 
@@ -220,21 +198,12 @@ export const mapSupplierNameToId = async (supplierName) => {
 };
 
 
-export const addSupplier = async (supplierName, regNo, email, address, contactNo, branchName) => {
+
+export const addSupplier = async (supplierName, regNo, email, address, contactNo) => {
   try {
     
 
-    const supplierId = await generateSupplierID(branchName);
-    
-
-    // Map branch name to branchId
-    const branchId = await mapBranchNameToId(branchName);
-    
-
-    if (!branchId) {
-      res.status(404).json({ error: "Branch not found" });
-      return;
-    }
+    const supplierId = await generateSupplierID();
     
 
     // Create new supplier record
@@ -247,11 +216,6 @@ export const addSupplier = async (supplierName, regNo, email, address, contactNo
       contactNo
     });
 
-    // Create new record in branch_Supplier table
-    await branchSupplier.create({
-      branchId,
-      supplierId: newSupplier.supplierId
-    });
   } catch (error) {
     throw new Error(error.message);
   }

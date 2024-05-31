@@ -192,6 +192,9 @@ export const getBatchDetailsByProductName = async (productName, branchName) => {
 }; 
 
 
+
+
+//function to get grn data using productId
 export const getGRNDetailsByProductId = async (productId) => {
   try {
     // Get GRN_NOs associated with the productId from productGRN table
@@ -255,35 +258,61 @@ export const getGRNDetailsByProductId = async (productId) => {
 };
 
 
-//update the totalqty column in thr product table
-export const updateProductQty = async (productId) => {
+
+// //function to get grn data using branchName and productId
+// export const getProductGRNDataByProductIdAndGRNNOService = async (productId, grnNo) => {
+//   try {
+//     // Get productGRN details for the given productId and GRN_NO
+//     const productGRNData = await productGRN.findAll({
+//       where: {
+//         productId,
+//         GRN_NO: grnNo,
+//       },
+//     });
+
+//     return productGRNData;
+//   } catch (error) {
+//     console.error('Error in getProductGRNDataByProductIdAndGRNNOService:', error);
+//     throw new Error('Failed to fetch productGRN data by productId and GRN_NO');
+//   }
+// };
+
+
+
+
+export const updateProductQty = async (productIds) => {
   try {
-    const productGRNs = await productGRN.findAll({
+    // Fetch the total available quantity for each productId, excluding expired products
+    const productsToUpdate = await productGRN.findAll({
+      attributes: ['productId', [sequelize.fn('SUM', sequelize.col('availableQty')), 'totalAvailableQty']],
       where: {
-        productId: productId
-      }
+        productId: productIds,
+        [Op.or]: [
+          { expDate: null },
+          { expDate: { [Op.gte]: new Date() } }
+        ]
+      },
+      group: ['productId']
     });
 
-    let totalAvailableQty = 0;
-    for (const productGRN of productGRNs) {
-      if (!productGRN.expDate || productGRN.expDate >= new Date()) {
-        totalAvailableQty += productGRN.availableQty;
-      }
+    // Iterate through each product and update its qty in the products table
+    for (const product of productsToUpdate) {
+      const { productId, totalAvailableQty } = product.dataValues;
+
+      await products.update(
+        { qty: totalAvailableQty },
+        { where: { productId } }
+      );
+
+      console.log(`Updated qty for productId ${productId} to ${totalAvailableQty}`);
     }
-
-
-    // Update the qty column in the product table
-    await products.update(
-      { qty: totalAvailableQty },
-      { where: { productId: productId } }
-    );
-
-    console.log(`Updated qty for productId ${productId} to ${totalAvailableQty}`);
   } catch (error) {
     console.error("Error updating product quantity:", error);
     throw error;
   }
 };
+
+
 
 
 
@@ -319,7 +348,29 @@ export const getProductTotalQuantity = async (branchName, productName) => {
 };
 
 
+// export const getGRNDetailsByGRNNOAndProductIdService = async (grnNos, productId, branchName) => {
+//   try {
+//     const productGRNData = await productGRN.findAll({
+//       where: {
+//         GRN_NO: grnNos,
+//         productId,
+//       },
+//     });
 
+//     return {
+//       GRN_NO: grnNos.GRN_NO,
+//       createdAt: grnNos.createdAt,
+//       branchName: branchName,
+//       supplierName: supplier.supplierName,
+//       invoiceNo: grnItem.invoiceNo,
+//     };
+
+//     return productGRNData;
+//   } catch (error) {
+//     console.error('Error in getGRNDetailsByGRNNOAndProductIdService:', error);
+//     throw new Error('Failed to fetch productGRN details by GRN_NO and productId');
+//   }
+// };
 
 
 

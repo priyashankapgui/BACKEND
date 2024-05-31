@@ -2,6 +2,8 @@ import { DataTypes } from "sequelize";
 import sequelize from "../../../config/database.js";
 import products from '../product/product.js';
 import grn from '../GRN/grn.js';
+import productBatchSum from '../productBatchSum/productBatchSum.js';
+import { updateProductBatchSum } from '../productBatchSum/service.js'; 
 
 const productGRN = sequelize.define(
   "product_GRN",
@@ -13,14 +15,14 @@ const productGRN = sequelize.define(
       references: {
         model: products,
         key: 'productId'
-      }
+      } 
     },
     GRN_NO: {
       type: DataTypes.STRING,
       allowNull: false,
       primaryKey: true,
       references: {
-        model: grn,
+        model: grn, 
         key: 'GRN_NO'
       }
     },
@@ -53,10 +55,15 @@ const productGRN = sequelize.define(
       type: DataTypes.FLOAT,
       allowNull: false,
     },
-    availableQty: {
+    availableQty: { 
       type: DataTypes.INTEGER,
       allowNull: true,
     },
+    barcode: {
+      type: DataTypes.STRING,
+      allowNull: false, 
+    },
+    
     comment: {
       type: DataTypes.STRING,
       allowNull: true, 
@@ -69,11 +76,26 @@ const productGRN = sequelize.define(
   },
   {
     tableName: "product_GRN",
-    timestamps: true,
+    timestamps: true, 
+    indexes: [
+      {
+        unique: true,
+        fields: ['productId', 'GRN_NO', 'batchNo']
+      }
+    ],
     hooks: {
       // Before creating a new record in product_GRN
       beforeCreate: async (productGRNInstance, options) => {
         productGRNInstance.availableQty = productGRNInstance.totalQty; 
+      },
+      afterCreate: async (productGRNInstance) => {
+        await updateProductBatchSum(productGRNInstance.productId, productGRNInstance.batchNo);
+      },
+      afterUpdate: async (productGRNInstance) => {
+        await updateProductBatchSum(productGRNInstance.productId, productGRNInstance.batchNo);
+      },
+      afterDestroy: async (productGRNInstance) => {
+        await updateProductBatchSum(productGRNInstance.productId, productGRNInstance.batchNo);
       }
     }
   }

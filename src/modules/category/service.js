@@ -1,5 +1,8 @@
+import { to, TE } from "../../helper.js";
 import categories from "../category/category.js";
+import database from "../category/database.js";
 import sequelize from "../../../config/database.js";
+
 
 
  const generateCategoryId = async () => {
@@ -54,17 +57,21 @@ import sequelize from "../../../config/database.js";
 };
 
 // Function to add a new category
- const addCategory = async (categoryData) => {
-  try {
+ const addCategory = async (data) => {
+  
     const categoryId = await generateCategoryId();
     
-    // Ensure branchData includes the generated branchId
-    const newCategory = await categories.create({ categoryId, ...categoryData });
-    
-    return newCategory;
-  } catch (error) {
-    throw new Error("Error creating category: " + error.message);
-  }
+    const createSingleRecord = database.createSingleRecord({ categoryId, ...data });
+
+    const [err, result] = await to (createSingleRecord);
+
+    if (err) TE(err.errors[0] ? err.errors[0].message : err);
+
+  if (!result) TE("Result not found");
+
+  return result;
+  
+ 
 };
 
 // Function to update a category by its ID
