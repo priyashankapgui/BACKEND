@@ -20,6 +20,10 @@ const feedback = sequelize.define('feedback', {
     type: DataTypes.STRING,
     allowNull: true,
   },
+  branch: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
   phone: {
     type: DataTypes.STRING,
     allowNull: true,
@@ -28,7 +32,15 @@ const feedback = sequelize.define('feedback', {
     type: DataTypes.STRING,
     allowNull: true,
   },
- 
+ action: {
+  type: DataTypes.STRING,
+  allowNull: true,
+  defaultValue: 'Pending'
+ },
+ actionSummary: {
+        type: DataTypes.STRING,
+        allowNull: true,
+    }
 
 
   

@@ -1,18 +1,16 @@
 import express from "express";
-// import {
-//   addCategory,
-//   getAllCategories,
-//   getCategoryById,
-//   mapCategoryNameToId,
-//   updateCategoryById,
-//   deleteCategoryById,
-// } from "../category/service.js"; 
 import * as categoryService from "../category/service.js";
+import { SUCCESS, ERROR } from "../../helper.js";
+import { Codes } from "../category/constants.js";
+
+const { SUC_CODES } = Codes;
+
 
 // Controller function to get all categories
 export const getCategories = async (req, res) => {
   try {
     const categories = await categoryService.getAllCategories();
+    SUCCESS(res, SUC_CODES, result, req.span);
     res.status(200).json(categories);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -38,10 +36,10 @@ export const getCategory = async (req, res) => {
 // Controller function to create a new category
 export const createCategory = async (req, res) => {
   try {
-    const newCategory = await categoryService.addCategory(req.body);
-    res.status(201).json(newCategory);
+    const result = await categoryService.addCategory(req.body);
+    SUCCESS(res, SUC_CODES, result, req.span);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    ERROR(res, error, res.span);
   }
 };
 

@@ -1,11 +1,12 @@
-//const { CUSTOM_CODE } = require("./errors");
+import { CUSTOM_CODE } from "./error.js";
+//import * as Sentry from "@sentry/node"; // Ensure you have Sentry imported
 
 const _spanFinished = (span, response, err) => {
   if (!span) return;
 
   if (err) {
     const stack = err.stack ? err.stack : null;
-    // Do something with the error stack if needed
+  } else {
   }
 
   span.finish();
@@ -13,7 +14,9 @@ const _spanFinished = (span, response, err) => {
 
 const to = (promise) => {
   return promise
-    .then((data) => [null, data])
+    .then((data) => {
+      return [null, data];
+    })
     .catch((err) => [err]);
 };
 
@@ -21,6 +24,7 @@ const TE = (err, isLog = false) => {
   if (isLog) {
     console.error(err);
   }
+
   throw err;
 };
 
@@ -57,9 +61,9 @@ const ERROR = (res, err, span = null, traceId = "") => {
       traceId,
     });
   } catch (catchErr) {
-    console.error("**", catchErr);
+    console.log("****", catchErr);
 
-    // Sentry.captureException(err); // Uncomment if using Sentry or similar service
+    Sentry.captureException(err);
 
     const response = CUSTOM_CODE._400(err);
 
@@ -89,9 +93,9 @@ const VALIDATION_ERROR = (res, err, span = null, traceId = "") => {
       traceId,
     });
   } catch (catchErr) {
-    console.error("**", catchErr);
+    console.log("****", catchErr);
 
-    // Sentry.captureException(err); // Uncomment if using Sentry or similar service
+    Sentry.captureException(err);
 
     const response = CUSTOM_CODE._400(err);
 
@@ -121,9 +125,9 @@ const UNAUTHORIZED_ERROR = (res, err, span = null, traceId = "") => {
       traceId,
     });
   } catch (catchErr) {
-    console.error("**", catchErr);
+    console.log("****", catchErr);
 
-    // Sentry.captureException(err); // Uncomment if using Sentry or similar service
+    Sentry.captureException(err);
 
     const response = CUSTOM_CODE._400(err);
 
@@ -184,13 +188,14 @@ const parseToObject = (value) => {
   }
 };
 
-module.exports = {
-  to,
-  TE,
-  SUCCESS,
-  ERROR,
-  VALIDATION_ERROR,
-  UNAUTHORIZED_ERROR,
-  mapError,
-  parseToObject,
-};
+
+
+
+export { to, 
+  TE, 
+  SUCCESS, 
+  ERROR, 
+  VALIDATION_ERROR, 
+  UNAUTHORIZED_ERROR, 
+  mapError, 
+  parseToObject  };
