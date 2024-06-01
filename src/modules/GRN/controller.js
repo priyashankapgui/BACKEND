@@ -11,7 +11,8 @@ import {
   //getGRNsByBranchNameService
 } from "../GRN/service.js";
 import { createProductGRNService, getGRNDetailsByProductId } from "../../modules/product_GRN/service.js";
-import { calculateTotalAmount, updateProductQty } from '../../modules/product_GRN/service.js'; 
+import { calculateTotalAmount } from '../../modules/product_GRN/service.js'; 
+import { updateProductQty } from "../productBatchSum/service.js";
 import suppliers from "../supplier/supplier.js";
 import branches from "../branch/branch.js";
 
@@ -45,7 +46,7 @@ export const createGRNAndProduct = async (req, res) => {
       comment: product.comment,
     }));
 
-    console.log('ProductGRNs to insert:', productGRNs);
+    
 
     const result = await createProductGRNService(productGRNs);
 
@@ -216,6 +217,56 @@ export const getGRNsByBranchAndSupplierController = async (req, res) => {
 
 
 
+
+
+// Controller function to calculate total amount by invoice number
+export const getTotalAmountByInvoiceNo = async (req, res) => {
+  try {
+    // Extract the invoice number from the request parameters
+    const { invoiceNo } = req.params;
+
+    // Check if invoice number is provided
+    if (!invoiceNo) {
+      return res.status(400).json({ error: "Invoice number is required" });
+    }
+
+    // Call the service function to calculate the total amount
+    const totalAmount = await calculateTotalAmount(invoiceNo);
+
+    // Return the total amount in the response
+    res.status(200).json({ totalAmount });
+  } catch (error) {
+    console.error("Error calculating total amount by invoice number:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 //function to get grn data using branchName ans productId
 // export const getGRNsAndProductGRNDataByBranchNameAndProductIdController = async (req, res) => {
 //   try {
@@ -252,28 +303,6 @@ export const getGRNsByBranchAndSupplierController = async (req, res) => {
 // };
 
 
-
-// Controller function to calculate total amount by invoice number
-export const getTotalAmountByInvoiceNo = async (req, res) => {
-  try {
-    // Extract the invoice number from the request parameters
-    const { invoiceNo } = req.params;
-
-    // Check if invoice number is provided
-    if (!invoiceNo) {
-      return res.status(400).json({ error: "Invoice number is required" });
-    }
-
-    // Call the service function to calculate the total amount
-    const totalAmount = await calculateTotalAmount(invoiceNo);
-
-    // Return the total amount in the response
-    res.status(200).json({ totalAmount });
-  } catch (error) {
-    console.error("Error calculating total amount by invoice number:", error);
-    res.status(500).json({ error: "Internal server error" });
-  }
-};
 
 
 
