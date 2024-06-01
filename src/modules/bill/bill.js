@@ -1,6 +1,6 @@
 import { DataTypes } from 'sequelize';
 import sequelize from '../../../config/database.js';
-import branches from '../branch/branch.js'; // Adjust the path if necessary
+import branches from '../branch/branch.js';
 
 const bill = sequelize.define('bill', {
     billNo: {
@@ -8,24 +8,14 @@ const bill = sequelize.define('bill', {
         allowNull: false,
         primaryKey: true,
     },
-    branchId: {
+    branchName: {
         type: DataTypes.STRING,
         allowNull: false,
     },
     billedAt: {
-        type: DataTypes.DATE,
-        allowNull: true,
-        defaultValue: sequelize.literal('CURRENT_TIMESTAMP'), // Set default value to current date and time
-        get() {
-            const rawValue = this.getDataValue('billedAt');
-            // Check if rawValue is a valid date
-            if (rawValue instanceof Date && !isNaN(rawValue)) {
-                // Formatting the date to remove the time portion
-                return rawValue.toISOString().split('T')[0];
-            } else {
-                return null; // Return null if rawValue is not a valid date
-            }
-        },
+        type: 'TIMESTAMP',
+        defaultValue: DataTypes.NOW,
+        allowNull: false
     },
     billedBy: {
         type: DataTypes.STRING,
@@ -47,7 +37,5 @@ const bill = sequelize.define('bill', {
     tableName: 'bill',
     timestamps: true,
 });
-
-
 
 export default bill;

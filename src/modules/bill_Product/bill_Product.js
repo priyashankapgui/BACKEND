@@ -1,16 +1,17 @@
 import { DataTypes } from "sequelize";
-import sequelize from "../../../config/database";
-import bill from "../bill/bill.js";
-import products from "../product/product.js";
-import productGRN from "../product_GRN/product_GRN.js";
+import sequelize from "../../../config/database.js";
+import Bill from "../bill/bill.js";
+import Product from "../product/product.js";
+import ProductGRN from "../product_GRN/product_GRN.js";
+import ProductBatchSum from "../productBatchSum/productBatchSum.js";
 
-const bill_Product = sequelize.define('bill_Product', {
+const BillProduct = sequelize.define('BillProduct', {
     billNo: {
         type: DataTypes.STRING,
         allowNull: false,
         primaryKey: true,
         references: {
-            model: bill,
+            model: Bill,
             key: 'billNo'
         }
     },
@@ -19,76 +20,52 @@ const bill_Product = sequelize.define('bill_Product', {
         allowNull: false,
         primaryKey: true,
         references: {
-            model: products,
+            model: Product,
             key: 'productId'
         }
     },
     barcode: {
         type: DataTypes.STRING,
-        allowNull: true,
-        references: {
-            model: products,
-        }
+        allowNull: true
     },
     productName: {
         type: DataTypes.STRING,
-        allowNull: false,
-        references: {
-            model: products,
-        }
+        allowNull: false
     },
     billQty: {
         type: DataTypes.INTEGER,
-        allowNull: false,
+        allowNull: false
     },
     sellingPrice: {
         type: DataTypes.FLOAT,
-        allowNull: false,
-        references: {
-            model: productGRN,
-        }
+        allowNull: false
     },
     batchNo: {
         type: DataTypes.STRING,
-        allowNull: false,
-        references: {
-            model: productGRN,
-        }
+        allowNull: false
     },
     availableQty: {
         type: DataTypes.INTEGER,
-        allowNull: true,
-        references: {
-            model: productGRN,
-        }
+        allowNull: true
     },
     discount: {
         type: DataTypes.FLOAT,
-        allowNull: true,
+        allowNull: true
     },
     amount: {
         type: DataTypes.FLOAT,
-        allowNull: false,
+        allowNull: false
     },
     paymentMethod: {
         type: DataTypes.STRING,
-        allowNull: false,
-    },
-
-},
-{
-    hooks: {
-        async beforeCreate(bill_Product) {
-            await products.findOne({
-                where: {
-                    productId: products.productId
-                }
-            }).then((product) => {
-                bill_Product.productName = product.productName;
-            });
-        },
-        
-    },
+        allowNull: false
+    }
 });
 
-export default bill_Product;
+// Define associations
+BillProduct.belongsTo(Bill, { foreignKey: 'billNo' });
+BillProduct.belongsTo(Product, { foreignKey: 'productId' });
+BillProduct.belongsTo(ProductGRN, { foreignKey: 'batchNo' });
+BillProduct.belongsTo(ProductBatchSum, { foreignKey: 'discount' });
+
+export default BillProduct;
