@@ -19,7 +19,8 @@ export const getSuppliers = async (req, res) => {
 
 // Controller function to get a specific supplier by supplierID
 export const getSupplier = async (req, res) => {
-  const supplierId = req.params.supplierId;
+  const supplierId = req.params;
+  console.log("supplier ha",supplierId);
   try {
     const supplier = await getSupplierById(supplierId);
     if (!supplier) {
@@ -172,13 +173,14 @@ export const deleteSupplier = async (req, res) => {
 
 
 export const createSupplier = async (req, res) => {
+  console.log("Received data:", req.body);
   const { supplierName, regNo, email, address, contactNo } = req.body;
 
   try {
     // Call service function to add supplier
-    await addSupplier(supplierName, regNo, email, address, contactNo);
+    const newSupplier = await addSupplier(supplierName, regNo, email, address, contactNo);
     
-    res.status(201).json({ message: 'Supplier added successfully' });
+    res.status(201).json(newSupplier);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

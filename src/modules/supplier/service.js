@@ -200,10 +200,12 @@ export const mapSupplierNameToId = async (supplierName) => {
 
 
 export const addSupplier = async (supplierName, regNo, email, address, contactNo) => {
+  console.log("data",supplierName);
   try {
     
 
     const supplierId = await generateSupplierID();
+    console.log("Id",supplierId);
     
 
     // Create new supplier record
@@ -215,12 +217,14 @@ export const addSupplier = async (supplierName, regNo, email, address, contactNo
       address,
       contactNo
     });
-
-  } catch (error) {
+    console.log("data two",newSupplier);
+    return newSupplier;
+ 
+  } catch (error) { 
     throw new Error(error.message);
   }
 };
-
+ 
 
 
 

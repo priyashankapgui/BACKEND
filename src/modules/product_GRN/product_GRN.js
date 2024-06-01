@@ -35,7 +35,7 @@ const productGRN = sequelize.define(
       type: DataTypes.INTEGER,
       allowNull: false,
     },
-    purchasePrice: {
+    purchasePrice: { 
       type: DataTypes.FLOAT,
       allowNull: false,
     },
@@ -89,14 +89,18 @@ const productGRN = sequelize.define(
         productGRNInstance.availableQty = productGRNInstance.totalQty; 
       },
       afterCreate: async (productGRNInstance) => {
-        await updateProductBatchSum(productGRNInstance.productId, productGRNInstance.batchNo);
+        const grnInstance = await grn.findOne({ where: { GRN_NO: productGRNInstance.GRN_NO } });
+        await updateProductBatchSum(productGRNInstance.productId, productGRNInstance.batchNo, grnInstance.branchId);
       },
       afterUpdate: async (productGRNInstance) => {
-        await updateProductBatchSum(productGRNInstance.productId, productGRNInstance.batchNo);
+        const grnInstance = await grn.findOne({ where: { GRN_NO: productGRNInstance.GRN_NO } });
+        await updateProductBatchSum(productGRNInstance.productId, productGRNInstance.batchNo, grnInstance.branchId);
       },
       afterDestroy: async (productGRNInstance) => {
-        await updateProductBatchSum(productGRNInstance.productId, productGRNInstance.batchNo);
-      }
+        const grnInstance = await grn.findOne({ where: { GRN_NO: productGRNInstance.GRN_NO } });
+        await updateProductBatchSum(productGRNInstance.productId, productGRNInstance.batchNo, grnInstance.branchId);
+    },
+    
     }
   }
 );

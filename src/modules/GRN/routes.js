@@ -12,9 +12,13 @@ GRNRouter.delete('/grn/:GRN_NO', deleteGRN);
 GRNRouter.get('/grn/totalAmount/:invoiceNo', getTotalAmountByInvoiceNo);
 GRNRouter.get('/grn-supplier/:supplierId', getGRNBySupplier);
 GRNRouter.get('/grn-details/product/:productId', getGRNDetailsByProductIdController);
-//GRNRouter.get('/grn-invoice-details', getDetailsByInvoiceNo);
 GRNRouter.get('/grn-branch/:branchId',getGRNByBranch);
 GRNRouter.get('/grn-branch-supplier',getGRNsByBranchAndSupplierController);
+
+
+
+
+//GRNRouter.get('/grn-invoice-details', getDetailsByInvoiceNo);
 //GRNRouter.get('/grn-branch-product',getGRNsAndProductGRNDataByBranchNameAndProductIdController);
 
 

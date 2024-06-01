@@ -7,6 +7,7 @@ import { mapBranchNameToId } from "../../modules/branch/service.js";
 import branches from "../branch/branch.js";
 import categories from '../category/category.js';
 import suppliers from "../supplier/supplier.js";
+import productBatchSum from "../productBatchSum/productBatchSum.js";
 
 
 
@@ -135,50 +136,7 @@ export const calculateTotalAmount = async (invoiceNo) => {
 
 
 
-// Service function to retrieve batch details by productName and branchNo for check price
-export const getBatchDetailsByProductName = async (productName, branchName) => {
-  try {
 
-    const branchId = await mapBranchNameToId(branchName);
-    if (!branchId) {
-      return res.status(404).json({ error: "Branch not found" });
-    }
-
-    const product = await products.findOne({
-      where: { productName, branchId },
-    });
-
-    if (!product) {
-      throw new Error("Product not found");
-    }
-
-    const productGRNs = await productGRN.findAll({
-      where: { productId: product.productId },
-    });
-
-     // Fetch branch details to get the branchName
-     const branch = await branches.findOne({
-      where: { branchId },
-    });
-
-    if (!branch) {
-      throw new Error("Branch not found");
-    }
-
-    // Extract batch details from the product GRNs
-    const batchDetails = productGRNs.map((productGRN) => ({
-      branchName: branch.branchName,
-      batchNo: productGRN.batchNo,
-      expDate: productGRN.expDate,
-      availableQty: productGRN.availableQty,
-      sellingPrice: productGRN.sellingPrice,
-    }));
-
-    return (batchDetails);
-  } catch (error) {
-    throw new Error("Error retrieving batch details: " + error.message);
-  }
-}; 
 
 
 
@@ -248,6 +206,75 @@ export const getGRNDetailsByProductId = async (productId) => {
 
 
 
+
+export const adjustProductGRNQuantity = async (productName, branchName, batchNo, newQuantity) => {
+  try {
+    const productGRNRecord = await productGRN.findOne({
+      where: {
+        batchNo,
+      },
+      include: [
+        {
+          model: products,
+          where: { productName },
+          include: {
+            model: branches,
+            where: { branchName },
+          },
+        },
+      ],
+    });
+
+    if (!productGRNRecord) {
+      throw new Error("Product GRN record not found.");
+    }
+
+  
+
+    // Update the availableQty with the newQuantity
+    productGRNRecord.availableQty = newQuantity;
+    await productGRNRecord.save();
+
+    return true; 
+  } catch (error) {
+    throw error;
+  }
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // //function to get grn data using branchName and productId
 // export const getProductGRNDataByProductIdAndGRNNOService = async (productId, grnNo) => {
 //   try {
@@ -269,72 +296,72 @@ export const getGRNDetailsByProductId = async (productId) => {
 
 
 
-export const updateProductQty = async (productIds) => {
-  try {
-    // Fetch the total available quantity for each productId, excluding expired products
-    const productsToUpdate = await productGRN.findAll({
-      attributes: ['productId', [sequelize.fn('SUM', sequelize.col('availableQty')), 'totalAvailableQty']],
-      where: {
-        productId: productIds,
-        [Op.or]: [
-          { expDate: null },
-          { expDate: { [Op.gte]: new Date() } }
-        ]
-      },
-      group: ['productId']
-    });
+// export const updateProductQty = async (productIds) => {
+//   try {
+//     // Fetch the total available quantity for each productId, excluding expired products
+//     const productsToUpdate = await productGRN.findAll({
+//       attributes: ['productId', [sequelize.fn('SUM', sequelize.col('availableQty')), 'totalAvailableQty']],
+//       where: {
+//         productId: productIds,
+//         [Op.or]: [
+//           { expDate: null },
+//           { expDate: { [Op.gte]: new Date() } }
+//         ]
+//       },
+//       group: ['productId']
+//     });
 
-    // Iterate through each product and update its qty in the products table
-    for (const product of productsToUpdate) {
-      const { productId, totalAvailableQty } = product.dataValues;
+//     // Iterate through each product and update its qty in the products table
+//     for (const product of productsToUpdate) {
+//       const { productId, totalAvailableQty } = product.dataValues;
 
-      await products.update(
-        { qty: totalAvailableQty },
-        { where: { productId } }
-      );
+//       await products.update(
+//         { qty: totalAvailableQty },
+//         { where: { productId } }
+//       );
 
-      console.log(`Updated qty for productId ${productId} to ${totalAvailableQty}`);
-    }
-  } catch (error) {
-    console.error("Error updating product quantity:", error);
-    throw error;
-  }
-};
-
-
+//       console.log(`Updated qty for productId ${productId} to ${totalAvailableQty}`);
+//     }
+//   } catch (error) {
+//     console.error("Error updating product quantity:", error);
+//     throw error;
+//   }
+// };
 
 
 
 
-export const getProductTotalQuantity = async (branchName, productName) => {
-  try {
-    // Retrieve product details including total quantity
-    const productDetails = await products.findOne({
-      where: { productName },
-      include: [
-        {
-          model: branches,
-          where: { branchName },
-          attributes: ['branchName'], 
-        },
-        {
-          model: categories, 
-          attributes: ['categoryName'], 
-        },
-      ],
-      attributes: ['productId', 'productName', 'qty'], 
 
-    });
+// //function to get active stock
+// export const getProductTotalQuantity = async (branchName, productId) => {
+//   try {
+//     // Retrieve product details including total quantity
+//     const productDetails = await products.findOne({
+//       where: { productId },
+//       include: [
+//         {
+//           model: branches,
+//           where: { branchName },
+//           attributes: ['branchName'], 
+//         },
+//         {
+//           model: categories, 
+//           attributes: ['categoryName'], 
+//         },
+//       ],
+//       attributes: ['productId', 'productName', 'qty'], 
 
-    if (productDetails) {
-      return productDetails;
-    } else {
-      return 0; 
-    }
-  } catch (error) {
-    throw error;
-  }
-};
+//     });
+
+//     if (productDetails) {
+//       return productDetails;
+//     } else {
+//       return 0; 
+//     }
+//   } catch (error) {
+//     throw error;
+//   }
+// };
 
 
 // export const getGRNDetailsByGRNNOAndProductIdService = async (grnNos, productId, branchName) => {
@@ -434,39 +461,6 @@ export const getProductTotalQuantity = async (branchName, productName) => {
 
 
 
-export const adjustProductGRNQuantity = async (productName, branchName, batchNo, newQuantity) => {
-  try {
-    const productGRNRecord = await productGRN.findOne({
-      where: {
-        batchNo,
-      },
-      include: [
-        {
-          model: products,
-          where: { productName },
-          include: {
-            model: branches,
-            where: { branchName },
-          },
-        },
-      ],
-    });
-
-    if (!productGRNRecord) {
-      throw new Error("Product GRN record not found.");
-    }
-
-  
-
-    // Update the availableQty with the newQuantity
-    productGRNRecord.availableQty = newQuantity;
-    await productGRNRecord.save();
-
-    return true; 
-  } catch (error) {
-    throw error;
-  }
-};
 
 
 

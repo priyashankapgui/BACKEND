@@ -1,12 +1,9 @@
 import { Op } from "sequelize";
 import products from "../product/product.js";
 import categories from "../category/category.js";
-import productRouter from "../product/routes.js";
 import sequelize from "../../../config/database.js";
 import suppliers from "../supplier/supplier.js";
-import branches from "../branch/branch.js";
-//import productSupplier from "../product_Supplier/product_Supplier.js";
-import { mapBranchNameToId } from "../branch/service.js";
+
 
 
 //function to generate the productId

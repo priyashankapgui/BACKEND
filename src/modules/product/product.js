@@ -41,6 +41,7 @@ const products = sequelize.define(
         onUpdate: "CASCADE"
       },
     },
+   
     createdAt: {
       type: 'TIMESTAMP',
       defaultValue: DataTypes.NOW,
@@ -50,6 +51,7 @@ const products = sequelize.define(
   },
   { tableName: "products",
     timestamps: true, 
+    
   }
 );
 
