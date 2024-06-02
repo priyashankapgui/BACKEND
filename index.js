@@ -27,6 +27,15 @@ import feedbackrouter from "./src/modules/feedback/routes.js";
 import cartProductRoutes from "./src/modules/cart_Product/routes.js"
 import billProductRouter from "./src/modules/bill_Product/routes.js";
 import ShoppingCart from "./src/modules/Cart_Customer/shoppingcart.js";
+import SuperAdmin from "./src/modules/superAdmin/superAdmin.js";
+import PageAccess from "./src/modules/pageAccess/pageAccess.js";
+import UserRole from "./src/modules/userRole/userRole.js";
+import Permission from "./src/modules/permission/permission.js";
+import SuperAdminRouter from "./src/modules/superAdmin/routes.js";
+import PermissionRouter from "./src/modules/permission/routes.js";
+import UserRoleRouter from "./src/modules/userRole/routes.js";
+import PageAccessRouter from "./src/modules/pageAccess/routes.js";
+
 import Stripe from 'stripe';
 
 
@@ -54,6 +63,11 @@ app.use('/', feedbackrouter);
 app.use('/', cartProductRoutes);
 app.use('/', productBatchSumrouter);
 app.use('/', billProductRouter);
+app.use('/', productBatchSumrouter);
+app.use('/', SuperAdminRouter);
+app.use('/', PermissionRouter);
+app.use('/', UserRoleRouter);
+app.use('/', PageAccessRouter)
 
 
 
@@ -138,4 +152,4 @@ app.post('/create-checkout-session', async (req, res) => {
 });
 
 
-export { sequelize, categories, suppliers, grn, products, branches, feedback, ShoppingCart, productBatchSum };
+export { sequelize, categories, suppliers, grn, products, branches, feedback, ShoppingCart, productBatchSum,SuperAdmin };
