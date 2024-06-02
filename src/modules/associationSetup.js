@@ -8,6 +8,7 @@ import Customer from "./customer/customer.js";
 import ShoppingCart from "./Cart_Customer/shoppingcart.js";
 import productBatchSum from "./productBatchSum/productBatchSum.js";
 import productGRN from "./product_GRN/product_GRN.js";
+import userRole from "./userRole/userRole.js";
 
 const setupBranchBillAssociations = (branches, bill) => {
   branches.hasMany(bill, { foreignKey: "branchId", as: "bill" });
@@ -67,6 +68,7 @@ const setupProductBatchSumAssociations = (productBatchSum, productGRN) => {
     onUpdate: 'CASCADE',
   });
 };
+
 
 
 export const setupAssociations = () => {
