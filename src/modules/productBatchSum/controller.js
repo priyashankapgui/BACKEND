@@ -1,4 +1,4 @@
-import { updateProductBatchSum, getBatchDetailsByProductName, getAllProductBatchSumData, getProductSumBatchByProductId, getProductSumBatchByBarcode, getBatchSumByBranchId } from "../productBatchSum/service.js";
+import { updateProductBatchSum, getBatchDetailsByProductName, getAllProductBatchSumData, getProductSumBatchByProductId, getProductSumBatchByBarcode, getBatchSumByBranchId,getproductdiscount } from "../productBatchSum/service.js";
 
 export const getAllProductBatchSumController = async (req, res) => {
   try {
@@ -10,7 +10,6 @@ export const getAllProductBatchSumController = async (req, res) => {
   }
 };
 
-import { updateProductBatchSum,getproductdiscount } from "../productBatchSum/service.js";
 
 export const updateProductBatchSumController = async (req, res) => {
   console.log("searching for data1");

@@ -1,6 +1,6 @@
 import express from "express";
-import {  adjustProductQuantity } from "../product_GRN/controller.js";
-import { getBatchDetailsByProductNameController, adjustProductQuantity, getproductGRN } from "../product_GRN/controller.js";
+// import {  adjustProductQuantity } from "../product_GRN/controller.js";
+import {  adjustProductQuantity, getproductGRN } from "../product_GRN/controller.js";
 
 const productGRNRouter = express.Router();
 

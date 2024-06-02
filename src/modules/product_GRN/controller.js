@@ -1,8 +1,8 @@
 import sequelize from "../../../config/database.js";
 import products from "../product/product.js";
-import {   adjustProductGRNQuantity } from "../product_GRN/service.js";
-import { updateProductQty } from "../productBatchSum/service.js";
-import { getBatchDetailsByProductName,  adjustProductGRNQuantity, updateProductQty,getAllProductGRN } from "../product_GRN/service.js";
+// import {   adjustProductGRNQuantity } from "../product_GRN/service.js";
+// import { updateProductQty } from "../productBatchSum/service.js";
+import {   adjustProductGRNQuantity,getAllProductGRN } from "../product_GRN/service.js";
 
 //=============================================
 export const getproductGRN = async (req, res) => {

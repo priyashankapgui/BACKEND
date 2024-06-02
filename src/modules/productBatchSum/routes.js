@@ -5,9 +5,9 @@ import {
     getAllProductBatchSumController,
     getProductSumBatchByProductIdController,
     getProductSumBatchByBarcodeController,
-    getBatchSumByBranchIdController 
+    getBatchSumByBranchIdController ,
+    getdiscount
 } from '../productBatchSum/controller.js';
-import { updateProductBatchSumController,getdiscount } from '../productBatchSum/controller.js';
 
 const productBatchSumrouter = express.Router();
 
