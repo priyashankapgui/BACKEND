@@ -53,7 +53,8 @@ export const getEmployeeById = async (employeeId) => {
 
 export const createEmployee = async (employee) => {
   const newEmployeeId = await generateEmployeeId();
-  const { employeeName, email, password, role, branchName, phone, address, userRoleName } = employee;
+  const { employeeName, email, password, branchName, phone, address, userRoleName } = employee;
+  console.log('employee:',employee);
 
   // Check if the employeeId already exists
   const existingEmployee = await Employee.findOne({ where: { employeeId: newEmployeeId } });
@@ -67,12 +68,16 @@ export const createEmployee = async (employee) => {
   }
 
   // Validate branchId
-  const branchId =await branches.findOne({where: {branchName: branchName}});
+  const branchRow =await branches.findOne({where: {branchName: branchName}});
+  const branchId = branchRow? branchRow.dataValues.branchId : null;
+  console.log("branchId- ",branchId);
   if (!branchId) {
     throw new Error("Branch does not exist");
   }
   // Validate userRoleId
   const userRoleID= await UserRole.findOne({where: {userRoleName: userRoleName}});
+  const userRoleId = userRoleID ? userRoleID.dataValues.userRoleId : null;
+  console.log("helleo- ",userRoleId);
   if (!userRoleID) {
     throw new Error("User role does not exist");
   }
@@ -93,15 +98,17 @@ export const createEmployee = async (employee) => {
   if (!phoneRegex.test(phone)) {
     throw new Error("Invalid phone number");
   }
-
+  
   try {
     const newEmployee = await Employee.create({
       employeeId: newEmployeeId,
       employeeName,
       email,
       password,
-      userRoleID: userRoleID.userRoleId,
-      branchId: branchId.branchId,
+      userRoleId,
+      userRoleName,
+      branchName,
+      branchId,
       phone,
       address
     });
@@ -113,23 +120,17 @@ export const createEmployee = async (employee) => {
 
 
 export const updateEmployeeById = async (employeeId, employeeData, role, branch) => {
-  console.log(employeeData, employeeId);
-  const branchid = await branches.findOne({where: {branchName: employeeData.branchName}});
-  const employee = await Employee.findByPk(parseInt(employeeId));
-  console.log(role);
+  console.log(employeeData, employeeId,role,branch);
+  const branchRow = await branches.findOne({where: {branchName: employeeData.branchName}});
+  // const employee = await Employee.findByPk(parseInt(employeeId));
+  const employee = await Employee.findByPk(employeeId);
+  console.log(employee);
   if (!employee) {
     throw new Error("Employee not found");
   }
+  console.log("hello:",employee);
   try{
-  if (
-    // role === "superadmin" ||
-    // (role === "admin" &&
-    //   employee.branchName === branch &&
-    //   employee.role !== "admin" &&
-    //   employee.role !== "superadmin")
-
-    role == 1 || branch === branchid.branchName
-  ) {
+  if (role == 1 || branch === branchRow.branchName) {
    
     console.log(employeeData);
     const updatedEmployee = await employee.update(employeeData);
