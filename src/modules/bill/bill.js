@@ -1,12 +1,21 @@
 import { DataTypes } from 'sequelize';
 import sequelize from '../../../config/database.js';
-import branches from '../branch/branch.js';
 
 const bill = sequelize.define('bill', {
     billNo: {
         type: DataTypes.STRING,
         allowNull: false,
         primaryKey: true,
+    },
+    branchId: {
+        type: DataTypes.INTEGER, 
+        allowNull: false,
+        references: {
+            model: 'branches',
+            key: 'branchId'
+        },
+        onDelete: 'CASCADE', 
+        onUpdate: 'CASCADE'
     },
     branchName: {
         type: DataTypes.STRING,
@@ -15,7 +24,7 @@ const bill = sequelize.define('bill', {
     billedAt: {
         type: 'TIMESTAMP',
         defaultValue: DataTypes.NOW,
-        allowNull: false
+        allowNull: false,
     },
     billedBy: {
         type: DataTypes.STRING,
