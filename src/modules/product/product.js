@@ -46,7 +46,7 @@ const products = sequelize.define(
     },
     barcode: {
       type: DataTypes.STRING,
-      allowNull: false, 
+      allowNull: true, 
     },
    
     createdAt: {
