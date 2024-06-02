@@ -177,9 +177,7 @@ export const getAllProductBatchSumData = async () => {
 // Function to get ProductBatchSum by productId
 export const getProductSumBatchByProductId = async (productId) => {
   try {
-    const productBatchSumData = await productBatchSum.findAll({
-      where: { productId }
-    });
+    const productBatchSumData = await productBatchSum.findByPk(productId);
     return productBatchSumData;
   } catch (error) {
     throw new Error("Error retrieving ProductBatchSum by productId: " + error.message);
@@ -189,9 +187,7 @@ export const getProductSumBatchByProductId = async (productId) => {
 // Function to get ProductBatchSum by barcode
 export const getProductSumBatchByBarcode = async (barcode) => {
   try {
-    const productBatchSumData = await productBatchSum.findAll({
-      where: { barcode }
-    });
+    const productBatchSumData = await productBatchSum.findOne({ where: { barcode: barcode } });
     return productBatchSumData;
   } catch (error) {
     throw new Error("Error retrieving ProductBatchSum by barcode: " + error.message);
@@ -201,9 +197,7 @@ export const getProductSumBatchByBarcode = async (barcode) => {
 // Function to get ProductBatchSum by branchId
 export const getBatchSumByBranchId = async (branchId) => {
   try {
-    const productBatchSumData = await productBatchSum.findAll({
-      where: { branchId }
-    });
+    const productBatchSumData = await productBatchSum.findOne({ where: { branchId: branchId } });
     return productBatchSumData;
   } catch (error) {
     throw new Error("Error retrieving ProductBatchSum by branchId: " + error.message);
