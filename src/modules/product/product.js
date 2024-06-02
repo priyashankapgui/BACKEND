@@ -44,11 +44,15 @@ const products = sequelize.define(
         onUpdate: "CASCADE"
       },
     },
+    barcode: {
+      type: DataTypes.STRING,
+      allowNull: false, 
+    },
    
     createdAt: {
       type: 'TIMESTAMP',
       defaultValue: DataTypes.NOW,
-      allowNull: false
+      allowNull: true
     },
     
   },
