@@ -1,7 +1,9 @@
 import { Op } from "sequelize";
+import { to, TE } from "../../helper.js";
 import sequelize from "../../../config/database.js";
 import suppliers from "../supplier/supplier.js";
 import { mapBranchNameToId } from "../../modules/branch/service.js";
+import database from "../supplier/database.js";
 //import branchSupplier from "../branch_Supplier/branch_Supplier.js";
 
 //import products from "../product/product.js";
@@ -199,31 +201,23 @@ export const mapSupplierNameToId = async (supplierName) => {
 
 
 
-export const addSupplier = async (supplierName, regNo, email, address, contactNo) => {
-  console.log("data",supplierName);
-  try {
-    
-
-    const supplierId = await generateSupplierID();
-    console.log("Id",supplierId);
-    
-
-    // Create new supplier record
-    const newSupplier = await suppliers.create({
-      supplierId,
-      supplierName,
-      regNo,
-      email,
-      address,
-      contactNo
-    });
-    console.log("data two",newSupplier);
-    return newSupplier;
+export const addSupplier = async (data) => {
  
-  } catch (error) { 
-    throw new Error(error.message);
-  }
+    const supplierId = await generateSupplierID();
+    console.log("supplierId",supplierId);
+
+    const createSingleRecord = database.createSingleRecord({ supplierId, ...data });
+
+    const [err, result] = await to (createSingleRecord);
+
+    if (err) TE(err.errors[0] ? err.errors[0].message : err);
+
+  if (!result) TE("Result not found");
+
+  return result;
+  
 };
+
  
 
 

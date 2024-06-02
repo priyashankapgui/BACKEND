@@ -2,39 +2,40 @@ import { DataTypes } from "sequelize";
 import sequelize from "../../../config/database.js";
 import products from '../product/product.js';
 import grn from '../GRN/grn.js';
-import { updateProductBatchSum } from '../productBatchSum/service.js';
+import productBatchSum from '../productBatchSum/productBatchSum.js';
+import { updateProductBatchSum } from '../productBatchSum/service.js'; 
 
 const productGRN = sequelize.define(
   "product_GRN",
   {
-    productId: {
+    productId: { 
       type: DataTypes.STRING,
       allowNull: false,
       primaryKey: true,
       references: {
         model: products,
         key: 'productId'
-      }
+      } 
     },
     GRN_NO: {
       type: DataTypes.STRING,
       allowNull: false,
       primaryKey: true,
       references: {
-        model: grn,
+        model: grn, 
         key: 'GRN_NO'
       }
     },
-    batchNo: {
+    batchNo: { 
       type: DataTypes.STRING,
       allowNull: false,
       primaryKey: true,
-    },
+    }, 
     totalQty: {
       type: DataTypes.INTEGER,
       allowNull: false,
     },
-    purchasePrice: {
+    purchasePrice: { 
       type: DataTypes.FLOAT,
       allowNull: false,
     },
@@ -54,17 +55,14 @@ const productGRN = sequelize.define(
       type: DataTypes.FLOAT,
       allowNull: false,
     },
-    availableQty: {
+    availableQty: { 
       type: DataTypes.INTEGER,
       allowNull: true,
     },
-    barcode: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
+    
     comment: {
       type: DataTypes.STRING,
-      allowNull: true,
+      allowNull: true, 
     },
     createdAt: {
       type: 'TIMESTAMP',
@@ -74,7 +72,7 @@ const productGRN = sequelize.define(
   },
   {
     tableName: "product_GRN",
-    timestamps: true,
+    timestamps: true, 
     indexes: [
       {
         unique: true,
@@ -84,7 +82,7 @@ const productGRN = sequelize.define(
     hooks: {
       // Before creating a new record in product_GRN
       beforeCreate: async (productGRNInstance, options) => {
-        productGRNInstance.availableQty = productGRNInstance.totalQty;
+        productGRNInstance.availableQty = productGRNInstance.totalQty; 
       },
       afterCreate: async (productGRNInstance) => {
         const grnInstance = await grn.findOne({ where: { GRN_NO: productGRNInstance.GRN_NO } });
@@ -97,9 +95,11 @@ const productGRN = sequelize.define(
       afterDestroy: async (productGRNInstance) => {
         const grnInstance = await grn.findOne({ where: { GRN_NO: productGRNInstance.GRN_NO } });
         await updateProductBatchSum(productGRNInstance.productId, productGRNInstance.batchNo, grnInstance.branchId);
-      },
+    },
+    
     }
   }
 );
 
 export default productGRN;
+ 

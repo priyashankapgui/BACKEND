@@ -23,5 +23,5 @@ Productrouter.get('/active-stock', getTotalQuantityByBranchAndProduct);
 
 
 
-
+ 
 export default Productrouter;
