@@ -8,13 +8,13 @@ const bill = sequelize.define('bill', {
         primaryKey: true,
     },
     branchId: {
-        type: DataTypes.INTEGER, 
+        type: DataTypes.STRING, 
         allowNull: false,
         references: {
             model: 'branches',
             key: 'branchId'
         },
-        onDelete: 'CASCADE', 
+        onDelete: 'CASCADE',  
         onUpdate: 'CASCADE'
     },
     branchName: {

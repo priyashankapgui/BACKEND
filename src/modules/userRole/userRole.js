@@ -16,7 +16,7 @@ const UserRole = sequelize.define(
       allowNull: false,
     },
     branchId: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.STRING,
       allowNull: true,
       references: {
         model: branches,
