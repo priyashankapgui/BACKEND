@@ -59,10 +59,6 @@ const productGRN = sequelize.define(
       type: DataTypes.INTEGER,
       allowNull: true,
     },
-    barcode: {
-      type: DataTypes.STRING,
-      allowNull: false, 
-    },
     
     comment: {
       type: DataTypes.STRING,

@@ -1,4 +1,5 @@
 import express from "express";
+import Validator from "../supplier/validator.js";
 import {
   getSuppliers,
   getSupplier,
@@ -10,8 +11,8 @@ import {
 const supplierRouter = express.Router();
 
 supplierRouter.get("/suppliers", getSuppliers);
-supplierRouter.get("/suppliers", getSupplier);
-supplierRouter.post("/suppliers", createSupplier);
+supplierRouter.get("/suppliers/:supplierId", getSupplier);
+supplierRouter.post("/suppliers", Validator.create, createSupplier);
 supplierRouter.put("/suppliers/:supplierId", updateSupplier);
 supplierRouter.delete("/suppliers/:supplierId", deleteSupplier);
 

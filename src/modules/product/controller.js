@@ -99,6 +99,9 @@ export const updateProduct = async (req, res) => {
 // Controller function to create a new product
 export const createProduct = async (req, res) => {
   const {  productName, description, categoryName, barcode } = req.body;
+  console.log("data ", productName);
+  console.log("data1 ", categoryName);
+
   try {
     // Check if a file is uploaded
     if (!req.file) {

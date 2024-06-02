@@ -23,7 +23,7 @@ export const updateProductBatchSumController = async (req, res) => {
 export const getBatchDetailsByProductNameController = async (req, res) => {
   try {
   
-    const {  productId, branchName } = req.body;
+    const {  productId, branchName } = req.query;
     console.log("product",productId);
     console.log("branch",branchName);
 
