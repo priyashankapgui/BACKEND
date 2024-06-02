@@ -4,14 +4,13 @@ import multer from "multer";
 import products from "../product/product.js";
 import { validateProduct } from "./validator.js";
 import { mapCategoryNameToId } from "../../modules/category/service.js";
-import { mapBranchNameToId } from "../../modules/branch/service.js";
-import { getProductTotalQuantity } from "../../modules/product_GRN/service.js"
+import { getProductTotalQuantity } from "../productBatchSum/service.js";
 import {
   getAllProducts,
-  getProductByIdAndBranchName,
+  getProductById,
   addProduct,
   searchProductsByName,
-  getProductsByCategoryNameAndBranchName,
+  getProductsByCategoryName,
   deleteProductById,
   updateProductById,
   getProductIdByProductNameService,
@@ -22,8 +21,6 @@ import { mapSupplierNameToId } from "../supplier/service.js";
 
 
  
-
-
 
 // Controller function to get all products
 export const getProducts = async (req, res) => {
@@ -36,23 +33,16 @@ export const getProducts = async (req, res) => {
 };
 
 
-
+//Function to get product using productId
 export const getProduct = async (req, res) => {
-  const {  branchName, productId } = req.query;
-  console.log("branchName",branchName);
+  const { productId } = req.query;
+  
   console.log("product",productId);
 
   try {
-    // Map branchName to branchId
-    const branchId = await mapBranchNameToId(branchName);
 
-    if (!branchId) {
-      res.status(404).json({ error: "Branch not found" });
-      return;
-    }
-
-    // Fetch product by productId and branchId
-    const result= await getProductByIdAndBranchName(productId, branchId);
+    // Fetch product by productId 
+    const result= await getProductById(productId);
     if (!result) {
       res.status(404).json({ error: "Product not found" });
       return;
@@ -67,60 +57,14 @@ export const getProduct = async (req, res) => {
 
 
 
-// Controller function to search products by name
-export const getStocksByProductName = async (req, res) => {
-  const { productName } = req.params;
-  
-  try {
-    if (!productName) {
-      res.status(400).json({ error: "Product name is required" });
-      return;
-    }
-  
-    const searchResults = await searchProductsByName(productName);
-    res.status(200).json(searchResults);
-  } catch (error) {
-    console.error("Error searching products:", error);
-    res.status(500).json({ error: "Internal server error" });
-  }
-};
-
-
-
-// Controller function to get products by category name
-// export const getProductsByCategoryName = async (req, res) => {
-//   const { categoryName } = req.params;
-
-//   try {
-//     if (!categoryName) {
-//       res.status(400).json({ error: "Category name is required" });
-//       return;
-//     }
-  
-//     const products = await searchProductsByCategoryName(categoryName);
-//     res.status(200).json(products);
-//   } catch (error) {
-//     console.error("Error fetching products by category name:", error);
-//     res.status(500).json({ error: "Internal server error" });
-//   }
-// };
-
-export const getProductsByCategoryAndBranch = async (req, res) => {
-  const { categoryName, branchName } = req.query;
-  console.log("branchName", branchName);
+// function to get product using categoryName
+export const getProductsByCategory = async (req, res) => {
+  const { categoryName } = req.query;
   console.log("categoryName", categoryName);
 
   try {
-    // Map branchName to branchId
-    const branchId = await mapBranchNameToId(branchName);
-
-    if (!branchId) {
-      res.status(404).json({ error: "Branch not found" });
-      return;
-    }
-
     // Fetch products by categoryName and branchId
-    const results = await getProductsByCategoryNameAndBranchName(categoryName, branchId);
+    const results = await getProductsByCategoryName(categoryName);
     if (!results || results.length === 0) {
       res.status(404).json({ error: "No products found" });
       return;
@@ -154,7 +98,10 @@ export const updateProduct = async (req, res) => {
 
 // Controller function to create a new product
 export const createProduct = async (req, res) => {
-  const { branchName, productName, description, categoryName, barcode, supplierName } = req.body;
+  const {  productName, description, categoryName, barcode } = req.body;
+  console.log("data ", productName);
+  console.log("data1 ", categoryName);
+
   try {
     // Check if a file is uploaded
     if (!req.file) {
@@ -165,27 +112,13 @@ export const createProduct = async (req, res) => {
       return res.status(404).json({ error: "Category not found" });
     }
 
-    const supplierId = await mapSupplierNameToId(supplierName);
-    console.log("supplier",supplierId);
-    if (!supplierId) {
-      return res.status(404).json({ error: "supplier not found" });
-    }
-
    const image = req.file.path;
-
-    // upload(req, res, async (err) => {
-    //   if (err) {
-    //     return res.status(400).json({ error: err.message });
-    //   }
-  
-      // Access the uploaded file using req.file
       
       const newProduct = await addProduct({
-        branchName,
+        
         productName,
         description,
         categoryId,
-        supplierId,
         image,
         barcode,
     });
@@ -210,63 +143,6 @@ export const deleteProduct = async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 };
-
-
-
-//Controller function to get productId by productName
-export const getProductIdByProductNameController = async (req, res) => {
-  const { productName } = req.params;
-
-  try {
-    const productId = await getProductIdByProductNameService(productName);
-    if (!productId) {
-      res.status(404).json({ error: "Product not found" });
-      return;
-    }
-    res.status(200).json({ productId });
-  } catch (error) {
-    console.error("Error fetching productId by productName:", error);
-    res.status(500).json({ error: "Internal server error" });
-  }
-};
-
-
-
-export const getProductAndSuppliersDetailsByProductName = async (req, res) => {
-  const { productName } = req.params;
-
-  try {
-    if (!productName) {
-      return res.status(400).json({ error: "Product name is required" });
-    }
-  
-    const product = await products.findOne({
-      where: { productName },
-    });
-
-    if (!product) {
-      return res.status(404).json({ error: "Product not found" });
-    }
-
-    const productId = product.productId;
-
-    // Retrieve the supplier details for the product
-    const suppliersDetails = await searchSuppliersByProductName(productId);
-    
-    // Construct the response object with product and supplier details
-    const response = {
-      productId: product.productId,
-      productName: product.productName,
-      suppliers: suppliersDetails
-    };
-
-    res.status(200).json(response);
-  } catch (error) {
-    console.error("Error fetching product and suppliers details by product name:", error);
-    res.status(500).json({ error: "Internal server error" });
-  }
-};
-
 
 
 
@@ -301,8 +177,8 @@ export const getProductAndSuppliersDetailsByProductName = async (req, res) => {
 
 export const getTotalQuantityByBranchAndProduct = async (req, res) => {
   try {
-    const { branchName, productName } = req.query;
-    const totalQuantity = await getProductTotalQuantity(branchName, productName);
+    const { branchName, productId } = req.query;
+    const totalQuantity = await getProductTotalQuantity(branchName, productId);
 
     res.status(200).json({ totalQuantity });
   } catch (error) {
@@ -339,6 +215,102 @@ export const getTotalQuantityByBranchAndProduct = async (req, res) => {
 //     res.status(200).json(productDetails);
 //   } catch (error) {
 //     console.error("Error fetching product details by product name:", error);
+//     res.status(500).json({ error: "Internal server error" });
+//   }
+// };
+
+
+
+
+// // Controller function to search products by name
+// export const getStocksByProductName = async (req, res) => {
+//   const { productName } = req.params;
+  
+//   try {
+//     if (!productName) {
+//       res.status(400).json({ error: "Product name is required" });
+//       return;
+//     }
+  
+//     const searchResults = await searchProductsByName(productName);
+//     res.status(200).json(searchResults);
+//   } catch (error) {
+//     console.error("Error searching products:", error);
+//     res.status(500).json({ error: "Internal server error" });
+//   }
+// };
+
+
+
+// Controller function to get products by category name
+// export const getProductsByCategoryName = async (req, res) => {
+//   const { categoryName } = req.params;
+
+//   try {
+//     if (!categoryName) {
+//       res.status(400).json({ error: "Category name is required" });
+//       return;
+//     }
+  
+//     const products = await searchProductsByCategoryName(categoryName);
+//     res.status(200).json(products);
+//   } catch (error) {
+//     console.error("Error fetching products by category name:", error);
+//     res.status(500).json({ error: "Internal server error" });
+//   }
+// };
+
+
+// //Controller function to get productId by productName
+// export const getProductIdByProductNameController = async (req, res) => {
+//   const { productName } = req.params;
+
+//   try {
+//     const productId = await getProductIdByProductNameService(productName);
+//     if (!productId) {
+//       res.status(404).json({ error: "Product not found" });
+//       return;
+//     }
+//     res.status(200).json({ productId });
+//   } catch (error) {
+//     console.error("Error fetching productId by productName:", error);
+//     res.status(500).json({ error: "Internal server error" });
+//   }
+// };
+
+
+
+// export const getProductAndSuppliersDetailsByProductName = async (req, res) => {
+//   const { productName } = req.params;
+
+//   try {
+//     if (!productName) {
+//       return res.status(400).json({ error: "Product name is required" });
+//     }
+  
+//     const product = await products.findOne({
+//       where: { productName },
+//     });
+
+//     if (!product) {
+//       return res.status(404).json({ error: "Product not found" });
+//     }
+
+//     const productId = product.productId;
+
+//     // Retrieve the supplier details for the product
+//     const suppliersDetails = await searchSuppliersByProductName(productId);
+    
+//     // Construct the response object with product and supplier details
+//     const response = {
+//       productId: product.productId,
+//       productName: product.productName,
+//       suppliers: suppliersDetails
+//     };
+
+//     res.status(200).json(response);
+//   } catch (error) {
+//     console.error("Error fetching product and suppliers details by product name:", error);
 //     res.status(500).json({ error: "Internal server error" });
 //   }
 // };

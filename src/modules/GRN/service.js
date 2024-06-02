@@ -6,13 +6,13 @@ import { mapSupplierNameToId } from "../../modules/supplier/service.js";
 import { mapBranchNameToId } from "../../modules/branch/service.js";
 import branches from "../branch/branch.js";
 import productGRN from '../product_GRN/product_GRN.js';
+import { Op } from 'sequelize';
 
 
 
 // Function to generate GRN number
 const generateGRNNumber = async (branchName) => {
   try {
-
     if (!branchName || typeof branchName !== 'string') {
       throw new Error("Invalid branchName: " + branchName);
     }
@@ -20,9 +20,9 @@ const generateGRNNumber = async (branchName) => {
     // Extract the first three letters of the branch name
     const branchCode = branchName.substring(0, 3).toUpperCase();
 
-    // Get the last GRN number from the database
-    const lastGRN = await getLastGRNNumber();
-    let lastNumber = 0; // Default to 0 if no previous GRN exists
+    // Get the last GRN number for the specific branch from the database
+    const lastGRN = await getLastBranchGRNNumber(branchCode);
+    let lastNumber = 0; // Default to 0 if no previous GRN exists for the branch
 
     if (lastGRN) {
       lastNumber = parseInt(lastGRN.split('GRN')[1]); // Extract the number part
@@ -46,40 +46,30 @@ const generateGRNNumber = async (branchName) => {
   }
 };
 
-
-
-// Function to get the last GRN number from the database
-const getLastGRNNumber = async () => {
+// Function to get the last GRN number for a specific branch from the database
+const getLastBranchGRNNumber = async (branchCode) => {
   try {
-    // Fetch the latest GRN entry from the database
+    // Fetch the latest GRN entry for the specific branch from the database
     const latestGRN = await grn.findOne({
+      where: {
+        GRN_NO: {
+          [Op.startsWith]: `${branchCode}-GRN`
+        }
+      },
       order: [['createdAt', 'DESC']] // Order by creation date in descending order to get the latest entry
-  });
+    });
 
-  // Extract and return the GRN number
-  return latestGRN ? latestGRN.GRN_NO : null; // Return null if there are no GRN entries in the database
+    // Extract and return the GRN number
+    return latestGRN ? latestGRN.GRN_NO : null; // Return null if there are no GRN entries for the branch in the database
 
   } catch (error) {
-    throw new Error("Error getting last GRN number: " + error.message);
+    throw new Error("Error getting last GRN number for branch: " + error.message);
   }
 };
 
-const extractCounterFromGRN = (GRN_NO) => {
-  if (GRN_NO) {
-    // Assuming the GRN number format is "GAL-GRNXXXX", where XXXX represents the counter value
-    const parts = GRN_NO.split('-');
-    if (parts.length === 2) {
-      const counter = parseInt(parts[1]); // Extract the counter part
-      if (!isNaN(counter)) {
-        return counter;
-      }
-    }
-  }
-  throw new Error("Invalid GRN number format");
-};
 
 
-
+ 
 
 //Function to create GRN 
 export const addGRN = async (invoiceNo, supplierId, branchName) => {
@@ -135,7 +125,7 @@ export const getAllGRNs = async () => {
       return {
         GRN_NO: grnItem.GRN_NO,
         createdAt: grnItem.createdAt, // This should be replaced with the actual productId if available
-        branchtName: branch.branchName,
+        branchName: branch.branchName,
         supplierName: supplier.supplierName,
         invoiceNo: grnItem.invoiceNo,
       };
@@ -391,7 +381,6 @@ export const getGRNsByBranchAndSupplier = async (branchName, supplierId) => {
 
 
 
-
 // Function to update a GRN by its ID
 export const updateGRNById = async (GRN_NO, updatedStockData) => {
   try {
@@ -407,6 +396,7 @@ export const updateGRNById = async (GRN_NO, updatedStockData) => {
     throw new Error("Error updating stock: " + error.message);
   }
 };
+
 
 
 
@@ -426,40 +416,119 @@ export const deleteGRNById = async (GRN_NO) => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// //function to get grn by branchName and productId
+// export const getGRNsByBranchNameService = async (branchName) => {
+
+//   try {
+
+//     const branch = await branches.findOne({
+//       where: { branchName }
+//     });
+
+//     if (!branch) {
+//       throw new Error('Branch not found for branchName: ' + branchName);
+//     }
+//     // Fetch GRNs for the given branchName
+//     const grnItems = await grn.findAll({
+//         where: {
+//           branchId: branch.branchId,
+//          },
+//         attributes: ['GRN_NO', 'createdAt', 'supplierId', 'invoiceNo'],
+//         raw: true,
+//       });
+  
+//       if (!grnItems || grnItems.length === 0) {
+//         throw new Error(`No GRNs found for branchId: ${branchId}`);
+//       }
+  
+//       // Fetch details for each GRN_NO
+//       const results = await Promise.all(grnItems.map(async (grnItem) => {
+//         const { GRN_NO, supplierId } = grnItem;
+  
+//         // Get supplier details
+//         const supplier = await suppliers.findOne({
+//           where: { supplierId },
+//           attributes: ['supplierName'],
+//           raw: true,
+//         });
+  
+//         if (!supplier) {
+//           throw new Error(`Supplier not found for supplierId: ${supplierId}`);
+//         }
+      
+//     });
+
+//     return grnItems;
+//   } catch (error) {
+//     console.error('Error in getGRNsByBranchNameService:', error);
+//     throw new Error('Failed to fetch GRNs by branchName');
+//   }
+// };
+
+
+
+
+
+
+
 // Service function to retrieve details by invoice number
-export const getDetailsByInvoiceNoService = async (invoiceNo) => {
-  try {
-    // Assuming you have models for GRN and Product_GRN
-    const grnEntry = await grn.findOne({ where: { invoiceNo } });
+// export const getDetailsByInvoiceNoService = async (invoiceNo) => {
+//   try {
+//     // Assuming you have models for GRN and Product_GRN
+//     const grnEntry = await grn.findOne({ where: { invoiceNo } });
     
-    if (!grnEntry) {
-      throw new Error("GRN entry with the provided invoice number not found");
-    }
+//     if (!grnEntry) {
+//       throw new Error("GRN entry with the provided invoice number not found");
+//     }
     
-    // Find all product GRNs associated with the GRN entry
-    const productGRNs = await productGRN.findAll({ where: { GRN_NO: grnEntry.GRN_NO } });
+//     // Find all product GRNs associated with the GRN entry
+//     const productGRNs = await productGRN.findAll({ where: { GRN_NO: grnEntry.GRN_NO } });
     
-    // Map product GRNs to desired details
-    const details = productGRNs.map(productGRN => ({
-      invoiceNo: grnEntry.invoiceNo,
-      supplierName: grnEntry.supplierName,
-      branchName: grnEntry.branchName,
-      productId: productGRN.productId,
-      productName: productGRN.productName,
-      batchNo: productGRN.batchNo,
-      totalQty: productGRN.totalQty,
-      purchasePrice: productGRN.purchasePrice,
-      sellingPrice: productGRN.sellingPrice,
-      freeQty: productGRN.freeQty,
-      expDate: productGRN.expDate,
-      comment: productGRN.comment
-    }));
+//     // Map product GRNs to desired details
+//     const details = productGRNs.map(productGRN => ({
+//       invoiceNo: grnEntry.invoiceNo,
+//       supplierName: grnEntry.supplierName,
+//       branchName: grnEntry.branchName,
+//       productId: productGRN.productId,
+//       productName: productGRN.productName,
+//       batchNo: productGRN.batchNo,
+//       totalQty: productGRN.totalQty,
+//       purchasePrice: productGRN.purchasePrice,
+//       sellingPrice: productGRN.sellingPrice,
+//       freeQty: productGRN.freeQty,
+//       expDate: productGRN.expDate,
+//       comment: productGRN.comment
+//     }));
     
-    return details;
-  } catch (error) {
-    throw new Error("Error retrieving details by invoice number: " + error.message);
-  }
-};
+//     return details;
+//   } catch (error) {
+//     throw new Error("Error retrieving details by invoice number: " + error.message);
+//   }
+// };
 
 
 

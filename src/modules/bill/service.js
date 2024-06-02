@@ -3,15 +3,15 @@ import bill from '../bill/bill.js';
 import branches from '../branch/branch.js';
 
 const generateBillNo = async (branchId) => {
-    console.log(`Generating bill number for branchId: ${branchId}`); // Debugging log
+    console.log(`Generating bill number for branchId: ${branchId}`);
 
     const branch = await branches.findByPk(branchId);
     if (!branch) {
-        console.error(`Branch not found for branchId: ${branchId}`); // Debugging log
+        console.error(`Branch not found for branchId: ${branchId}`);
         throw new Error('Branch not found');
     }
 
-    const branchName = branch.branchName;  // Correct property name
+    const branchName = branch.branchName;
     const branchPrefix = branchName.substring(0, 3).toUpperCase();
     const lastBill = await bill.findOne({
         where: { branchId },
@@ -51,7 +51,7 @@ export const getbillDataByNoService = async (billNo) => {
 
 export const addbillDataService = async (billData) => {
     try {
-        console.log('billData:', billData);  // Debugging log
+        console.log('billData:', billData);
         const billNo = await generateBillNo(billData.branchId);
         billData.billNo = billNo;
         const newBillData = await bill.create(billData);
@@ -68,7 +68,7 @@ export const cancellbillDatabyNoService = async (billNo) => {
         if (!billToCancel) {
             throw new Error('Bill not found');
         }
-        billToCancel.status = 'canceled';  // Assuming 'canceled' is the desired status for a canceled bill
+        billToCancel.status = 'canceled';
         await billToCancel.save();
         return billToCancel;
     } catch (error) {

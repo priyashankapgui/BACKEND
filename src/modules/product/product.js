@@ -1,9 +1,7 @@
 import { DataTypes } from "sequelize";
 import sequelize from "../../../config/database.js";
 import categories from "../category/category.js";
-import suppliers from "../supplier/supplier.js";
 import grn from "../GRN/grn.js";
-import branches from "../branch/branch.js";
 //import productSupplier from "../product_Supplier/product_Supplier.js";
 
 const products = sequelize.define(
@@ -19,17 +17,10 @@ const products = sequelize.define(
       type: DataTypes.STRING,
       allowNull: false,
     },
-    branchId: {
+    barcode: {
       type: DataTypes.STRING,
       allowNull: true,
-      references: {
-        model: branches,
-        key: "branchId",
-        onDelete: "CASCADE",
-        onUpdate: "CASCADE"
-      },
     },
-    
     description: {
       type: DataTypes.STRING,
       allowNull: true,
@@ -38,10 +29,7 @@ const products = sequelize.define(
       type: DataTypes.STRING,
       allowNull: true,
     },
-    barcode: { 
-      type: DataTypes.STRING, 
-      allowNull: true,
-    },
+    
     qty: {
       type: DataTypes.INTEGER,
       allowNull: true,
@@ -56,15 +44,21 @@ const products = sequelize.define(
         onUpdate: "CASCADE"
       },
     },
+    barcode: {
+      type: DataTypes.STRING,
+      allowNull: true, 
+    },
+   
     createdAt: {
       type: 'TIMESTAMP',
       defaultValue: DataTypes.NOW,
-      allowNull: false
+      allowNull: true
     },
     
   },
   { tableName: "products",
     timestamps: true, 
+    
   }
 );
 

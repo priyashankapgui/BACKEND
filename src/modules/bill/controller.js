@@ -30,8 +30,8 @@ export const getBillDataByNo = async (req, res) => {
 
 export const addBillData = async (req, res) => {
     try {
-        const billData = req.body;  // Assuming the bill data comes from the request body
-        console.log('Received bill data:', billData);  // Debugging log
+        const billData = req.body;
+        console.log('Received bill data:', billData);
         const newBill = await addbillDataService(billData);
         res.status(201).json(newBill);
     } catch (error) {

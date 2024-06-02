@@ -1,19 +1,14 @@
-import {
-  getAllSuppliers,
-  getSupplierById,
-  searchSupplierByName,
-  searchSuppliersByProductId,
-  searchSuppliersByProductName,
-  addSupplier,
-  deleteSupplierById,
-  updateSupplierById,
-} from "../supplier/service.js";
+import * as SupplierService from "../supplier/service.js"
 import products from "../product/product.js";
+import { SUCCESS, ERROR } from "../../helper.js";
+import { Codes } from "../supplier/constants.js";
+
+const { SUC_CODES } = Codes;
 
 // Controller function to get all suppliers
 export const getSuppliers = async (req, res) => {
   try {
-    const suppliersReq = await getAllSuppliers();
+    const suppliersReq = await SupplierService.getAllSuppliers();
     res.status(200).json(suppliersReq);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -23,8 +18,9 @@ export const getSuppliers = async (req, res) => {
 // Controller function to get a specific supplier by supplierID
 export const getSupplier = async (req, res) => {
   const supplierId = req.params.supplierId;
+  console.log("supplier ha",supplierId);
   try {
-    const supplier = await getSupplierById(supplierId);
+    const supplier = await SupplierService.getSupplierById(supplierId);
     if (!supplier) {
       res.status(404).json({ error: "Supplier not found" });
       return;
@@ -54,82 +50,82 @@ export const getSupplier = async (req, res) => {
 //   }
 // };
 
-export const getSupplierBySupplierName = async (req, res) => {
-  const {  branchName, supplierId } = req.query;
-  console.log("branchName",branchName);
-  console.log("product",supplierId);
+// export const getSupplierBySupplierName = async (req, res) => {
+//   const {  branchName, supplierId } = req.query;
+//   console.log("branchName",branchName);
+//   console.log("product",supplierId);
 
-  try {
-    // Map branchName to branchId
-    const branchId = await mapBranchNameToId(branchName);
+//   try {
+//     // Map branchName to branchId
+//     const branchId = await mapBranchNameToId(branchName);
 
-    if (!branchId) {
-      res.status(404).json({ error: "Branch not found" });
-      return;
-    }
+//     if (!branchId) {
+//       res.status(404).json({ error: "Branch not found" });
+//       return;
+//     }
 
-    // Fetch product by productId and branchId
-    const result= await searchSupplierByName(supplierId, branchId);
-    if (!result) {
-      res.status(404).json({ error: "supplier data not found" });
-      return;
-    }
+//     // Fetch product by productId and branchId
+//     const result= await searchSupplierByName(supplierId, branchId);
+//     if (!result) {
+//       res.status(404).json({ error: "supplier data not found" });
+//       return;
+//     }
 
-    res.status(200).json(result);
-  } catch (error) {
-    console.error("Error fetching product:", error);
-    res.status(500).json({ error: "Internal server error" });
-  }
-};
-
-
-
-export const getSuppliersByProductId = async (req, res) => {
-  const productId = req.params.productId;
-
-  try {
-    const supplierDetails = await searchSuppliersByProductId(productId);
-    if (!supplierDetails || supplierDetails.length === 0) {
-      res.status(404).json({ error: "No suppliers found for the given product Name" });
-      return;
-    }
-    res.status(200).json(supplierDetails);
-  } catch (error) {
-    console.error("Error getting suppliers by product Name:", error);
-    res.status(500).json({ error: "Internal server error" });
-  }
-};
+//     res.status(200).json(result);
+//   } catch (error) {
+//     console.error("Error fetching product:", error);
+//     res.status(500).json({ error: "Internal server error" });
+//   }
+// };
 
 
 
-export const getSuppliersByProductName = async (req, res) => {
-  const { productName } = req.params;
+// export const getSuppliersByProductId = async (req, res) => {
+//   const productId = req.params.productId;
 
-  try {
-    if (!productName) {
-      return res.status(400).json({ error: "Product name is required" });
-    }
+//   try {
+//     const supplierDetails = await searchSuppliersByProductId(productId);
+//     if (!supplierDetails || supplierDetails.length === 0) {
+//       res.status(404).json({ error: "No suppliers found for the given product Name" });
+//       return;
+//     }
+//     res.status(200).json(supplierDetails);
+//   } catch (error) {
+//     console.error("Error getting suppliers by product Name:", error);
+//     res.status(500).json({ error: "Internal server error" });
+//   }
+// };
+
+
+
+// export const getSuppliersByProductName = async (req, res) => {
+//   const { productName } = req.params;
+
+//   try {
+//     if (!productName) {
+//       return res.status(400).json({ error: "Product name is required" });
+//     }
   
-    const product = await products.findOne({
-      where: { productName },
-    });
+//     const product = await products.findOne({
+//       where: { productName },
+//     });
 
-    if (!product) {
-      return res.status(404).json({ error: "Product not found" });
-    }
+//     if (!product) {
+//       return res.status(404).json({ error: "Product not found" });
+//     }
 
-    const productId = product.productId;
+//     const productId = product.productId;
   
-    const suppliersDetails = await searchSuppliersByProductName(productId);
-    if (!suppliersDetails || suppliersDetails.length === 0) {
-      return res.status(404).json({ error: "No suppliers found for the given product name" });
-    }
-    res.status(200).json(suppliersDetails);
-  } catch (error) {
-    console.error("Error fetching suppliers by product name:", error);
-    res.status(500).json({ error: "Internal server error" });
-  }
-};
+//     const suppliersDetails = await searchSuppliersByProductName(productId);
+//     if (!suppliersDetails || suppliersDetails.length === 0) {
+//       return res.status(404).json({ error: "No suppliers found for the given product name" });
+//     }
+//     res.status(200).json(suppliersDetails);
+//   } catch (error) {
+//     console.error("Error fetching suppliers by product name:", error);
+//     res.status(500).json({ error: "Internal server error" });
+//   }
+// };
 
 // // Controller function to create a new supplier
 // export const createSupplier = async (req, res) => {
@@ -149,7 +145,7 @@ export const updateSupplier = async (req, res) => {
   const supplierId = req.params.supplierId;
   const updatedSupplierData = req.body;
   try {
-    const updatedSupplier = await updateSupplierById(
+    const updatedSupplier = await SupplierService.updateSupplierById(
       supplierId,
       updatedSupplierData
     );
@@ -164,7 +160,7 @@ export const updateSupplier = async (req, res) => {
 export const deleteSupplier = async (req, res) => {
   const supplierId = req.params.supplierId;
   try {
-    await deleteSupplierById(supplierId);
+    await SupplierService.deleteSupplierById(supplierId);
     res.status(204).json({ message: "Supplier deleted succesfully" });
   } catch (error) {
     console.error("Error deleting supplier:", error);
@@ -175,18 +171,13 @@ export const deleteSupplier = async (req, res) => {
 
 
 export const createSupplier = async (req, res) => {
-  const { supplierName, regNo, email, address, contactNo, branchName } = req.body;
-
   try {
-    // Call service function to add supplier
-    await addSupplier(supplierName, regNo, email, address, contactNo, branchName);
-    
-    res.status(201).json({ message: 'Supplier added successfully' });
+    const result = await SupplierService.addSupplier(req.body);
+    SUCCESS(res, SUC_CODES, result, req.span);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    ERROR(res, error, res.span);
   }
 };
-
 
 
 

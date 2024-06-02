@@ -6,12 +6,13 @@ import {
   updateGRNById,
   deleteGRNById,
   getGRNBySupplierId,
-  getDetailsByInvoiceNoService,
   getGRNByBranchId,
-  getGRNsByBranchAndSupplier
+  getGRNsByBranchAndSupplier,
+  //getGRNsByBranchNameService
 } from "../GRN/service.js";
 import { createProductGRNService, getGRNDetailsByProductId } from "../../modules/product_GRN/service.js";
-import { calculateTotalAmount, updateProductQty } from '../../modules/product_GRN/service.js'; 
+import { calculateTotalAmount } from '../../modules/product_GRN/service.js'; 
+import { updateProductQty } from "../productBatchSum/service.js";
 import suppliers from "../supplier/supplier.js";
 import branches from "../branch/branch.js";
 
@@ -41,10 +42,11 @@ export const createGRNAndProduct = async (req, res) => {
       amount: product.amount,
       expDate: product.expDate,
       availableQty: product.availableQty,
+      barcode: product.barcode,
       comment: product.comment,
     }));
 
-    console.log('ProductGRNs to insert:', productGRNs);
+    
 
     const result = await createProductGRNService(productGRNs);
 
@@ -195,8 +197,9 @@ export const deleteGRN = async (req, res) => {
 //Function to get GRN data using branchName and supplierId
 export const getGRNsByBranchAndSupplierController = async (req, res) => {
   try {
-    const branchName = req.params.branchName;
-    const supplierId = req.params.supplierId;
+    // const branchName = req.params.branchName;
+    // const supplierId = req.params.supplierId;
+    const {branchName , supplierId } = req.query;
     //const { branchName, supplierId } = req.body; // Assuming you are sending branchName and supplierId in the request body
 
     if (!branchName || !supplierId) {
@@ -211,6 +214,8 @@ export const getGRNsByBranchAndSupplierController = async (req, res) => {
     res.status(500).json({ message: 'Failed to fetch GRNs by branch and supplier' });
   }
 };
+
+
 
 
 
@@ -239,26 +244,89 @@ export const getTotalAmountByInvoiceNo = async (req, res) => {
 
 
 
-// Controller function to retrieve details by invoice number
-export const getDetailsByInvoiceNo = async (req, res) => {
-  try {
-    const { invoiceNo } = req.query;
-    console.log("invoive",invoiceNo);
 
-    if (!invoiceNo) {
-      throw new Error("Please provide invoiceNo");
-    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//function to get grn data using branchName ans productId
+// export const getGRNsAndProductGRNDataByBranchNameAndProductIdController = async (req, res) => {
+//   try {
+//     const { branchName, productId } = req.query;
+
+//     if (!branchName || !productId) {
+//       return res.status(400).json({ message: 'branchName and productId are required' });
+//     }
+
+//     // Get GRNs for the branchName
+//     const grnItems = await getGRNsByBranchNameService(branchName);
+
+//     // Extract GRN_NOs from the results
+//     const grnNos = grnItems.map(grnItem => grnItem.gen.GRN_NO);
+
+//     // Get productGRN details for each GRN_NO and productId
+//     const productGRNData = await getProductGRNDataByProductIdAndGRNNOService(productId, grnNos);
+
+//     // Map and format the data as needed
+//     const formattedData = grnItems.map(grnItem => ({
+//       GRN_NO: grnItem.gen.GRN_NO,
+//       createdAt: grnItem.gen.createdAt,
+//       branchName: grnItem.gen.branch.branchName,
+//       supplierName: grnItem.gen.supplier.supplierName,
+//       invoiceNo: grnItem.gen.invoiceNo,
+//       productGRNData: productGRNData.filter(item => item.GRN_NO === grnItem.gen.GRN_NO),
+//     }));
+
+//     res.status(200).json(formattedData);
+//   } catch (error) {
+//     console.error('Error fetching GRN and productGRN data:', error);
+//     res.status(500).json({ message: 'Failed to fetch GRN and productGRN data' });
+//   }
+// };
+
+
+
+
+
+
+// // Controller function to retrieve details by invoice number
+// export const getDetailsByInvoiceNo = async (req, res) => {
+//   try {
+//     const { invoiceNo } = req.query;
+//     console.log("invoive",invoiceNo);
+
+//     if (!invoiceNo) {
+//       throw new Error("Please provide invoiceNo");
+//     }
     
-    // Call the service function to retrieve details by invoice number
-    const details = await getDetailsByInvoiceNoService(invoiceNo);
+//     // Call the service function to retrieve details by invoice number
+//     const details = await getDetailsByInvoiceNoService(invoiceNo);
     
-    // Respond with the retrieved details
-    res.status(200).json(details);
-  } catch (error) {
-    console.error("Error retrieving details:", error);
-    res.status(500).json({ error: "Internal server error" });
-  }
-};
+//     // Respond with the retrieved details
+//     res.status(200).json(details);
+//   } catch (error) {
+//     console.error("Error retrieving details:", error);
+//     res.status(500).json({ error: "Internal server error" });
+//   }
+// };
 
 
 
