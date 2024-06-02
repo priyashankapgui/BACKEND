@@ -47,6 +47,10 @@ const productBatchSum = sequelize.define('productBatchSum', {
       onUpdate: 'CASCADE',
     },
   },
+  branchName: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
   expDate: {
     type: DataTypes.DATE,
     allowNull: true,
@@ -62,71 +66,37 @@ const productBatchSum = sequelize.define('productBatchSum', {
   hooks: {
     beforeCreate: async (productBatchSumInstance, options) => {
       console.log('Before Create Hook Called');
-      const productGRNInstance = await productGRN.findOne({
-        where: {
-          productId: productBatchSumInstance.productId,
-          batchNo: productBatchSumInstance.batchNo,
-          branchId: productBatchSumInstance.branchId,
-        },
-      });
-      if (productGRNInstance) {
-        console.log('ProductGRN Instance Found:', productGRNInstance);
-        productBatchSumInstance.expDate = productGRNInstance.expDate;
-        productBatchSumInstance.sellingPrice = productGRNInstance.sellingPrice;
-        if (productGRNInstance.barcode) {
-          productBatchSumInstance.barcode = productGRNInstance.barcode;
-        }
-      } else {
-        console.log('ProductGRN Instance Not Found');
-      }
-
-      const productInstance = await products.findOne({
-        where: {
-          productId: productBatchSumInstance.productId,
-        },
-      });
-      if (productInstance) {
-        console.log('Product Instance Found:', productInstance);
-        productBatchSumInstance.productName = productInstance.productName;
-      } else {
-        console.log('Product Instance Not Found');
-      }
+      await updateBranchName(productBatchSumInstance);
+      await updateProductInfo(productBatchSumInstance);
     },
     beforeUpdate: async (productBatchSumInstance, options) => {
-      const productGRNInstance = await productGRN.findOne({
-        where: {
-          productId: productBatchSumInstance.productId,
-          batchNo: productBatchSumInstance.batchNo,
-          branchId: productBatchSumInstance.branchId,
-        },
-      });
-      if (productGRNInstance) {
-        console.log('ProductGRN Instance Found:', productGRNInstance);
-        productBatchSumInstance.expDate = productGRNInstance.expDate;
-        productBatchSumInstance.sellingPrice = productGRNInstance.sellingPrice;
-        if (productGRNInstance.barcode) {
-          productBatchSumInstance.barcode = productGRNInstance.barcode;
-        }
-      } else {
-        console.log('ProductGRN Instance Not Found');
-      }
-
-      const productInstance = await products.findOne({
-        where: {
-          productId: productBatchSumInstance.productId,
-        },
-      });
-      if (productInstance) {
-        console.log('Product Instance Found:', productInstance);
-        productBatchSumInstance.productName = productInstance.productName;
-      } else {
-        console.log('Product Instance Not Found');
-      }
+      await updateBranchName(productBatchSumInstance);
+      await updateProductInfo(productBatchSumInstance);
     },
   },
 });
 
-productBatchSum.belongsTo(products, { foreignKey: 'productId' });
-products.hasMany(productBatchSum, { foreignKey: 'productId' });
+// Relationship between productBatchSum and branches
+productBatchSum.belongsTo(branches, { foreignKey: 'branchId' });
+
+// Function to update branchName
+const updateBranchName = async (productBatchSumInstance) => {
+  const branch = await branches.findByPk(productBatchSumInstance.branchId);
+  if (branch) {
+    productBatchSumInstance.branchName = branch.branchName;
+  }
+};
+
+// Function to update product info
+const updateProductInfo = async (productBatchSumInstance) => {
+  const productInstance = await products.findOne({
+    where: {
+      productId: productBatchSumInstance.productId,
+    },
+  });
+  if (productInstance) {
+    productBatchSumInstance.productName = productInstance.productName;
+  }
+};
 
 export default productBatchSum;
