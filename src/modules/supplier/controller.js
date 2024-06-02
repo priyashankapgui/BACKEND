@@ -1,16 +1,14 @@
-import {
-  getAllSuppliers,
-  getSupplierById,
-  addSupplier,
-  deleteSupplierById,
-  updateSupplierById,
-} from "../supplier/service.js";
+import * as SupplierService from "../supplier/service.js"
 import products from "../product/product.js";
+import { SUCCESS, ERROR } from "../../helper.js";
+import { Codes } from "../supplier/constants.js";
+
+const { SUC_CODES } = Codes;
 
 // Controller function to get all suppliers
 export const getSuppliers = async (req, res) => {
   try {
-    const suppliersReq = await getAllSuppliers();
+    const suppliersReq = await SupplierService.getAllSuppliers();
     res.status(200).json(suppliersReq);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -19,10 +17,10 @@ export const getSuppliers = async (req, res) => {
 
 // Controller function to get a specific supplier by supplierID
 export const getSupplier = async (req, res) => {
-  const supplierId = req.params;
+  const supplierId = req.params.supplierId;
   console.log("supplier ha",supplierId);
   try {
-    const supplier = await getSupplierById(supplierId);
+    const supplier = await SupplierService.getSupplierById(supplierId);
     if (!supplier) {
       res.status(404).json({ error: "Supplier not found" });
       return;
@@ -147,7 +145,7 @@ export const updateSupplier = async (req, res) => {
   const supplierId = req.params.supplierId;
   const updatedSupplierData = req.body;
   try {
-    const updatedSupplier = await updateSupplierById(
+    const updatedSupplier = await SupplierService.updateSupplierById(
       supplierId,
       updatedSupplierData
     );
@@ -162,7 +160,7 @@ export const updateSupplier = async (req, res) => {
 export const deleteSupplier = async (req, res) => {
   const supplierId = req.params.supplierId;
   try {
-    await deleteSupplierById(supplierId);
+    await SupplierService.deleteSupplierById(supplierId);
     res.status(204).json({ message: "Supplier deleted succesfully" });
   } catch (error) {
     console.error("Error deleting supplier:", error);
@@ -173,19 +171,13 @@ export const deleteSupplier = async (req, res) => {
 
 
 export const createSupplier = async (req, res) => {
-  console.log("Received data:", req.body);
-  const { supplierName, regNo, email, address, contactNo } = req.body;
-
   try {
-    // Call service function to add supplier
-    const newSupplier = await addSupplier(supplierName, regNo, email, address, contactNo);
-    
-    res.status(201).json(newSupplier);
+    const result = await SupplierService.addSupplier(req.body);
+    SUCCESS(res, SUC_CODES, result, req.span);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    ERROR(res, error, res.span);
   }
 };
-
 
 
 

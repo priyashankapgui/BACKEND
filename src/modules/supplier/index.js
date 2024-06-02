@@ -3,7 +3,7 @@ import * as SupplierService from '../supplier/service.js';
 import * as SupplierRoutes from '../supplier/routes.js';
 import suppliers from '../supplier/supplier.js'; 
 
-  module.exports = {
+  export default {
     Controller: SupplierController,
     Service: SupplierService,
     Routes: SupplierRoutes,

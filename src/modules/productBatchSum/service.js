@@ -192,7 +192,7 @@ export const getProductTotalQuantity = async (branchName, productId) => {
     const totalAvailableQty = await productBatchSum.sum('totalAvailableQty', {
       where: { productId, branchId }
     });
-
+    
     return {
       productId: productDetails.productId,
       productName: productDetails.productName,

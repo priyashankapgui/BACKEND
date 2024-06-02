@@ -125,7 +125,7 @@ export const getAllGRNs = async () => {
       return {
         GRN_NO: grnItem.GRN_NO,
         createdAt: grnItem.createdAt, // This should be replaced with the actual productId if available
-        branchtName: branch.branchName,
+        branchName: branch.branchName,
         supplierName: supplier.supplierName,
         invoiceNo: grnItem.invoiceNo,
       };

@@ -41,24 +41,36 @@ export const generateProductID = async () => {
 // Function to retrieve all products with their associated categories
 export const getAllProducts = async () => {
   try {
-    const productsReq = await products.findAll({
-      
-      include: [
-        //associated model should be loaded along with the main model
-        {
-          model: categories,
-          as: "category",
-          attributes: ["categoryId", "categoryName"],
-        },
-      ],
-    });
-    console.log(productsReq);
-    return productsReq;
+    const productsReq = await products.findAll();
+
+    // Create an array to hold the results
+    const result = [];
+
+    // Iterate over each product and fetch the corresponding category
+    for (const product of productsReq) {
+      const category = await categories.findOne({
+        where: { categoryId: product.categoryId },
+      });
+
+      if (!category) {
+        throw new Error(`Category not found for productId ${product.productId}`);
+      }
+
+      // Add product details to the result array
+      result.push({
+        productId: product.productId,
+        productName: product.productName,
+        categoryName: category.categoryName,
+        description: product.description,
+      });
+    }
+
+    return result;
   } catch (error) {
-    console.error("Error retrieving products:", error);
-    throw new Error("Error retrieving products");
+    throw new Error("Error retrieving product details: " + error.message);
   }
 };
+
 
 
 
@@ -69,6 +81,7 @@ export const getProductById = async (productId) => {
     const product = await products.findOne({
       where: { productId},
     });
+    console.log("category oh",product);
 
     if (!product) {
       throw new Error("Product not found");
@@ -78,6 +91,7 @@ export const getProductById = async (productId) => {
     const category = await categories.findOne({
       where: { categoryId: product.categoryId },
     });
+    console.log("category oh",category);
 
     if (!category) {
       throw new Error("Category not found");
@@ -92,6 +106,7 @@ export const getProductById = async (productId) => {
       categoryName: category.categoryName,
       description: product.description,
     };
+    console.log("category ohhhh",result);
 
     return result;
   } catch (error) {
