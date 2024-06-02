@@ -50,10 +50,11 @@ export const updateEmployee = async (req, res) => {
   const authHeader = req.headers["authorization"];
   const token = authHeader.split(" ")[1];
   const decoded = jwt.verify(token, ACCESS_TOKEN);
-  const role = decoded.role;
+  const role = decoded.userRoleId;
   const branch = decoded.branchName;
   const employeeId = req.params.employeeId;
   const updatedEmployeeData = req.body;
+  
   try {
     const updatedEmployee = await updateEmployeeById(
       employeeId,
@@ -62,7 +63,7 @@ export const updateEmployee = async (req, res) => {
       branch
     );
     if (!updatedEmployee) {
-      res.status(404).json({ error: "Employee not found" });
+      res.status(404).json({ error: "Couldn't Update" });
       return;
     }
     res.status(200).json(updatedEmployee);
@@ -80,11 +81,8 @@ export const deleteEmployee = async (req, res) => {
   const authHeader = req.headers["authorization"];
   const token = authHeader.split(" ")[1];
   const decoded = jwt.verify(token, ACCESS_TOKEN);
-  const role = decoded.role;
+  const role = decoded.role || decoded.userRoleId;
   const branch = decoded.branchName;
-  if (role != "superadmin" && role != "admin") {
-    return res.status(403).json({ message: "Unauthorized" });
-  }
   const employeeId = req.params.employeeId;
   try {
     const deletedEmployee = await deleteEmployeeById(employeeId, role, branch);

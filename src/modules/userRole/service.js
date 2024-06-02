@@ -19,6 +19,18 @@ export const createRole = async (userRoleName, branch, t) => {
     return newUserRole;
 };
 
+export const getRole = async (userRoleId) => {
+    try{
+        const userRole = await sequelize.query("select distinct userRoleId, userRoleName, ur.branchId, branchName from userrole as ur left join branches as b on ur.branchId=b.branchId where userRoleId = :userRoleId;", {
+            replacements: { userRoleId: userRoleId }
+        });
+        return userRole[0][0];
+    }
+    catch(error){
+        throw new Error(error.message);
+    }
+}
+
 export const getAllUserRoles = async () => {
     const userRoles = await sequelize.query("select userRoleId, userRoleName, ur.branchId, branchName from userrole as ur left join branches as b on ur.branchId=b.branchId;");
     return userRoles[0];

@@ -5,7 +5,8 @@ import jwt from "jsonwebtoken";
 import { SECRET } from "../../../config/config.js";
 const { SECRET_KEY: ACCESS_TOKEN } = SECRET;
 import emailjs from "@emailjs/nodejs";
-
+import branches from "../branch/branch.js";
+import UserRole from "../userRole/userRole.js";
 
 export const getAllEmployees = async () => {
   try {
@@ -26,7 +27,7 @@ export const getEmployeeById = async (employeeId) => {
 };
 
 export const createEmployee = async (employee) => {
-  const { employeeId,email, password ,phone} = employee;
+  const { employeeId,email, password ,phone, branchName, userRoleName} = employee;
 
   // Check if the employeeId already exists
   const existingEmployee = await Employee.findOne({ where: { employeeId: employeeId } });
@@ -42,11 +43,16 @@ export const createEmployee = async (employee) => {
     throw new Error("Email already exists");
   }
 
-  // // Validate employee role
-  // const roleRegex = /^(cashier|admin|superadmin)$/;
-  // if (!roleRegex.test(role)) {
-  //   throw new Error("Invalid role");
-  // }
+  // Validate branchId
+  const branchId =await branches.findOne({where: {branchName: branchName}});
+  if (!branchId) {
+    throw new Error("Branch does not exist");
+  }
+  // Validate userRoleId
+  const userRoleID= await UserRole.findOne({where: {userRoleName: userRoleName}});
+  if (!userRoleID) {
+    throw new Error("User role does not exist");
+  }
  
   // Validate email
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -66,6 +72,7 @@ export const createEmployee = async (employee) => {
   }
 
   try {
+    employee={branchId: branchId.branchId, userRoleId: userRoleID.userRoleId, ...employee}
     const newEmployee = await Employee.create(employee);
     return newEmployee;
   } catch (error) {
@@ -74,36 +81,43 @@ export const createEmployee = async (employee) => {
 };
 
 export const updateEmployeeById = async (employeeId, employeeData, role, branch) => {
-  const employee = await Employee.findByPk(employeeId);
+  console.log(employeeData, employeeId);
+  const branchid = await branches.findOne({where: {branchName: employeeData.branchName}});
+  const employee = await Employee.findByPk(parseInt(employeeId));
+  console.log(role);
   if (!employee) {
     throw new Error("Employee not found");
   }
+  try{
   if (
-    role === "superadmin" ||
-    (role === "admin" &&
-      employee.branchName === branch &&
-      employee.role !== "admin" &&
-      employee.role !== "superadmin")
+    // role === "superadmin" ||
+    // (role === "admin" &&
+    //   employee.branchName === branch &&
+    //   employee.role !== "admin" &&
+    //   employee.role !== "superadmin")
+
+    role == 1 || branch === branchid.branchName
   ) {
+   
+    console.log(employeeData);
     const updatedEmployee = await employee.update(employeeData);
     return updatedEmployee;
-  } else {
-    throw new Error("Unauthorized");
+  }
+    else{
+      throw new Error("Unauthorized");
+    }
+  } catch (error) {
+    throw new Error("Error updating employee: " + error.message);
   }
 };
 
 export const deleteEmployeeById = async (employeeId, role, branch) => {
   const employee = await Employee.findByPk(employeeId);
+  console.log(employee);
   if (!employee) {
     return null;
   }
-  if (
-    role === "superadmin" ||
-    (role === "admin" &&
-      employee.branchName === branch &&
-      employee.role !== "admin" &&
-      employee.role !== "superadmin")
-  ) {
+  if (role == 1 || employee.branchName === branch) {
     await employee.destroy();
     return employee;
   } else {
@@ -135,7 +149,8 @@ export const handleLogin = async (req, res) => {
       const accessToken = jwt.sign(
         {
           employeeId: user.employeeId,
-          role: user.role,
+          role: user.userRoleName,
+          userRoleId: user.userRoleId,
           branchName: user.branchName,
         },
         ACCESS_TOKEN,
@@ -151,11 +166,11 @@ export const handleLogin = async (req, res) => {
         message: "Login successful",
         token: accessToken,
         user: {
-          employeeId: user.employeeId,
+          userID: user.employeeId,
           branchName: user.branchName,
-          employeeName: user.employeeName,
+          userName: user.employeeName,
           email: user.email,
-          role: user.role,
+          role: user.userRoleName,
           phone: user.phone,
           address: user.address,
         },

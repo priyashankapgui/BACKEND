@@ -1,5 +1,5 @@
 import sequelize from "../../../config/database.js";
-import { createRole, getAllUserRoles, createPermissions } from "./service.js";
+import { createRole, getAllUserRoles, createPermissions, getRole } from "./service.js";
 
 export const createUserRole = async (req, res) => {
     try {
@@ -12,6 +12,16 @@ export const createUserRole = async (req, res) => {
         
         const newUserRole = await createRole(userRoleName, pageAccess);
         return res.status(201).json(newUserRole);
+    } catch (error) {
+        return res.status(400).json({ message: error.message });
+    }
+};
+
+export const getUserRole = async (req, res) => {
+    try {
+        const { userRoleId } = req.params;
+        const userRole = await getRole(userRoleId);
+        return res.status(200).json(userRole);
     } catch (error) {
         return res.status(400).json({ message: error.message });
     }

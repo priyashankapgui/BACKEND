@@ -1,6 +1,6 @@
 import Permission from './permission.js';
 
-const getAllPermissionsGroup = async (groupName) => {
+export const getAllPermissionsGroup = async (groupName) => {
     try {
         let permissionsGroup = await Permission.findAll({
             where: {
@@ -14,4 +14,15 @@ const getAllPermissionsGroup = async (groupName) => {
     }
 };
 
-export default getAllPermissionsGroup;
+export const getPermissions = async (userRoleId) => {
+    try {
+        const permissions = await Permission.findAll({
+            where: {
+                userRoleId
+            }
+        });
+        return permissions;
+    } catch (error) {
+        throw new Error(error.message);
+    }
+};

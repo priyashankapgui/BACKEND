@@ -7,7 +7,7 @@ import UserRole from '../userRole/userRole.js';
 
 const Employee = sequelize.define('employee', {
     employeeId: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.STRING,
         allowNull: false,
         primaryKey: true,
       },
@@ -60,7 +60,7 @@ const Employee = sequelize.define('employee', {
     },
     userRoleName: {
         type: DataTypes.STRING,
-        allowNull: false,
+        allowNull: true,
     },
 
 

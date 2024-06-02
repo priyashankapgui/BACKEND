@@ -1,4 +1,4 @@
-import getAllPermissionsGroup from './service.js';
+import {getAllPermissionsGroup, getPermissions} from './service.js';
 import jwt from 'jsonwebtoken';
 import { SECRET } from '../../../config/config.js';
 const ACCESS_TOKEN = SECRET.SECRET_KEY;
@@ -20,7 +20,9 @@ export const verifyPermissions = async (req, res) => {
     try {
         console.log(req.body);
         const decoded = jwt.verify(token, ACCESS_TOKEN);
+        console.log(decoded);
         const userRoleId = decoded.userRoleId;
+        console.log(userRoleId);
         const permissionsGroup = await getAllPermissionsGroup(groupName);
         if (permissionsGroup.includes(userRoleId)) {
             res.status(200).json({ message: "Permission Granted" });
@@ -34,10 +36,10 @@ export const verifyPermissions = async (req, res) => {
 }
 
 export const getUserRolePermissions = async (req, res) => {
-    const { userRoleId } = req.body;
+    const userRoleId = req.params.userRoleId;
     try {
-        const permissionsGroup = await getAllPermissionsGroup(userRoleId);
-        res.status(200).json(permissionsGroup);
+        const permissions = await getPermissions(userRoleId);
+        res.status(200).json({permissions: permissions});
     } catch (error) {
         res.status(500).json({ error: error.message });
     }

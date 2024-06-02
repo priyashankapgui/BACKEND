@@ -83,7 +83,7 @@ setupAssociations();
 
 
 
-sequelize.sync({ force: true }) 
+sequelize.sync() 
   .then(() => {
     console.log("Database synchronized");
     app.listen(8080, () => {
