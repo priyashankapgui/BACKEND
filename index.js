@@ -1,10 +1,6 @@
 import sequelize from "./config/database.js";
 import express from "express";
-import cors from "cors"; 
-import dotenv from "./config/database.js";
-import Stripe from 'stripe';
-
-// Importing modules and their routes
+import cors from "cors";
 import grn from "./src/modules/GRN/grn.js";
 import products from "./src/modules/product/product.js";
 import suppliers from "./src/modules/supplier/supplier.js";
@@ -28,16 +24,20 @@ import billRouter from "./src/modules/bill/routes.js";
 import feedback from "./src/modules/feedback/feedback.js";
 import feedbackrouter from "./src/modules/feedback/routes.js";
 import cartProductRoutes from "./src/modules/cart_Product/routes.js"
+import billProductRouter from "./src/modules/bill_Product/routes.js";
 import ShoppingCart from "./src/modules/Cart_Customer/shoppingcart.js";
+import Stripe from 'stripe';
 
-// Initialize express app
+
+
+
 const app = express();
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 app.use(cors());
+
 app.use(express.json());
 
-// Registering routes
 app.use("/", Productrouter);
 app.use("/", categoryRouter);
 app.use("/", supplierRouter);
@@ -52,11 +52,12 @@ app.use('/', listedProductsRouter);
 app.use('/', billRouter);
 app.use('/', feedbackrouter);
 app.use('/', cartProductRoutes);
-app.use('/',productBatchSumrouter);
+app.use('/', productBatchSumrouter);
+app.use('/', billProductRouter);
 
 
 
-app.use("/api", Productrouter);  
+app.use("/api", Productrouter);
 app.use("/api", categoryRouter);
 app.use("/api", supplierRouter);
 app.use("/api", GRNRouter);
@@ -68,8 +69,8 @@ app.use('/api', listedProductsRouter);
 app.use('/api', billRouter);
 app.use('/api', feedback);
 app.use('/api', cartProductRoutes);
-app.use('/api',productBatchSumrouter);
-
+app.use('/api', productBatchSumrouter);
+app.use('/api', billProductRouter);
 
 app.use('/Images', express.static('.src/Images'))
 
@@ -78,7 +79,7 @@ setupAssociations();
 
 
 
-sequelize.sync({ alter: true }) 
+sequelize.sync({ alter: true })
   .then(() => {
     console.log("Database synchronized");
     app.listen(8080, () => {
@@ -137,4 +138,4 @@ app.post('/create-checkout-session', async (req, res) => {
 });
 
 
- export { sequelize, categories, suppliers, grn, products, branches,feedback,ShoppingCart, productBatchSum};
+export { sequelize, categories, suppliers, grn, products, branches, feedback, ShoppingCart, productBatchSum };

@@ -6,13 +6,13 @@ import { mapSupplierNameToId } from "../../modules/supplier/service.js";
 import { mapBranchNameToId } from "../../modules/branch/service.js";
 import branches from "../branch/branch.js";
 import productGRN from '../product_GRN/product_GRN.js';
+import { Op } from 'sequelize';
 
 
 
 // Function to generate GRN number
 const generateGRNNumber = async (branchName) => {
   try {
-
     if (!branchName || typeof branchName !== 'string') {
       throw new Error("Invalid branchName: " + branchName);
     }
@@ -20,9 +20,9 @@ const generateGRNNumber = async (branchName) => {
     // Extract the first three letters of the branch name
     const branchCode = branchName.substring(0, 3).toUpperCase();
 
-    // Get the last GRN number from the database
-    const lastGRN = await getLastGRNNumber();
-    let lastNumber = 0; // Default to 0 if no previous GRN exists
+    // Get the last GRN number for the specific branch from the database
+    const lastGRN = await getLastBranchGRNNumber(branchCode);
+    let lastNumber = 0; // Default to 0 if no previous GRN exists for the branch
 
     if (lastGRN) {
       lastNumber = parseInt(lastGRN.split('GRN')[1]); // Extract the number part
@@ -46,40 +46,30 @@ const generateGRNNumber = async (branchName) => {
   }
 };
 
-
-
-// Function to get the last GRN number from the database
-const getLastGRNNumber = async () => {
+// Function to get the last GRN number for a specific branch from the database
+const getLastBranchGRNNumber = async (branchCode) => {
   try {
-    // Fetch the latest GRN entry from the database
+    // Fetch the latest GRN entry for the specific branch from the database
     const latestGRN = await grn.findOne({
+      where: {
+        GRN_NO: {
+          [Op.startsWith]: `${branchCode}-GRN`
+        }
+      },
       order: [['createdAt', 'DESC']] // Order by creation date in descending order to get the latest entry
-  });
+    });
 
-  // Extract and return the GRN number
-  return latestGRN ? latestGRN.GRN_NO : null; // Return null if there are no GRN entries in the database
+    // Extract and return the GRN number
+    return latestGRN ? latestGRN.GRN_NO : null; // Return null if there are no GRN entries for the branch in the database
 
   } catch (error) {
-    throw new Error("Error getting last GRN number: " + error.message);
+    throw new Error("Error getting last GRN number for branch: " + error.message);
   }
 };
 
-const extractCounterFromGRN = (GRN_NO) => {
-  if (GRN_NO) {
-    // Assuming the GRN number format is "GAL-GRNXXXX", where XXXX represents the counter value
-    const parts = GRN_NO.split('-');
-    if (parts.length === 2) {
-      const counter = parseInt(parts[1]); // Extract the counter part
-      if (!isNaN(counter)) {
-        return counter;
-      }
-    }
-  }
-  throw new Error("Invalid GRN number format");
-};
 
 
-
+ 
 
 //Function to create GRN 
 export const addGRN = async (invoiceNo, supplierId, branchName) => {
@@ -390,6 +380,66 @@ export const getGRNsByBranchAndSupplier = async (branchName, supplierId) => {
 };
 
 
+
+// Function to update a GRN by its ID
+export const updateGRNById = async (GRN_NO, updatedStockData) => {
+  try {
+    const stock = await grn.findByPk(GRN_NO);
+    if (!stock) {
+      throw new Error("Stock not found");
+    }
+    await stock.update(updatedStockData, {
+      where: { GRN_NO: GRN_NO } 
+    });
+    return stock;
+  } catch (error) {
+    throw new Error("Error updating stock: " + error.message);
+  }
+};
+
+
+
+
+// Function to delete a GRN by its ID
+export const deleteGRNById = async (GRN_NO) => {
+  try {
+    const stock = await grn.findByPk(GRN_NO);
+    if (!stock) {
+      throw new Error("Stock not found");
+    }
+    await stock.destroy();
+  } catch (error) {
+    throw new Error("Error deleting stock: " + error.message);
+  }
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // //function to get grn by branchName and productId
 // export const getGRNsByBranchNameService = async (branchName) => {
 
@@ -441,43 +491,6 @@ export const getGRNsByBranchAndSupplier = async (branchName, supplierId) => {
 
 
 
-// Function to update a GRN by its ID
-export const updateGRNById = async (GRN_NO, updatedStockData) => {
-  try {
-    const stock = await grn.findByPk(GRN_NO);
-    if (!stock) {
-      throw new Error("Stock not found");
-    }
-    await stock.update(updatedStockData, {
-      where: { GRN_NO: GRN_NO } 
-    });
-    return stock;
-  } catch (error) {
-    throw new Error("Error updating stock: " + error.message);
-  }
-};
-
-
-
-
-
-
-
-
-
-
-// Function to delete a GRN by its ID
-export const deleteGRNById = async (GRN_NO) => {
-  try {
-    const stock = await grn.findByPk(GRN_NO);
-    if (!stock) {
-      throw new Error("Stock not found");
-    }
-    await stock.destroy();
-  } catch (error) {
-    throw new Error("Error deleting stock: " + error.message);
-  }
-};
 
 
 

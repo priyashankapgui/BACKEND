@@ -9,9 +9,9 @@ const { SUC_CODES } = Codes;
 // Controller function to get all categories
 export const getCategories = async (req, res) => {
   try {
-    const categories = await categoryService.getAllCategories();
-    SUCCESS(res, SUC_CODES, result, req.span);
-    res.status(200).json(categories);
+    const categoryReq = await categoryService.getAllCategories();
+    // SUCCESS(res, SUC_CODES, result, req.span);
+    res.status(200).json(categoryReq);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

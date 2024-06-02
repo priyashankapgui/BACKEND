@@ -1,5 +1,7 @@
 import sequelize from "../../../config/database.js";
 import products from "../product/product.js";
+import {   adjustProductGRNQuantity } from "../product_GRN/service.js";
+import { updateProductQty } from "../productBatchSum/service.js";
 import { getBatchDetailsByProductName,  adjustProductGRNQuantity, updateProductQty,getAllProductGRN } from "../product_GRN/service.js";
 
 //=============================================
@@ -13,26 +15,73 @@ export const getproductGRN = async (req, res) => {
 };
 //=================================================
 
+export const adjustProductQuantity = async (req, res) => {
+  try {
+    const { productName, branchName, batchNo, newQuantity } = req.body;
 
-// Controller function to retrieve batch details by productName and branchNo for check price 
-export const getBatchDetailsByProductNameController = async (req, res) => {
-    try {
     
-      const { branchName, productName } = req.query;
-  
-      if (!productName || !branchName) {
-        throw new Error("Please provide both productName and branchName");
-      }
-  
-      const batchDetails = await getBatchDetailsByProductName(productName, branchName);
-  
-      
-      res.status(200).json(batchDetails);
-    } catch (error) {
-      console.error("Error retrieving batch details:", error);
-      res.status(500).json({ error: "Internal server error" });
+    await adjustProductGRNQuantity(productName, branchName, batchNo, newQuantity);
+
+    const product = await products.findOne({ where: { productName } });
+    if (!product) {
+      throw new Error("Product not found.");
     }
-  };
+    await updateProductQty(product.productId);
+
+    res.status(200).json({ message: "Product quantity adjusted successfully." });
+  } catch (error) {
+    console.error("Error adjusting product quantity:", error);
+    res.status(500).json ({ error: "Internal server error" });
+  }
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -94,34 +143,6 @@ export const getBatchDetailsByProductNameController = async (req, res) => {
   //     res.status(500).json({ error: "Internal server error" });
   //   }
   // };
-
-
-  export const adjustProductQuantity = async (req, res) => {
-    try {
-      const { productName, branchName, batchNo, newQuantity } = req.body;
-  
-      
-      await adjustProductGRNQuantity(productName, branchName, batchNo, newQuantity);
-
-      const product = await products.findOne({ where: { productName } });
-      if (!product) {
-        throw new Error("Product not found.");
-      }
-      await updateProductQty(product.productId);
-  
-      res.status(200).json({ message: "Product quantity adjusted successfully." });
-    } catch (error) {
-      console.error("Error adjusting product quantity:", error);
-      res.status(500).json ({ error: "Internal server error" });
-    }
-  };
-
-
-
-
-
-
-
 
 
 

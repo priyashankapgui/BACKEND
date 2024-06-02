@@ -4,7 +4,7 @@ import multer from "multer";
 import products from "../product/product.js";
 import { validateProduct } from "./validator.js";
 import { mapCategoryNameToId } from "../../modules/category/service.js";
-import { getProductTotalQuantity } from "../../modules/product_GRN/service.js"
+import { getProductTotalQuantity } from "../productBatchSum/service.js";
 import {
   getAllProducts,
   getProductById,
@@ -21,8 +21,6 @@ import { mapSupplierNameToId } from "../supplier/service.js";
 
 
  
-
-
 
 // Controller function to get all products
 export const getProducts = async (req, res) => {
@@ -176,8 +174,8 @@ export const deleteProduct = async (req, res) => {
 
 export const getTotalQuantityByBranchAndProduct = async (req, res) => {
   try {
-    const { branchName, productName } = req.query;
-    const totalQuantity = await getProductTotalQuantity(branchName, productName);
+    const { branchName, productId } = req.query;
+    const totalQuantity = await getProductTotalQuantity(branchName, productId);
 
     res.status(200).json({ totalQuantity });
   } catch (error) {
