@@ -10,10 +10,7 @@ import {
   //getProductIdByProductNameController,
   //getProductAndSuppliersDetailsByProductName,
   upload,
-  getTotalQuantityByBranchAndProduct,
-  
-} from "../product/controller.js"; 
-  getproductsweb,
+  getTotalQuantityByBranchAndProduct
 } from "../product/controller.js";
 
 
@@ -29,8 +26,6 @@ Productrouter.put("/products/:productId", updateProduct);
 //Productrouter.get("/products/productId/:productName", getProductIdByProductNameController);
 //Productrouter.get('/product/:productName', getProductAndSuppliersDetailsByProductName);
 Productrouter.get('/active-stock', getTotalQuantityByBranchAndProduct);
-//==============================
-Productrouter.get("/productweb", getproductsweb);
 
 
 

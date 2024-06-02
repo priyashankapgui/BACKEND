@@ -67,20 +67,6 @@ export const getAllProducts = async () => {
 
 // function to get the products using product name
 export const getProductById = async (productId) => {
-//============================
-export const getAllproductsweb = async () => {
-  try{
-      const productsReq = await products.findAll();
-      console.log(productsReq);
-      return productsReq;
-  }catch (error) {
-      console.error('Error retrieving products:', error);
-      throw new Error('Error retrieving products');
-  }
-};
-//===============================
-
-export const getProductByIdAndBranchName = async (productId, branchId) => {
   try {
     // Fetch product details
     const product = await products.findOne({

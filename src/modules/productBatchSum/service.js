@@ -54,3 +54,15 @@ export const updateProductBatchSum = async (productId, batchNo) => {
       throw error;
     }
   };
+  //====================================
+  export const getproductdiscount = async () => {
+    try{
+        const productsReq = await productBatchSum.findAll();
+        console.log(productsReq);
+        return productsReq;
+    }catch (error) {
+        console.error('Error retrieving products:', error);
+        throw new Error('Error retrieving products');
+    }
+  };
+  //=======================================

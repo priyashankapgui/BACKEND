@@ -14,8 +14,7 @@ import {
   deleteProductById,
   updateProductById,
   getProductIdByProductNameService,
-  searchSuppliersByProductName,
-  getAllproductsweb,
+  searchSuppliersByProductName
 } from "../product/service.js";
 import { mapSupplierNameToId } from "../supplier/service.js";
 
@@ -35,16 +34,6 @@ export const getProducts = async (req, res) => {
   }
 };
 
-//================================
-export const getproductsweb = async (req, res) => {
-  try {
-    const productsList = await getAllproductsweb(); 
-    res.status(200).json(productsList);  
-  } catch (error) {
-    res.status(500).json({ error: error.message }); 
-  }
-};
-//===================================
 
 //Function to get product using productId
 export const getProduct = async (req, res) => {

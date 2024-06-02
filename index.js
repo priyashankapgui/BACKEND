@@ -29,7 +29,6 @@ import feedback from "./src/modules/feedback/feedback.js";
 import feedbackrouter from "./src/modules/feedback/routes.js";
 import cartProductRoutes from "./src/modules/cart_Product/routes.js"
 import ShoppingCart from "./src/modules/Cart_Customer/shoppingcart.js";
-import { setupAssociations } from "./src/modules/associationSetup.js";
 
 // Initialize express app
 const app = express();

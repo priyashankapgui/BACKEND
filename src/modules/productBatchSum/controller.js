@@ -1,4 +1,4 @@
-import { updateProductBatchSum } from "../productBatchSum/service.js";
+import { updateProductBatchSum,getproductdiscount } from "../productBatchSum/service.js";
 
 export const updateProductBatchSumController = async (req, res) => {
   const { productId, batchNo } = req.body;
@@ -14,4 +14,13 @@ export const updateProductBatchSumController = async (req, res) => {
     res.status(500).json({ error: "An error occurred while updating the ProductBatchSum" });
   }
 };
- 
+ //=================================
+ export const getdiscount = async (req, res) => {
+  try {
+    const productsList = await getproductdiscount(); 
+    res.status(200).json(productsList);  
+  } catch (error) {
+    res.status(500).json({ error: error.message }); 
+  }
+};
+//========================================
