@@ -61,7 +61,7 @@ export const createEmployee = async (employee) => {
   }
 
   // Validate password
-  if (!/^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,20}$/.test(password)) {
+  if (password.length < 8 || password.length > 64) {
     throw new Error("Invalid password format");
   } 
 
@@ -185,18 +185,19 @@ export const handleLogin = async (req, res) => {
 };
 
 export const forgotPassword = async (req, res) => {
-  const { email } = req.body;
+  const { employeeId } = req.body;
 
-  if (!email) {
-    return res.status(400).json({ message: "Email is required" });
+  if (!employeeId) {
+    return res.status(400).json({ message: "employee ID is required" });
   }
   try {
-    const user = await Employee.findOne({ where: { email: email } });
+    const user = await Employee.findOne({ where: { employeeId: employeeId } });
     if (!user) {
       return res.status(404).json({ message: "Email not found" });
     } else {
       const passwordResetToken = jwt.sign(
         {
+          userId: user.employeeId,
           email: user.email,
         },
         ACCESS_TOKEN,
@@ -221,6 +222,8 @@ export const forgotPassword = async (req, res) => {
       
       const templateParams = {
         resetLink: resetLink,
+        receiver_name: user.employeeName,
+        receiver_email: user.email,
       };
 
       // Send email using EmailJS with the  template
@@ -245,43 +248,17 @@ export const forgotPassword = async (req, res) => {
   }
 };
 
-export const passwordReset = async (req, res) => {
-  const { resetToken, newPassword, confirmPassword } = req.body;
-
-  if (!resetToken || !newPassword || !confirmPassword) {
-    return res.status(400).json({ message: "Missing required fields" });
+export const handleEmployeeResetPassword = async (userId, newPassword) => {
+  const user = await Employee.findByPk({ where: { employeeId: userId } });
+  if (!user) {
+    throw new TypeError("Employee ID not found");
   }
-
-  try {
-    const decoded = jwt.verify(resetToken, ACCESS_TOKEN);
-    const email = decoded.email;
-
-    const user = await Employee.findOne({ where: { email: email } });
-    if (!user) {
-      return res.status(404).json({ message: "Invalid Request" });
-    }
-
-    if (newPassword.length < 8 || newPassword.length > 20 || !/^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,20}$/.test(newPassword)) {
-      return res
-        .status(400)
-        .json({ message: "Invalid password format" });
-    }
-
-    if (newPassword === user.password) {
-      return res
-        .status(400)
-        .json({ message: "New password cannot be the same as old password" });
-    }
-
-    
-    user.password = newPassword;
-    await user.save();
-
-    return res.status(200).json({ message: "Password reset successful" });
-  } catch (error) {
-    console.error("Password reset error:", error);
-    return res.status(500).json({ message: "Internal server error" });
+  const passwordMatch = await bcrypt.compare(newPassword, user.password);
+  if (passwordMatch) {
+    throw new TypeError("New password cannot be the same as the old password");
   }
+  await user.save();
+  return;
 };
 
 
@@ -298,9 +275,6 @@ export const verify = async (req, res) => {
 export const verifyAdmin = async(req,res)=> {
   const authHeader = req.headers['authorization'];
     const token = authHeader.split(' ')[1];
-
-
-
   try {
 
     const decoded = jwt.verify(token,ACCESS_TOKEN);
@@ -329,8 +303,6 @@ export const verifyAdmin = async(req,res)=> {
 export const verifySuperAdmin = async (req, res) => {
   const authHeader = req.headers["authorization"];
   const token = authHeader.split(" ")[1];
-
-
   try {
     const decoded = jwt.verify(token, ACCESS_TOKEN);
 

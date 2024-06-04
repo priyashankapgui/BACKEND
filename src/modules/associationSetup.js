@@ -4,7 +4,6 @@ import branches from "../modules/branch/branch.js"
 import products from "../modules/product/product.js";
 import categories from "./category/category.js";
 import bill from "./bill/bill.js";
-import userRole from "./userRole/userRole.js";
 
 const setupBranchBillAssociations = (branches, bill) => {
   branches.hasMany(bill, { foreignKey: "branchId", as: "bill" });
