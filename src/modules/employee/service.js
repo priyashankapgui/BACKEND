@@ -9,29 +9,29 @@ import UserRole from "../userRole/userRole.js";
 const salt = bcrypt.genSaltSync(10);
 const { SECRET_KEY: ACCESS_TOKEN } = SECRET;
 
-export const generateEmployeeId = async () => {
-  try {
-    const latestEmployee = await Employee.findOne({
-      order: [['employeeId', 'DESC']],
-      attributes: ['employeeId'],
-    });
+// export const generateEmployeeId = async () => {
+//   try {
+//     const latestEmployee = await Employee.findOne({
+//       order: [['employeeId', 'DESC']],
+//       attributes: ['employeeId'],
+//     });
 
-    let newEmployeeId;
+//     let newEmployeeId;
 
-    if (latestEmployee && latestEmployee.employeeId) {
-      const numericPart = parseInt(latestEmployee.employeeId.substring(1), 10);
-      const incrementedNumericPart = numericPart + 1;
-      newEmployeeId = `E${incrementedNumericPart.toString().padStart(5, '0')}`;
-    } else {
-      newEmployeeId = 'E00001';
-    }
+//     if (latestEmployee && latestEmployee.employeeId) {
+//       const numericPart = parseInt(latestEmployee.employeeId.substring(1), 10);
+//       const incrementedNumericPart = numericPart + 1;
+//       newEmployeeId = `E${incrementedNumericPart.toString().padStart(5, '0')}`;
+//     } else {
+//       newEmployeeId = 'E00001';
+//     }
 
-    return newEmployeeId;
-  } catch (error) {
-    console.error('Error generating new employee ID:', error);
-    throw new Error('Could not generate new employee ID');
-  }
-}
+//     return newEmployeeId;
+//   } catch (error) {
+//     console.error('Error generating new employee ID:', error);
+//     throw new Error('Could not generate new employee ID');
+//   }
+// }
 
 export const getAllEmployees = async () => {
   try {
@@ -52,12 +52,11 @@ export const getEmployeeById = async (employeeId) => {
 };
 
 export const createEmployee = async (employee) => {
-  const newEmployeeId = await generateEmployeeId();
-  const { employeeName, email, password, branchName, phone, address, userRoleName } = employee;
-  console.log('employee:',employee);
+  // const newEmployeeId = await generateEmployeeId();
+  const { employeeId, employeeName, email, password, branchName, phone, address, userRoleName } = employee;
 
   // Check if the employeeId already exists
-  const existingEmployee = await Employee.findOne({ where: { employeeId: newEmployeeId } });
+  const existingEmployee = await Employee.findOne({ where: { employeeId: employeeId } });
   if (existingEmployee) {
     throw new Error("Employee ID already exists");
   }
@@ -101,7 +100,7 @@ export const createEmployee = async (employee) => {
   
   try {
     const newEmployee = await Employee.create({
-      employeeId: newEmployeeId,
+      employeeId,
       employeeName,
       email,
       password,
@@ -128,7 +127,6 @@ export const updateEmployeeById = async (employeeId, employeeData, role, branch)
   if (!employee) {
     throw new Error("Employee not found");
   }
-  console.log("hello:",employee);
   try{
   if (role == 1 || branch === branchRow.branchName) {
    

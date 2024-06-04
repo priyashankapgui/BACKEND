@@ -37,7 +37,7 @@ export const handleSuperAdminLogin = async (superAdminId, password) => {
     );
     return { token: token, superAdmin: superAdmin };
   } catch (error) {
-    throw new Error("Error logging in: " + error.message);
+    throw new Error(error.message);
   }
 };
 
