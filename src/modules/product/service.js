@@ -81,7 +81,7 @@ export const getProductById = async (productId) => {
     const product = await products.findOne({
       where: { productId},
     });
-    console.log("category oh",product);
+    
 
     if (!product) {
       throw new Error("Product not found");
@@ -91,7 +91,7 @@ export const getProductById = async (productId) => {
     const category = await categories.findOne({
       where: { categoryId: product.categoryId },
     });
-    console.log("category oh",category);
+    
 
     if (!category) {
       throw new Error("Category not found");
@@ -106,7 +106,7 @@ export const getProductById = async (productId) => {
       categoryName: category.categoryName,
       description: product.description,
     };
-    console.log("category ohhhh",result);
+    
 
     return result;
   } catch (error) {
