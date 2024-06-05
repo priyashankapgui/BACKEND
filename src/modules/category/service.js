@@ -37,24 +37,28 @@ import sequelize from "../../../config/database.js";
 
 
 // Function to get all categories
- const getAllCategories = async () => {
-  try {
-    const categoryReq = await categories.findAll();
-    return categoryReq;
-  } catch (error) {
-    throw new Error("Error retrieving categories");
-  }
-};
+ const getAllCategories = async (params) => {
+
+    const getRecords = database.findAll();
+    const [err, result] = await to(getRecords);
+    if (err) TE(err);
+    if (!result) TE("Results not found");
+    return result;
+  };
+
+
 
 // Function to get a category by its ID
  const getCategoryById = async (categoryId) => {
-  try {
-    const category = await categories.findByPk(categoryId);
-    return category;
-  } catch (error) {
-    throw new Error("Error fetching category: " + error.message);
-  }
+ 
+const getRecord = database.findOneById(categoryId);
+const [err, result] = await to(getRecord);
+if (err) TE(err);
+if (!result) TE("Result not found");
+return result;
 };
+
+
 
 // Function to add a new category
  const addCategory = async (data) => {
@@ -74,33 +78,42 @@ import sequelize from "../../../config/database.js";
  
 };
 
+
+
 // Function to update a category by its ID
  const updateCategoryById = async (categoryId, updatedCategoryData) => {
-  try {
-    const category = await categories.findByPk(categoryId);
-    if (!category) {
-      throw new Error("Category not found");
-    }
-    await category.update(updatedCategoryData);
-    return category;
-  } catch (error) {
-    throw new Error("Error updating category: " + error.message);
-  }
+const updateRecord = database.updateRecord(
+  { where: { categoryId: categoryId } },
+  updatedCategoryData
+);
+
+const [err, result] = await to(updateRecord);
+
+if (err) TE(err.errors[0] ? err.errors[0].message : err);
+
+if (!result) TE("Result not found");
+
+const category = await database.findOneById(categoryId);
+
+return category;
 };
+
+
 
 // Function to delete a category by its ID
  const deleteCategoryById = async (categoryId) => {
-  try {
-    const category = await categories.findByPk(categoryId);
-    if (!category) {
-      throw new Error("Category not found");
-    }
-    await category.destroy();
-    return { message: "Category deleted successfully" };
-  } catch (error) {
-    throw new Error("Error deleting category: " + error.message);
-  }
+const deleteRecord = database.deleteSingleRecord(categoryId);
+
+  const [err, result] = await to(deleteRecord);
+
+  if (err) TE(err);
+
+  if (!result) TE("Result not found");
+
+  return result;
 };
+
+
 
 // Function to map a category name to its ID
  const mapCategoryNameToId = async (categoryName) => {
@@ -126,7 +139,7 @@ import sequelize from "../../../config/database.js";
 
 
 
-export {
+export  {
   generateCategoryId,
   getAllCategories,
   getCategoryById,

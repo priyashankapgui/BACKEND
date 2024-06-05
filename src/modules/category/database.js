@@ -6,47 +6,35 @@ const createSingleRecord = async (singleRecord) => {
   };
 
 
-  // const deleteSingleRecord = async (id) => {
-  //   const result = await Doctor.destroy({ where: { doctor_id: id } });
-  //   return result;
-  // };
+  const deleteSingleRecord = async (categoryId) => {
+    const result = await categories.destroy({ where: { categoryId: categoryId } });
+    return result;
+  };
   
-  // const updateMultipleRecords = async (query, updates) =>
-  //   await Doctor.update(updates, query);
+  const updateMultipleRecords = async (query, updates) =>
+    await categories.update(updates, query);
   
-  // const updateRecord = async (condition, dataNeedToUpdate) =>
-  //   await Doctor.update(dataNeedToUpdate, condition);
+  const updateRecord = async (condition, dataNeedToUpdate) =>
+    await categories.update(dataNeedToUpdate, condition);
   
-  // const findOneById = async (id) => {
-  //   return await Doctor.findByPk(id);
-  // };
+  const findOneById = async (categoryId) => {
+    return await categories.findByPk(categoryId);
+  };
   
-  // const findAll = async () => {
-  //   return await Doctor.findAll({
-  //     order: [["createdAt", "DESC"]],
-  //   });
-  // };
+  const findAll = async () => {
+    return await categories.findAll({
+      order: [["createdAt", "DESC"]],
+    });
+  };
   
-  // const findByQuery = async (query) => {
-  //   return await Doctor.findAll({
-  //     where: {
-  //       [Op.or]: [
-  //         { fname: { [Op.iLike]: `%${query}%` } },
-  //         { mname: { [Op.iLike]: `%${query}%` } },
-  //         { lname: { [Op.iLike]: `%${query}%` } },
-  //       ],
-  //     },
-  //   });
-  // };
   
   export default {
     Schema: categories,
-    //updateRecord: updateRecord,
-    //findOneById,
-    //findByQuery,
-    //findAll,
-    //updateMultipleRecords,
+    updateRecord: updateRecord,
+    findOneById,
+    findAll,
+    updateMultipleRecords,
     createSingleRecord,
-    //deleteSingleRecord,
+    deleteSingleRecord,
   };
   
