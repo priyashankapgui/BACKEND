@@ -10,11 +10,16 @@ import {
   getGRNsByBranchAndSupplier,
   //getGRNsByBranchNameService
 } from "../GRN/service.js";
+import * as GRNService from "../GRN/service.js"
 import { createProductGRNService, getGRNDetailsByProductId } from "../../modules/product_GRN/service.js";
 import { calculateTotalAmount } from '../../modules/product_GRN/service.js'; 
 import { updateProductQty } from "../productBatchSum/service.js";
 import suppliers from "../supplier/supplier.js";
 import branches from "../branch/branch.js";
+import { SUCCESS, ERROR } from "../../helper.js";
+import { Codes } from "../GRN/constants.js";
+
+const { SUC_CODES } = Codes;
 
 
 

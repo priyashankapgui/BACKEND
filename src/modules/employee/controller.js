@@ -8,6 +8,7 @@ import {
 } from "../employee/service.js";
 import { SECRET } from "../../../config/config.js";
 import jwt from "jsonwebtoken";
+import { handleSuperAdminResetPassword } from "../superAdmin/service.js";
 const ACCESS_TOKEN = SECRET.SECRET_KEY;
 
 export const getEmployees = async (req, res) => {
@@ -100,4 +101,38 @@ export const deleteEmployee = async (req, res) => {
     }
   }
 };
+
+export const resetEmployeePassword = async (req, res) => {
+  const { resetToken, newPassword, confirmPassword } = req.body;
+  if (!resetToken || !newPassword || !confirmPassword) {
+    res.status(400).json({ message: "Missing required fields" });
+    return;
+  }
+  if(newPassword !== confirmPassword){
+    res.status(400).json({ message: "Passwords do not match" });
+    return;
+  }
+  if(newPassword.length < 8 || newPassword.length > 64){
+    res.status(400).json({ message: "Invalid password format" });
+    return;
+  }
+  const decoded = jwt.verify(resetToken, ACCESS_TOKEN);
+  console.log(decoded);
+  const userId = decoded.userId;
+  try {
+    if(userId.startsWith("SA")){
+      handleSuperAdminResetPassword(userId, newPassword);
+    }
+    else{
+      handleEmployeeResetPassword(userId, newPassword);
+    }
+    res.status(200).json({ message: "Password reset successfully" });
+  } catch (error) {
+    if (error instanceof TypeError) {
+      res.status(400).json({ error: error.message });
+    } else {
+      res.status(500).json({ error: error.message });
+    }
+  }
+}
 
