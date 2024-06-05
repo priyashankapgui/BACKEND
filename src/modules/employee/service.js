@@ -9,29 +9,29 @@ import UserRole from "../userRole/userRole.js";
 const salt = bcrypt.genSaltSync(10);
 const { SECRET_KEY: ACCESS_TOKEN } = SECRET;
 
-export const generateEmployeeId = async () => {
-  try {
-    const latestEmployee = await Employee.findOne({
-      order: [['employeeId', 'DESC']],
-      attributes: ['employeeId'],
-    });
+// export const generateEmployeeId = async () => {
+//   try {
+//     const latestEmployee = await Employee.findOne({
+//       order: [['employeeId', 'DESC']],
+//       attributes: ['employeeId'],
+//     });
 
-    let newEmployeeId;
+//     let newEmployeeId;
 
-    if (latestEmployee && latestEmployee.employeeId) {
-      const numericPart = parseInt(latestEmployee.employeeId.substring(1), 10);
-      const incrementedNumericPart = numericPart + 1;
-      newEmployeeId = `E${incrementedNumericPart.toString().padStart(5, '0')}`;
-    } else {
-      newEmployeeId = 'E00001';
-    }
+//     if (latestEmployee && latestEmployee.employeeId) {
+//       const numericPart = parseInt(latestEmployee.employeeId.substring(1), 10);
+//       const incrementedNumericPart = numericPart + 1;
+//       newEmployeeId = `E${incrementedNumericPart.toString().padStart(5, '0')}`;
+//     } else {
+//       newEmployeeId = 'E00001';
+//     }
 
-    return newEmployeeId;
-  } catch (error) {
-    console.error('Error generating new employee ID:', error);
-    throw new Error('Could not generate new employee ID');
-  }
-}
+//     return newEmployeeId;
+//   } catch (error) {
+//     console.error('Error generating new employee ID:', error);
+//     throw new Error('Could not generate new employee ID');
+//   }
+// }
 
 export const getAllEmployees = async () => {
   try {
@@ -52,12 +52,11 @@ export const getEmployeeById = async (employeeId) => {
 };
 
 export const createEmployee = async (employee) => {
-  const newEmployeeId = await generateEmployeeId();
-  const { employeeName, email, password, branchName, phone, address, userRoleName } = employee;
-  console.log('employee:',employee);
+  // const newEmployeeId = await generateEmployeeId();
+  const { employeeId, employeeName, email, password, branchName, phone, address, userRoleName } = employee;
 
   // Check if the employeeId already exists
-  const existingEmployee = await Employee.findOne({ where: { employeeId: newEmployeeId } });
+  const existingEmployee = await Employee.findOne({ where: { employeeId: employeeId } });
   if (existingEmployee) {
     throw new Error("Employee ID already exists");
   }
@@ -89,7 +88,7 @@ export const createEmployee = async (employee) => {
   }
 
   // Validate password
-  if (!/^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,20}$/.test(password)) {
+  if (password.length < 8 || password.length > 64) {
     throw new Error("Invalid password format");
   }
 
@@ -101,7 +100,7 @@ export const createEmployee = async (employee) => {
   
   try {
     const newEmployee = await Employee.create({
-      employeeId: newEmployeeId,
+      employeeId,
       employeeName,
       email,
       password,
@@ -128,7 +127,6 @@ export const updateEmployeeById = async (employeeId, employeeData, role, branch)
   if (!employee) {
     throw new Error("Employee not found");
   }
-  console.log("hello:",employee);
   try{
   if (role == 1 || branch === branchRow.branchName) {
    
@@ -162,14 +160,14 @@ export const handleLogin = async (req, res) => {
   const { employeeId, password } = req.body;
 
   if (!employeeId || !password) {
-    return res.status(400).json({ message: "Username and password are required" });
+    return res.status(400).json({ error: "Username and password are required" });
   }
 
   try {
     // Find the user in the database based on the provided empID
     const user = await Employee.findOne({ where: { employeeId: employeeId } });
     if (!user) {
-      return res.status(404).json({ message: "Invalid Credentials" });
+      return res.status(404).json({ error: "Invalid Credentials" });
     }
 
     const storedPassword = user.password;
@@ -201,28 +199,31 @@ export const handleLogin = async (req, res) => {
         },
       });
     } else {
-      return res.status(401).json({ message: "Invalid Credentials" });
+      return res.status(401).json({ error: "Invalid Credentials" });
     }
   } catch (error) {
     console.error("Login error:", error);
-    return res.status(500).json({ message: "Internal server error" });
+    return res.status(500).json({ error: "Internal server error" });
   }
 };
 
 export const forgotPassword = async (req, res) => {
-  const { email } = req.body;
+  const { employeeId } = req.body;
 
-  if (!email) {
-    return res.status(400).json({ message: "Email is required" });
+  if (!employeeId) {
+    return res.status(400).json({ message: "employee ID is required" });
   }
 
   try {
-    const user = await Employee.findOne({ where: { email } });
+    const user = await Employee.findOne({ where: { employeeId: employeeId } });
     if (!user) {
       return res.status(404).json({ message: "Email not found" });
     } else {
       const passwordResetToken = jwt.sign(
-        { email: user.email },
+        {
+          userId: user.employeeId,
+          email: user.email,
+        },
         ACCESS_TOKEN,
         { expiresIn: "5m" }
       );
@@ -239,8 +240,14 @@ export const forgotPassword = async (req, res) => {
         },
       });
 
-      const templateParams = { resetLink };
+      
+      const templateParams = {
+        resetLink: resetLink,
+        receiver_name: user.employeeName,
+        receiver_email: user.email,
+      };
 
+      // Send email using EmailJS with the  template
       emailjs.send("service_kqwt4xi", "template_hbmw31c", templateParams).then(
         (response) => {
           console.log("SUCCESS!", response.status, response.text);
@@ -262,94 +269,16 @@ export const forgotPassword = async (req, res) => {
   }
 };
 
-export const passwordReset = async (req, res) => {
-  const { resetToken, newPassword, confirmPassword } = req.body;
-
-  if (!resetToken || !newPassword || !confirmPassword) {
-    return res.status(400).json({ message: "Missing required fields" });
+export const handleEmployeeResetPassword = async (userId, newPassword) => {
+  const user = await Employee.findByPk(userId);
+  if (!user) {
+    throw new TypeError("Employee ID not found");
   }
-
-  try {
-    const decoded = jwt.verify(resetToken, ACCESS_TOKEN);
-    const email = decoded.email;
-
-    const user = await Employee.findOne({ where: { email } });
-    if (!user) {
-      return res.status(404).json({ message: "Invalid Request" });
-    }
-
-    if (newPassword.length < 8 || newPassword.length > 20 ||
-        !/^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,20}$/.test(newPassword)) {
-      return res.status(400).json({ message: "Invalid password format" });
-    }
-
-    if (newPassword === user.password) {
-      return res.status(400).json({ message: "New password cannot be the same as old password" });
-    }
-
-    user.password = bcrypt.hashSync(newPassword, salt);
-    await user.save();
-
-    return res.status(200).json({ message: "Password reset successful" });
-  } catch (error) {
-    console.error("Password reset error:", error);
-    return res.status(500).json({ message: "Internal server error" });
+  const passwordMatch = await bcrypt.compare(newPassword, user.password);
+  if (passwordMatch) {
+    throw new TypeError("New password cannot be the same as the old password");
   }
-};
-
-export const verify = async (req, res) => {
-  res.status(200).json({
-    status: "success",
-    message: "User Verified",
-  });
-}
-
-export const verifyAdmin = async (req, res) => {
-  const authHeader = req.headers['authorization'];
-  const token = authHeader.split(' ')[1];
-
-  if (token == null) {
-    return res.sendStatus(401);
-  }
-
-  jwt.verify(token, ACCESS_TOKEN, (err, user) => {
-    if (err) {
-      return res.sendStatus(403);
-    }
-
-    if (user.role !== 'admin' && user.role !== 'superadmin') {
-      return res.status(403).json({ message: 'Forbidden' });
-    }
-
-    res.status(200).json({
-      status: "success",
-      message: "User Verified",
-    });
-  });
-}
-
-
-// Add this function definition in service.js
-export const verifySuperAdmin = async (req, res) => {
-  const authHeader = req.headers['authorization'];
-  const token = authHeader.split(' ')[1];
-
-  if (token == null) {
-    return res.sendStatus(401);
-  }
-
-  jwt.verify(token, ACCESS_TOKEN, (err, user) => {
-    if (err) {
-      return res.sendStatus(403);
-    }
-
-    if (user.role !== 'superadmin') {
-      return res.status(403).json({ message: 'Forbidden' });
-    }
-
-    res.status(200).json({
-      status: "success",
-      message: "User Verified",
-    });
-  });
+  user.password = newPassword;
+  await user.save();
+  return;
 };

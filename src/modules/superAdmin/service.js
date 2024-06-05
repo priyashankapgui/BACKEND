@@ -35,10 +35,9 @@ export const handleSuperAdminLogin = async (superAdminId, password) => {
         expiresIn: "8h",
       }
     );
-
     return { token: token, superAdmin: superAdmin };
   } catch (error) {
-    throw new Error("Error logging in: " + error.message);
+    throw new Error(error.message);
   }
 };
 
@@ -50,7 +49,9 @@ export const handleSuperAdminForgotPassword = async (userID) => {
     } else {
       const passwordResetToken = jwt.sign(
         {
+          userId: user.superAdminId,
           email: user.email,
+
         },
         ACCESS_TOKEN,
         {
@@ -69,6 +70,8 @@ export const handleSuperAdminForgotPassword = async (userID) => {
       });
       const templateParams = {
         resetLink: resetLink,
+        receiver_name: user.superAdminName,
+        receiver_email: user.email,
       };
     let data = {};
     // Send email using EmailJS with the  template
@@ -92,27 +95,18 @@ export const handleSuperAdminForgotPassword = async (userID) => {
   }
 };
 
-export const handleSuperAdminResetPassword = async (resetToken, newPassword, confirmPassword) => {
-      try {
-        if (!resetToken || !newPassword || !confirmPassword) {
-           throw new Error("Missing required fields");
-        }
-        const decoded = jwt.verify(resetToken, ACCESS_TOKEN);
-        const email = decoded.email;
-        const user = await SuperAdmin.findOne({ where: { email: email } });
-        if (!user) {
-          throw new Error("User not found");
-        }
-        if (newPassword === user.password) {
-          throw new Error("New password cannot be the same as old password");
-        }
-        user.password = newPassword;
-        await user.save();
-        return "Password reset successful";
-      } catch (error) {
-        console.error("Password reset error:", error);
-        throw new Error(error.message);
-      }
+export const handleSuperAdminResetPassword = async (userId, newPassword) => {
+  const user = await SuperAdmin.findOne({ where: { superAdminId: userId } });
+  if (!user) {
+    throw new TypeError("Super Admin ID not found");
+  }
+  const passwordMatch = await bcrypt.compare(newPassword, user.password);
+  if (passwordMatch) {
+    throw new TypeError("New password cannot be the same as the old password");
+  }
+  user.password = newPassword;
+  await user.save();
+  return;
 }
 
 export const updateSuperAdminById = async (superAdminID, updatedSuperAdminData) => {

@@ -141,6 +141,8 @@ export const handleLoginCustomer = async (req, res) => {
         
         const templateParams = {
           resetLink: resetLink,
+          receiver_name: user.firstName,
+          receiver_email: user.email,
         };
   
         // Send email using EmailJS with the  template

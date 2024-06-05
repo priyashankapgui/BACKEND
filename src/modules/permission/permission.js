@@ -10,10 +10,10 @@ const Permission = sequelize.define('permission', {
         references: {
             model: UserRole,
             key: 'userRoleId',
-            onDelete: 'CASCADE',
-            onUpdate: 'CASCADE'
         },
-        primaryKey: true
+        primaryKey: true,
+        onDelete: "CASCADE",
+        onUpdate: "CASCADE"
         
     },
     pageAccessId: {
@@ -22,10 +22,10 @@ const Permission = sequelize.define('permission', {
         references: {
             model: PageAccess,
             key: 'pageId',
-            onDelete: 'CASCADE',
-            onUpdate: 'CASCADE'
         },
-        primaryKey: true
+        primaryKey: true,
+        onDelete: "CASCADE",
+        onUpdate: "CASCADE"
     },
     
     }, 
