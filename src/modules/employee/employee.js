@@ -37,7 +37,7 @@ const Employee = sequelize.define('employee', {
 
     branchName: {
         type: DataTypes.STRING,
-        allowNull: true,
+        allowNull: false,
     },
     
     phone: {
@@ -60,7 +60,7 @@ const Employee = sequelize.define('employee', {
     },
     userRoleName: {
         type: DataTypes.STRING,
-        allowNull: true,
+        allowNull: false,
     },
 
 
@@ -70,6 +70,13 @@ const Employee = sequelize.define('employee', {
         tableName: 'employee',
         hooks: {
             async beforeCreate(employee) {
+                await UserRole.findOne({
+                    where: {
+                        userRoleId: employee.userRoleId
+                    }
+                }).then((userRole) => {
+                    employee.userRoleName = userRole.userRoleName;
+                });
                 await branches.findOne({
                     where: {
                         branchId: employee.branchId
@@ -78,26 +85,25 @@ const Employee = sequelize.define('employee', {
                     employee.branchName = branch.branchName;
                 });
             },
-
-            async beforeCreate(employee) {
-                await UserRole.findOne({
-                    where: {
-                        userRoleId: employee.userRoleId
-                    }
-                }).then((userRole) => {
-                    employee.userRoleName = userRole.userRoleName;
-                });
-            },
             
             async beforeSave(employee) {
                 if (employee.changed('password')) {
                     const saltRounds = bcrypt.genSaltSync(10); 
                     employee.password = await bcrypt.hash(employee.password, saltRounds);
                 }
-
+                // Check if branch and branchId are related
+                const relatedBranch = await branches.findOne({
+                    where: {
+                        branchId: employee.branchId
+                    }
+                });
+                if (relatedBranch.dataValues.branchName !== employee.branchName) {
+                    throw new Error('BranchName and branchId are not related');
+                }
+                },
             },
         },
-    });
+    );
     
 export default Employee;
   

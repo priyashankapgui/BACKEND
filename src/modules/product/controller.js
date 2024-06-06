@@ -2,21 +2,26 @@ import express from "express";
 import path from "path";
 import multer from "multer";
 import products from "../product/product.js";
-import { validateProduct } from "./validator.js";
+//import { validateProduct } from "./validator.js";
 import { mapCategoryNameToId } from "../../modules/category/service.js";
 import { getProductTotalQuantity } from "../productBatchSum/service.js";
-import {
-  getAllProducts,
-  getProductById,
-  addProduct,
-  searchProductsByName,
-  getProductsByCategoryName,
-  deleteProductById,
-  updateProductById,
-  getProductIdByProductNameService,
-  searchSuppliersByProductName,
-} from "../product/service.js";
+// import {
+//   getAllProducts,
+//   getProductById,
+//   addProduct,
+//   searchProductsByName,
+//   getProductsByCategoryName,
+//   deleteProductById,
+//   updateProductById,
+//   getProductIdByProductNameService,
+//   searchSuppliersByProductName,
+// } from "../product/service.js";
+import * as Service from "../product/service.js"
 import { mapSupplierNameToId } from "../supplier/service.js";
+import { SUCCESS, ERROR } from "../../helper.js";
+import { Codes } from "../category/constants.js";
+
+const { SUC_CODES } = Codes;
 
 
 
@@ -24,25 +29,32 @@ import { mapSupplierNameToId } from "../supplier/service.js";
 
 // Controller function to get all products
 export const getProducts = async (req, res) => {
-  try {
-    const products = await getAllProducts();
-    res.status(200).json(products);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
+//   try {
+//     const products = await getAllProducts();
+//     res.status(200).json(products);
+//   } catch (error) {
+//     res.status(500).json({ error: error.message });
+//   }
+// };
+try {
+  const result = await Service.getAllProducts(req.query);
+  SUCCESS(res, SUC_CODES, result, req.span);
+} catch (err) {
+  console.log(err);
+  ERROR(res, err, res.span);
+}
 };
 
 
 //Function to get product using productId
 export const getProduct = async (req, res) => {
-  const { productId } = req.query;
+  const productId = req.params.productId;
   
-  console.log("product",productId);
 
   try {
 
     // Fetch product by productId 
-    const result= await getProductById(productId);
+    const result= await Service.getProductById(productId);
     if (!result) {
       res.status(404).json({ error: "Product not found" });
       return;
@@ -64,7 +76,7 @@ export const getProductsByCategory = async (req, res) => {
 
   try {
     // Fetch products by categoryName and branchId
-    const results = await getProductsByCategoryName(categoryName);
+    const results = await Service.getProductsByCategoryName(categoryName);
     if (!results || results.length === 0) {
       res.status(404).json({ error: "No products found" });
       return;
@@ -83,7 +95,7 @@ export const updateProduct = async (req, res) => {
   const productId = req.params.productId;
   const updatedProductData = req.body;
   try {
-    const updatedProduct = await updateProductById(
+    const updatedProduct = await Service.updateProductById(
       productId,
       updatedProductData
     );
@@ -98,10 +110,9 @@ export const updateProduct = async (req, res) => {
 
 // Controller function to create a new product
 export const createProduct = async (req, res) => {
+  
   const {  productName, description, categoryName, barcode } = req.body;
-  console.log("data ", productName);
-  console.log("data1 ", categoryName);
-
+ 
   try {
     // Check if a file is uploaded
     if (!req.file) {
@@ -114,7 +125,7 @@ export const createProduct = async (req, res) => {
 
    const image = req.file.path;
       
-      const newProduct = await addProduct({
+      const newProduct = await Service.addProduct({
         
         productName,
         description,
@@ -136,7 +147,7 @@ export const createProduct = async (req, res) => {
 export const deleteProduct = async (req, res) => {
   const productId = req.params.productId;
   try {
-    await deleteProductById(productId);
+    await Service.deleteProductById(productId);
     res.status(200).json({ message: "Product deleted successfully" });
   } catch (error) {
     console.error("Error deleting product:", error);
