@@ -13,21 +13,31 @@ const generateBillNo = async (branchId) => {
 
     const branchName = branch.branchName;
     const branchPrefix = branchName.substring(0, 3).toUpperCase();
+    const currentYear = new Date().getFullYear();
+    const yearSuffix = currentYear.toString().slice(-2);
+
     const lastBill = await bill.findOne({
-        where: { branchId },
+        where: {
+            branchId,
+            billNo: {
+                [sequelize.Op.like]: `${branchPrefix}-B${yearSuffix}%`
+            }
+        },
         order: [['createdAt', 'DESC']],
     });
 
     let newBillNumber = 1;
     if (lastBill) {
         const lastBillNo = lastBill.billNo;
-        const lastBillNumber = parseInt(lastBillNo.split('-B')[1], 10);
+        const lastBillNumber = parseInt(lastBillNo.split('-B')[1].slice(2), 10);
         newBillNumber = lastBillNumber + 1;
     }
 
-    const billNo = `${branchPrefix}-B${newBillNumber.toString().padStart(5, '0')}`;
+    const billNo = `${branchPrefix}-B${yearSuffix}${newBillNumber.toString().padStart(6, '0')}`;
     return billNo;
 };
+
+
 
 export const getAllBillData = async () => {
     try {

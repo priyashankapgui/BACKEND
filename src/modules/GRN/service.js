@@ -9,7 +9,6 @@ import productGRN from '../product_GRN/product_GRN.js';
 import { Op } from 'sequelize';
 
 
-
 // Function to generate GRN number
 const generateGRNNumber = async (branchName) => {
   try {
@@ -19,13 +18,14 @@ const generateGRNNumber = async (branchName) => {
 
     // Extract the first three letters of the branch name
     const branchCode = branchName.substring(0, 3).toUpperCase();
+    const currentYear = new Date().getFullYear().toString().substring(2); // Get the last two digits of the current year
 
-    // Get the last GRN number for the specific branch from the database
-    const lastGRN = await getLastBranchGRNNumber(branchCode);
-    let lastNumber = 0; // Default to 0 if no previous GRN exists for the branch
+    // Get the last GRN number for the specific branch and year from the database
+    const lastGRN = await getLastBranchGRNNumber(branchCode, currentYear);
+    let lastNumber = 0; // Default to 0 if no previous GRN exists for the branch in the current year
 
     if (lastGRN) {
-      lastNumber = parseInt(lastGRN.split('GRN')[1]); // Extract the number part
+      lastNumber = parseInt(lastGRN.split('GRN')[1].substring(2)); // Extract the number part after the year digits
       if (isNaN(lastNumber)) {
         throw new Error("Invalid GRN number format");
       }
@@ -38,7 +38,7 @@ const generateGRNNumber = async (branchName) => {
     const paddedNumber = lastNumber.toString().padStart(5, '0');
 
     // Construct the GRN number
-    const GRN_NO = `${branchCode}-GRN${paddedNumber}`;
+    const GRN_NO = `${branchCode}-GRN${currentYear}${paddedNumber}`;
 
     return GRN_NO;
   } catch (error) {
@@ -46,14 +46,14 @@ const generateGRNNumber = async (branchName) => {
   }
 };
 
-// Function to get the last GRN number for a specific branch from the database
-const getLastBranchGRNNumber = async (branchCode) => {
+// Function to get the last GRN number for a specific branch and year from the database
+const getLastBranchGRNNumber = async (branchCode, currentYear) => {
   try {
-    // Fetch the latest GRN entry for the specific branch from the database
+    // Fetch the latest GRN entry for the specific branch and year from the database
     const latestGRN = await grn.findOne({
       where: {
         GRN_NO: {
-          [Op.startsWith]: `${branchCode}-GRN`
+          [Op.startsWith]: `${branchCode}-GRN${currentYear}`
         }
       },
       order: [['createdAt', 'DESC']] // Order by creation date in descending order to get the latest entry
@@ -67,11 +67,7 @@ const getLastBranchGRNNumber = async (branchCode) => {
   }
 };
 
-
-
- 
-
-//Function to create GRN 
+// Function to create GRN
 export const addGRN = async (invoiceNo, supplierId, branchName) => {
   try {
     const GRN_NO = await generateGRNNumber(branchName); // Generate GRN number
@@ -79,8 +75,7 @@ export const addGRN = async (invoiceNo, supplierId, branchName) => {
     const branchId = await mapBranchNameToId(branchName);
 
     if (!branchId) {
-      res.status(404).json({ error: "Branch not found" });
-      return;
+      throw new Error("Branch not found");
     }
 
     // Create new GRN entry
@@ -96,6 +91,7 @@ export const addGRN = async (invoiceNo, supplierId, branchName) => {
     throw new Error('Error creating GRN entry: ' + error.message);
   }
 };
+
 
 
 
