@@ -5,6 +5,7 @@ import products from "../product/product.js";
 //import { validateProduct } from "./validator.js";
 import { mapCategoryNameToId } from "../../modules/category/service.js";
 import { getProductTotalQuantity } from "../productBatchSum/service.js";
+import {getAllProducts} from "../product/service.js";
 // import {
 //   getAllProducts,
 //   getProductById,
@@ -29,21 +30,21 @@ const { SUC_CODES } = Codes;
 
 // Controller function to get all products
 export const getProducts = async (req, res) => {
-//   try {
-//     const products = await getAllProducts();
-//     res.status(200).json(products);
-//   } catch (error) {
-//     res.status(500).json({ error: error.message });
-//   }
-// };
-try {
-  const result = await Service.getAllProducts(req.query);
-  SUCCESS(res, SUC_CODES, result, req.span);
-} catch (err) {
-  console.log(err);
-  ERROR(res, err, res.span);
-}
+  try {
+    const products = await getAllProducts();
+    res.status(200).json(products);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 };
+// try {
+//   const result = await Service.getAllProducts(req.query);
+//   SUCCESS(res, SUC_CODES, result, req.span);
+// } catch (err) {
+//   console.log(err);
+//   ERROR(res, err, res.span);
+// }
+// };
 
 
 //Function to get product using productId
