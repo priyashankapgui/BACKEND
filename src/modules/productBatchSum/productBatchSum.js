@@ -28,12 +28,12 @@ const ProductBatchSum = sequelize.define('ProductBatchSum', {
     allowNull: true,
   },
   totalAvailableQty: {
-    type: DataTypes.INTEGER,
+    type: DataTypes.FLOAT,
     allowNull: false,
     defaultValue: 0,
   },
   discount: {
-    type: DataTypes.INTEGER,
+    type: DataTypes.FLOAT,
     allowNull: true,
     defaultValue: 0,
   },
@@ -64,6 +64,20 @@ const ProductBatchSum = sequelize.define('ProductBatchSum', {
 }, {
   tableName: 'product_batch_sum',
   timestamps: false,
+  indexes: [
+    {
+      unique: false,
+      fields: ['productId']
+    },
+    {
+      unique: false,
+      fields: ['batchNo']
+    },
+    {
+      unique: false,
+      fields: ['branchId']
+    }
+  ],
   hooks: {
     beforeCreate: async (productBatchSumInstance, options) => {
       await updateBranchName(productBatchSumInstance);

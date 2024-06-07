@@ -32,7 +32,7 @@ const productGRN = sequelize.define(
       primaryKey: true,
     }, 
     totalQty: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.FLOAT,
       allowNull: false,
     },
     purchasePrice: { 
@@ -44,7 +44,7 @@ const productGRN = sequelize.define(
       allowNull: false,
     },
     freeQty: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.FLOAT,
       allowNull: false,
     },
     expDate: {
@@ -56,7 +56,7 @@ const productGRN = sequelize.define(
       allowNull: false,
     },
     availableQty: { 
-      type: DataTypes.INTEGER,
+      type: DataTypes.FLOAT,
       allowNull: true,
     },
     

@@ -43,11 +43,7 @@ const bill = sequelize.define('bill', {
         type: DataTypes.STRING,
         allowNull: false,
     },
-    updatedAt: {
-        type: 'TIMESTAMP',
-        defaultValue: DataTypes.NOW,
-        allowNull: false,
-    },
+    
 }, {
     tableName: 'bill',
     timestamps: true,
