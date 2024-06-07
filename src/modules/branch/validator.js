@@ -5,7 +5,7 @@ const createBranchSchema = Joi.object({
   branchName: Joi.string().required(),
   address: Joi.string().required(),
   email: Joi.string().email().required(),
-  contactNumber: Joi.string().pattern(/^[0-9]{10,15}$/).required()
+  contactNumber: Joi.string().pattern(/^[0-9]{10}$/).required()
 });
 
 const updateBranchSchema = Joi.object({
