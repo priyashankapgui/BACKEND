@@ -25,7 +25,7 @@ import feedback from "./src/modules/feedback/feedback.js";
 import feedbackrouter from "./src/modules/feedback/routes.js";
 import cartProductRoutes from "./src/modules/cart_Product/routes.js"
 import billProductRouter from "./src/modules/bill_Product/routes.js";
-import ShoppingCart from "./src/modules/Cart_Customer/shoppingcart.js";
+import ShoppingCart from "./src/modules/cart_Customer/shoppingcart.js";
 import SuperAdmin from "./src/modules/superAdmin/superAdmin.js";
 import PageAccess from "./src/modules/pageAccess/pageAccess.js";
 import UserRole from "./src/modules/userRole/userRole.js";
@@ -34,6 +34,7 @@ import SuperAdminRouter from "./src/modules/superAdmin/routes.js";
 import PermissionRouter from "./src/modules/permission/routes.js";
 import UserRoleRouter from "./src/modules/userRole/routes.js";
 import PageAccessRouter from "./src/modules/pageAccess/routes.js";
+import cartRoutes from "./src/modules/cart_Product/routes.js"
 
 import Stripe from 'stripe';
 
@@ -68,7 +69,7 @@ app.use('/', SuperAdminRouter);
 app.use('/', PermissionRouter);
 app.use('/', UserRoleRouter);
 app.use('/', PageAccessRouter)
-
+app.use('/', cartRoutes);
 
 
 app.use("/api", Productrouter);
@@ -85,6 +86,7 @@ app.use('/api', feedback);
 app.use('/api', cartProductRoutes);
 app.use('/api', productBatchSumrouter);
 app.use('/api', billProductRouter);
+app.use('/api', cartRoutes);
 
 app.use('/Images', express.static('.src/Images'))
 

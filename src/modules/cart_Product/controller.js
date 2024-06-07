@@ -1,72 +1,70 @@
-import cartProductService from "../cart_Product/service.js";
+import ShoppingCart from '../cart_Customer/shoppingcart.js';
+import CartProduct from '../cart_Product/cartProduct.js';
 
-const createCartProduct = async (req, res) => {
+export const getCartItems = async (req, res) => {
   try {
-    const { shoppingcartCartId, productProductId, quantity } = req.body;
-    console.log("data",shoppingcartCartId)
-    const newCartProduct = await cartProductService.createCartProductservice(shoppingcartCartId, productProductId, quantity);
-    res.status(201).json(newCartProduct);
+    const cartItems = await CartProduct.findAll();
+    res.status(200).json(cartItems);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('Error fetching cart items:', error);
+    res.status(500).json({ message: 'Internal server error' });
   }
 };
 
-const getCartProducts = async (req, res) => {
+export const addToCart = async (req, res) => {
+  const { productId, productName, sellingPrice, quantity, discount } = req.body;
+
   try {
-    const cartProducts = await cartProductService.getCartProductsservice();
-    res.status(200).json(cartProducts);
+    const [cart, created] = await ShoppingCart.findOrCreate({ where: {} });
+    await CartProduct.create({
+      cartId: cart.cartId,
+      productId,
+      productName,
+      sellingPrice,
+      quantity,
+      discount,
+    });
+
+    res.status(201).json({ message: 'Product added to cart successfully' });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('Error adding to cart:', error);
+    res.status(500).json({ message: 'Internal server error' });
   }
 };
 
-const getCartProductById = async (req, res) => {
+export const updateCartItem = async (req, res) => {
+  const { productId } = req.params;
+  const { quantity } = req.body;
+
   try {
-    const { id } = req.params;
-    const cartProduct = await cartProductService.getCartProductByIdservice(id);
-    if (!cartProduct) {
-      res.status(404).json({ error: "Cart product not found" });
+    const cartProduct = await CartProduct.findOne({ where: { productId } });
+    if (cartProduct) {
+      cartProduct.quantity = quantity;
+      await cartProduct.save();
+      res.status(200).json({ message: 'Cart item updated successfully' });
     } else {
-      res.status(200).json(cartProduct);
+      res.status(404).json({ message: 'Cart item not found' });
     }
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('Error updating cart item:', error);
+    res.status(500).json({ message: 'Internal server error' });
   }
 };
 
-const updateCartProduct = async (req, res) => {
+export const deleteCartItem = async (req, res) => {
+  const { productId } = req.params;
+
   try {
-    const { id } = req.params;
-    const { quantity } = req.body;
-    const updatedCartProduct = await cartProductService.updateCartProductservice(id, quantity);
-    if (!updatedCartProduct) {
-      res.status(404).json({ error: "Cart product not found" });
+    const cartProduct = await CartProduct.findOne({ where: { productId } });
+    if (cartProduct) {
+      await cartProduct.destroy();
+      res.status(200).json({ message: 'Cart item deleted successfully' });
     } else {
-      res.status(200).json(updatedCartProduct);
+      res.status(404).json({ message: 'Cart item not found' });
     }
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('Error deleting cart item:', error);
+    res.status(500).json({ message: 'Internal server error' });
   }
 };
 
-const deleteCartProduct = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const deleted = await cartProductService.deleteCartProductservice(id);
-    if (!deleted) {
-      res.status(404).json({ error: "Cart product not found" });
-    } else {
-      res.status(204).json();
-    }
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-};
-
-export default {
-  createCartProduct,
-  getCartProducts,
-  getCartProductById,
-  updateCartProduct,
-  deleteCartProduct,
-};

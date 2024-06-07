@@ -5,7 +5,7 @@ import products from "../product/product.js";
 //import { validateProduct } from "./validator.js";
 import { mapCategoryNameToId } from "../../modules/category/service.js";
 import { getProductTotalQuantity } from "../productBatchSum/service.js";
-import {getAllProducts} from "../product/service.js";
+import * as productService from "./service.js"
 // import {
 //   getAllProducts,
 //   getProductById,
@@ -31,7 +31,7 @@ const { SUC_CODES } = Codes;
 // Controller function to get all products
 export const getProducts = async (req, res) => {
   try {
-    const products = await getAllProducts();
+    const products = await productService.getAllProducts();
     res.status(200).json(products);
   } catch (error) {
     res.status(500).json({ error: error.message });
