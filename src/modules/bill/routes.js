@@ -1,16 +1,14 @@
 import express from 'express';
-import {
-    getBillData,
-    getBillDataByNo,
-    addBillData,
-    cancelBillDataByNo
-} from "../bill/controller.js";
+import * as Controller from '../bill/controller.js';
+import Validator from '../bill/validator.js';
 
 const billRouter = express.Router();
 
-billRouter.get('/bills', getBillData);
-billRouter.get('/bills/:billNo', getBillDataByNo);
-billRouter.post('/bills', addBillData);
-billRouter.put('/bills/cancel/:billNo', cancelBillDataByNo);
+billRouter.get('/bills', Controller.getBillData);
+billRouter.get('/bills/:billNo', Controller.getBillDataByNo);
+billRouter.post('/bills', Validator.create, Controller.addBillData);
+billRouter.put('/bills/:billNo', Validator.update, Controller.updateCustomerDetails);
+billRouter.put('/bills/cancel/:billNo', Controller.cancelBillDataByNo);
+
 
 export default billRouter;

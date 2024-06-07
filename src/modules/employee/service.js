@@ -160,14 +160,14 @@ export const handleLogin = async (req, res) => {
   const { employeeId, password } = req.body;
 
   if (!employeeId || !password) {
-    return res.status(400).json({ message: "Username and password are required" });
+    return res.status(400).json({ error: "Username and password are required" });
   }
 
   try {
     // Find the user in the database based on the provided empID
     const user = await Employee.findOne({ where: { employeeId: employeeId } });
     if (!user) {
-      return res.status(404).json({ message: "Invalid Credentials" });
+      return res.status(404).json({ error: "Invalid Credentials" });
     }
 
     const storedPassword = user.password;
@@ -199,11 +199,11 @@ export const handleLogin = async (req, res) => {
         },
       });
     } else {
-      return res.status(401).json({ message: "Invalid Credentials" });
+      return res.status(401).json({ error: "Invalid Credentials" });
     }
   } catch (error) {
     console.error("Login error:", error);
-    return res.status(500).json({ message: "Internal server error" });
+    return res.status(500).json({ error: "Internal server error" });
   }
 };
 
@@ -270,7 +270,7 @@ export const forgotPassword = async (req, res) => {
 };
 
 export const handleEmployeeResetPassword = async (userId, newPassword) => {
-  const user = await Employee.findByPk({ where: { employeeId: userId } });
+  const user = await Employee.findByPk(userId);
   if (!user) {
     throw new TypeError("Employee ID not found");
   }
@@ -278,6 +278,7 @@ export const handleEmployeeResetPassword = async (userId, newPassword) => {
   if (passwordMatch) {
     throw new TypeError("New password cannot be the same as the old password");
   }
+  user.password = newPassword;
   await user.save();
   return;
 };

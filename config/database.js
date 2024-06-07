@@ -59,4 +59,4 @@ const sequelize = new Sequelize(DATABASE_NAME, DATABASE_USERNAME, DATABASE_PASSW
 
 export default sequelize;
 
- 
+

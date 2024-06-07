@@ -5,6 +5,7 @@ import {
   createEmployee,
   updateEmployeeById,
   deleteEmployeeById,
+  handleEmployeeResetPassword
 } from "../employee/service.js";
 import { SECRET } from "../../../config/config.js";
 import jwt from "jsonwebtoken";

@@ -1,6 +1,11 @@
 import sequelize from '../../../config/database.js';
+import { Op } from 'sequelize';
 import bill from '../bill/bill.js';
 import branches from '../branch/branch.js';
+import { SUCCESS, ERROR } from "../../helper.js";
+import { Codes } from "../bill/constants.js";
+
+const { SUC_CODES } = Codes;
 
 const generateBillNo = async (branchId) => {
     console.log(`Generating bill number for branchId: ${branchId}`);
@@ -13,19 +18,27 @@ const generateBillNo = async (branchId) => {
 
     const branchName = branch.branchName;
     const branchPrefix = branchName.substring(0, 3).toUpperCase();
+    const currentYear = new Date().getFullYear();
+    const yearSuffix = currentYear.toString().slice(-2);
+
     const lastBill = await bill.findOne({
-        where: { branchId },
+        where: {
+            branchId,
+            billNo: {
+                [Op.like]: `${branchPrefix}-B${yearSuffix}%`
+            }
+        },
         order: [['createdAt', 'DESC']],
     });
 
     let newBillNumber = 1;
     if (lastBill) {
         const lastBillNo = lastBill.billNo;
-        const lastBillNumber = parseInt(lastBillNo.split('-B')[1], 10);
+        const lastBillNumber = parseInt(lastBillNo.split('-B')[1].slice(2), 10);
         newBillNumber = lastBillNumber + 1;
     }
 
-    const billNo = `${branchPrefix}-B${newBillNumber.toString().padStart(5, '0')}`;
+    const billNo = `${branchPrefix}-B${yearSuffix}${newBillNumber.toString().padStart(6, '0')}`;
     return billNo;
 };
 
@@ -74,5 +87,21 @@ export const cancellbillDatabyNoService = async (billNo) => {
     } catch (error) {
         console.error('Error canceling bill:', error);
         throw new Error('Error canceling bill: ' + error.message);
+    }
+};
+
+export const updateCustomerDetailsByBillNo = async (billNo, customerData) => {
+    try {
+        const billToUpdate = await bill.findByPk(billNo);
+        if (!billToUpdate) {
+            throw new Error('Bill not found');
+        }
+        billToUpdate.customerName = customerData.customerName;
+        billToUpdate.contactNo = customerData.contactNo;
+        await billToUpdate.save();
+        return billToUpdate;
+    } catch (error) {
+        console.error('Error updating customer details:', error);
+        throw new Error('Error updating customer details: ' + error.message);
     }
 };
