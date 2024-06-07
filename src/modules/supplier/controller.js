@@ -1,4 +1,4 @@
-import * as SupplierService from "../supplier/service.js"
+import * as Service from "../supplier/service.js"
 import products from "../product/product.js";
 import { SUCCESS, ERROR } from "../../helper.js";
 import { Codes } from "../supplier/constants.js";
@@ -7,29 +7,111 @@ const { SUC_CODES } = Codes;
 
 // Controller function to get all suppliers
 export const getSuppliers = async (req, res) => {
-  try {
-    const suppliersReq = await SupplierService.getAllSuppliers();
-    res.status(200).json(suppliersReq);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
+try {
+  const result = await Service.getAllSuppliers(req.query);
+  SUCCESS(res, SUC_CODES, result, req.span);
+} catch (err) {
+  console.log(err);
+  ERROR(res, err, res.span);
+}
 };
 
 // Controller function to get a specific supplier by supplierID
 export const getSupplier = async (req, res) => {
-  const supplierId = req.params.supplierId;
-  console.log("supplier ha",supplierId);
+try {
+  const result = await Service.getSupplierById(req.params.supplierId);
+
+  SUCCESS(res, SUC_CODES, result, req.span);
+} catch (error) {
+  console.log(error);
+
+  ERROR(res, error, res.span);
+}
+};
+
+
+
+// Controller function  to update an existing supplier
+export const updateSupplier = async (req, res) => {
+try {
+  const result = await Service.updateSupplierById(req.params.supplierId, req.body);
+
+  SUCCESS(res, SUC_CODES, result, req.span);
+} catch (error) {
+  console.log(error);
+
+  ERROR(res, error, res.span);
+}
+};
+
+
+// Controller function to delete an existing supplier
+export const deleteSupplier = async (req, res) => {
+
+try {
+  const result = await Service.deleteSupplierById(req.params.supplierId);
+
+  SUCCESS(res, SUC_CODES, result, req.span);
+} catch (error) {
+  console.log(error);
+
+  ERROR(res, error, res.span);
+}
+};
+
+
+//function to create supplier
+export const createSupplier = async (req, res) => {
   try {
-    const supplier = await SupplierService.getSupplierById(supplierId);
-    if (!supplier) {
-      res.status(404).json({ error: "Supplier not found" });
-      return;
-    }
-    res.status(200).json(supplier);
+    const result = await Service.addSupplier(req.body);
+    SUCCESS(res, SUC_CODES, result, req.span);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    ERROR(res, error, res.span);
   }
 };
+
+
+
+
+
+
+
+
+
+
+
+
+// const addSupplier = async (req, res) => {
+//   const { supplierName, regNo, email, address, contactNo, branchName } = req.body;
+
+//   try {
+//     // Map branch name to branchId
+//     const branchId = await mapBranchNameToId(branchName);
+
+//     // Create new supplier record
+//     const newSupplier = await suppliers.create({
+//       supplierName,
+//       regNo,
+//       email,
+//       address,
+//       contactNo
+//     });
+
+//     // Create new record in branch_Supplier table
+//     await branchSupplier.create({
+//       branchId,
+//       supplierId: newSupplier.supplierId
+//     });
+
+//     res.status(201).json({ message: 'Supplier added successfully' });
+//   } catch (error) {
+//     res.status(500).json({ error: error.message });
+//   }
+// };
+
+// export default addSupplier;
+
+
 
 
 //Controller function to get a specific supplier by SupplierName
@@ -139,83 +221,3 @@ export const getSupplier = async (req, res) => {
 //     res.status(500).json({ error: error.message });
 //   }
 // };
-
-// Controller function  to update an existing supplier
-export const updateSupplier = async (req, res) => {
-  const supplierId = req.params.supplierId;
-  const updatedSupplierData = req.body;
-  try {
-    const updatedSupplier = await SupplierService.updateSupplierById(
-      supplierId,
-      updatedSupplierData
-    );
-    res.status(200).json(updatedSupplier);
-  } catch (error) {
-    console.error("Error updating supplier:", error);
-    res.status(500).json({ error: error.message });
-  }
-};
-
-// Controller function to delete an existing supplier
-export const deleteSupplier = async (req, res) => {
-  const supplierId = req.params.supplierId;
-  try {
-    await SupplierService.deleteSupplierById(supplierId);
-    res.status(204).json({ message: "Supplier deleted succesfully" });
-  } catch (error) {
-    console.error("Error deleting supplier:", error);
-    res.status(500).json({ error: "Internal server error" });
-  }
-};
-
-
-
-export const createSupplier = async (req, res) => {
-  try {
-    const result = await SupplierService.addSupplier(req.body);
-    SUCCESS(res, SUC_CODES, result, req.span);
-  } catch (error) {
-    ERROR(res, error, res.span);
-  }
-};
-
-
-
-
-
-
-
-
-
-
-
-
-// const addSupplier = async (req, res) => {
-//   const { supplierName, regNo, email, address, contactNo, branchName } = req.body;
-
-//   try {
-//     // Map branch name to branchId
-//     const branchId = await mapBranchNameToId(branchName);
-
-//     // Create new supplier record
-//     const newSupplier = await suppliers.create({
-//       supplierName,
-//       regNo,
-//       email,
-//       address,
-//       contactNo
-//     });
-
-//     // Create new record in branch_Supplier table
-//     await branchSupplier.create({
-//       branchId,
-//       supplierId: newSupplier.supplierId
-//     });
-
-//     res.status(201).json({ message: 'Supplier added successfully' });
-//   } catch (error) {
-//     res.status(500).json({ error: error.message });
-//   }
-// };
-
-// export default addSupplier;

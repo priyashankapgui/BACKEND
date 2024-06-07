@@ -5,7 +5,7 @@ import grn from '../GRN/grn.js';
 
   export default  {
     Controller: GRNController,
-    Service: GRNService,
+    GRNService: GRNService,
     Routes: GRNRoutes,
     GRN: grn,
   };

@@ -1,13 +1,9 @@
 import { Op } from "sequelize";
 import { to, TE } from "../../helper.js";
-import sequelize from "../../../config/database.js";
 import suppliers from "../supplier/supplier.js";
+import categories from "../category/category.js";
 import { mapBranchNameToId } from "../../modules/branch/service.js";
-import database from "../supplier/database.js";
-//import branchSupplier from "../branch_Supplier/branch_Supplier.js";
 
-//import products from "../product/product.js";
-//import productSupplier from "../product_Supplier/product_Supplier.js";
 
 
 //Function to generate supplieId
@@ -46,25 +42,113 @@ export const generateSupplierID = async () => {
 
 // Function to retrieve all suppliers from the database
 export const getAllSuppliers = async () => {
-  try {
-    const suppliersReq = await suppliers.findAll();
-    return suppliersReq;
-  } catch (error) {
-    throw new Error("Error retrieving suppliers: " + error.message);
-  }
-};
+  const getRecords = suppliers.findAll({order: [["createdAt", "DESC"]],});
+    const [err, result] = await to(getRecords);
+    if (err) TE(err);
+    if (!result) TE("Results not found");
+    return result;
+  };
 
 
 
 // Function to retrieve a supplier by its ID
 export const getSupplierById = async (supplierId) => {
+ 
+  const getRecord = suppliers.findByPk(supplierId);
+  const [err, result] = await to(getRecord);
+  if (err) TE(err);
+  if (!result) TE("Result not found");
+  return result;
+  };
+
+
+
+
+//function to create supplier
+export const addSupplier = async (data) => {
+ 
+  const supplierId = await generateSupplierID();
+  console.log("supplierId",supplierId);
+
+  const createSingleRecord = suppliers.create({ supplierId, ...data });
+
+  const [err, result] = await to (createSingleRecord);
+
+  if (err) TE(err.errors[0] ? err.errors[0].message : err);
+
+if (!result) TE("Result not found");
+
+return result;
+
+};
+
+
+
+
+// Function to update a supplier by its ID
+export const updateSupplierById = async (supplierId, updatedSupplierData) => {
+  const updateRecord = suppliers.update(updatedSupplierData, {
+    where: { supplierId: supplierId },
+    returning: true, // Ensure it returns the updated record
+    plain: true
+  });
+
+  const [err, result] = await to(updateRecord);
+  if (err) TE(err);
+  if (!result) TE("Result not found");
+  
+  // Fetch the updated record to return
+  const updatedRecord = await suppliers.findByPk(supplierId);
+  if (!updatedRecord) TE("Updated result not found");
+
+  return updatedRecord;
+};
+
+
+// Function to delete a supplier by its ID
+export const deleteSupplierById = async (supplierId) => {
+  const deleteRecord = suppliers.destroy({ where: { supplierId: supplierId } });
+
+  const [err, result] = await to(deleteRecord);
+  if (err) TE(err);
+  if (result === 0) TE("Supplier not found or already deleted");
+
+  return { message: 'Supplier successfully deleted' };
+};
+
+
+
+//function to map supplierId into supplierName
+export const mapSupplierNameToId = async (supplierName) => {
   try {
-    const supplier = await suppliers.findByPk(supplierId);
-    return supplier;
+    console.log("Mapping supplier name to ID:", supplierName);
+    const supplier = await suppliers.findOne({
+      where: { supplierName: supplierName },
+    });
+    if (supplier) {
+      return supplier.supplierId;
+    } else {
+      throw new Error("Supplier not found");
+    }
   } catch (error) {
-    throw new Error("Error fetching supplier: " + error.message);
+    console.error("Error mapping supplier name to ID:", error);
+    throw new Error("Error mapping supplier name to ID: " + error.message);
   }
 };
+
+
+
+
+
+ 
+
+
+
+
+
+
+
+
 
 // Function to retrieve a supplier by its supplierName
 // export const searchSupplierByName = async (supplierName) => {
@@ -150,82 +234,6 @@ export const getSupplierById = async (supplierId) => {
 //     throw new Error("Error getting suppliers by product ID");
 //   }
 // };
-
-
-
-// Function to update a supplier by its ID
-export const updateSupplierById = async (supplierId, updatedSupplierData) => {
-  try {
-    const supplier = await suppliers.findByPk(supplierId);
-    if (!supplier) {
-      throw new Error("Supplier not found");
-    }
-    await supplier.update(updatedSupplierData);
-    return supplier;
-  } catch (error) {
-    throw new Error("Error updating supplier: " + error.message);
-  }
-};
-
-// Function to delete a supplier by its ID
-export const deleteSupplierById = async (supplierId) => {
-  try {
-    const supplier = await suppliers.findByPk(supplierId);
-    if (!supplier) {
-      throw new Error("Supplier not found");
-    }
-    await supplier.destroy();
-    return { message: "Supplier deleted successfully" };
-  } catch (error) {
-    throw new Error("Error deleting supplier: " + error.message);
-  }
-};
-
-
-export const mapSupplierNameToId = async (supplierName) => {
-  try {
-    console.log("Mapping supplier name to ID:", supplierName);
-    const supplier = await suppliers.findOne({
-      where: { supplierName: supplierName },
-    });
-    if (supplier) {
-      return supplier.supplierId;
-    } else {
-      throw new Error("Supplier not found");
-    }
-  } catch (error) {
-    console.error("Error mapping supplier name to ID:", error);
-    throw new Error("Error mapping supplier name to ID: " + error.message);
-  }
-};
-
-
-
-export const addSupplier = async (data) => {
- 
-    const supplierId = await generateSupplierID();
-    console.log("supplierId",supplierId);
-
-    const createSingleRecord = database.createSingleRecord({ supplierId, ...data });
-
-    const [err, result] = await to (createSingleRecord);
-
-    if (err) TE(err.errors[0] ? err.errors[0].message : err);
-
-  if (!result) TE("Result not found");
-
-  return result;
-  
-};
-
- 
-
-
-
-
-
-
-
 
 
 

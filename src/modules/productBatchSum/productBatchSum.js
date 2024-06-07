@@ -4,7 +4,7 @@ import productGRN from '../../modules/product_GRN/product_GRN.js';
 import branches from '../branch/branch.js';
 import products from '../product/product.js';
 
-const productBatchSum = sequelize.define('productBatchSum', {
+const ProductBatchSum = sequelize.define('ProductBatchSum', {
   productId: {
     type: DataTypes.STRING,
     allowNull: false,
@@ -22,9 +22,6 @@ const productBatchSum = sequelize.define('productBatchSum', {
     type: DataTypes.STRING,
     allowNull: true,
     primaryKey: true,
-    references: {
-      model: productGRN
-    },
   },
   barcode: {
     type: DataTypes.STRING,
@@ -69,7 +66,6 @@ const productBatchSum = sequelize.define('productBatchSum', {
   timestamps: false,
   hooks: {
     beforeCreate: async (productBatchSumInstance, options) => {
-      console.log('Before Create Hook Called');
       await updateBranchName(productBatchSumInstance);
       await updateProductInfo(productBatchSumInstance);
     },
@@ -81,26 +77,38 @@ const productBatchSum = sequelize.define('productBatchSum', {
 });
 
 // Relationship between productBatchSum and branches
-productBatchSum.belongsTo(branches, { foreignKey: 'branchId' });
+ProductBatchSum.belongsTo(branches, { foreignKey: 'branchId' });
 
 // Function to update branchName
 const updateBranchName = async (productBatchSumInstance) => {
-  const branch = await branches.findByPk(productBatchSumInstance.branchId);
-  if (branch) {
-    productBatchSumInstance.branchName = branch.branchName;
+  try {
+    const branch = await branches.findByPk(productBatchSumInstance.branchId);
+    if (branch) {
+      productBatchSumInstance.branchName = branch.branchName;
+    } else {
+      throw new Error('Branch not found');
+    }
+  } catch (error) {
+    console.error('Error fetching branch:', error);
   }
 };
 
 // Function to update product info
 const updateProductInfo = async (productBatchSumInstance) => {
-  const productInstance = await products.findOne({
-    where: {
-      productId: productBatchSumInstance.productId,
-    },
-  });
-  if (productInstance) {
-    productBatchSumInstance.productName = productInstance.productName;
+  try {
+    const productInstance = await products.findOne({
+      where: {
+        productId: productBatchSumInstance.productId,
+      },
+    });
+    if (productInstance) {
+      productBatchSumInstance.productName = productInstance.productName;
+    } else {
+      throw new Error('Product not found');
+    }
+  } catch (error) {
+    console.error('Error fetching product:', error);
   }
 };
 
-export default productBatchSum;
+export default ProductBatchSum;
