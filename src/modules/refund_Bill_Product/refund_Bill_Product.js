@@ -42,7 +42,7 @@ const refund_Bill_Product = sequelize.define('refund_Bill_Product', {
         allowNull: false
     },
     returnQty: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.FLOAT,
         allowNull: false,
     },
     returnAmount: {
