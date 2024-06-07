@@ -1,24 +1,12 @@
 import express from 'express';
-import {
-    addBillProductController,
-    getAllBillProductsController,
-    getBillProductsByBillNoController,
-    getBillProductsByProductIdController,
-    updateBillProductController,
-    deleteBillProductController
-} from './controller.js';
+import * as Controller from './controller.js';
+import Validator from './validator.js';
 
 const billProductRouter = express.Router();
 
-billProductRouter.post('/billProducts', addBillProductController);
-billProductRouter.get('/billProducts', getAllBillProductsController);
-billProductRouter.get('/billProducts/bill/:billNo', getBillProductsByBillNoController);
-billProductRouter.get('/billProducts/product/:productId', getBillProductsByProductIdController);
-billProductRouter.put('/billProducts/:billNo/:productId', updateBillProductController);
-billProductRouter.delete('/billProducts/:billNo/:productId', deleteBillProductController);
+billProductRouter.post('/bill-products', Validator.create, Controller.addBillProductController);
+billProductRouter.get('/bill-products', Controller.getAllBillProductsController);
+billProductRouter.get('/bill-products/:billNo', Controller.getBillProductsByBillNoController);
+billProductRouter.get('/bill-products/product/:productId', Controller.getBillProductsByProductIdController);
 
 export default billProductRouter;
-
-
-
-
