@@ -1,6 +1,11 @@
 import sequelize from '../../../config/database.js';
+import { Op } from 'sequelize';
 import bill from '../bill/bill.js';
 import branches from '../branch/branch.js';
+import { SUCCESS, ERROR } from "../../helper.js";
+import { Codes } from "../bill/constants.js";
+
+const { SUC_CODES } = Codes;
 
 const generateBillNo = async (branchId) => {
     console.log(`Generating bill number for branchId: ${branchId}`);
@@ -20,7 +25,7 @@ const generateBillNo = async (branchId) => {
         where: {
             branchId,
             billNo: {
-                [sequelize.Op.like]: `${branchPrefix}-B${yearSuffix}%`
+                [Op.like]: `${branchPrefix}-B${yearSuffix}%`
             }
         },
         order: [['createdAt', 'DESC']],
@@ -36,8 +41,6 @@ const generateBillNo = async (branchId) => {
     const billNo = `${branchPrefix}-B${yearSuffix}${newBillNumber.toString().padStart(6, '0')}`;
     return billNo;
 };
-
-
 
 export const getAllBillData = async () => {
     try {
@@ -84,5 +87,21 @@ export const cancellbillDatabyNoService = async (billNo) => {
     } catch (error) {
         console.error('Error canceling bill:', error);
         throw new Error('Error canceling bill: ' + error.message);
+    }
+};
+
+export const updateCustomerDetailsByBillNo = async (billNo, customerData) => {
+    try {
+        const billToUpdate = await bill.findByPk(billNo);
+        if (!billToUpdate) {
+            throw new Error('Bill not found');
+        }
+        billToUpdate.customerName = customerData.customerName;
+        billToUpdate.contactNo = customerData.contactNo;
+        await billToUpdate.save();
+        return billToUpdate;
+    } catch (error) {
+        console.error('Error updating customer details:', error);
+        throw new Error('Error updating customer details: ' + error.message);
     }
 };

@@ -21,6 +21,10 @@ const productBatchSum = sequelize.define('productBatchSum', {
   batchNo: {
     type: DataTypes.STRING,
     allowNull: true,
+    primaryKey: true,
+    references: {
+      model: productGRN
+    },
   },
   barcode: {
     type: DataTypes.STRING,
