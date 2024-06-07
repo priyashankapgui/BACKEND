@@ -1,7 +1,7 @@
 import Joi from "joi";
 import { VALIDATION_ERROR } from "../../helper.js";
 
-const supplierSchema = Joi.object({
+const creatSupplierSchema = Joi.object({
   supplierName: Joi.string().required(),
   regNo: Joi.string().required(),
   email: Joi.string().email().required(),
@@ -9,9 +9,17 @@ const supplierSchema = Joi.object({
   contactNo: Joi.string().required(),
 });
 
+const updateSupplierSchema = Joi.object({
+  supplierName: Joi.string().optional(),
+  regNo: Joi.string().optional(),
+  email: Joi.string().email().optional(),
+  address: Joi.string().optional(),
+  contactNo: Joi.string().optional(),
+});
+
 const create = async (req, res, next) => {
   try {
-    await supplierSchema.validateAsync(req.body);
+    await creatSupplierSchema.validateAsync(req.body);
     next();
   } catch (error) {
     VALIDATION_ERROR(res, error);
@@ -21,7 +29,7 @@ const create = async (req, res, next) => {
 
 const update = async (req, res, next) => {
   try {
-    await supplierSchema.validateAsync(req.body);
+    await updateSupplierSchema.validateAsync(req.body);
     next();
   } catch (error) {
     VALIDATION_ERROR(res, error);
