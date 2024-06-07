@@ -1,5 +1,4 @@
-
-const { VALIDATION_ERROR } = require('../../helper');
+import {VALIDATION_ERROR} from "../../helper.js"
 import Joi from 'joi';
 
 const createproductSchema = Joi.object({
@@ -7,7 +6,7 @@ const createproductSchema = Joi.object({
   description: Joi.string().allow(null, ''),
   categoryName: Joi.string().required(),
   barcode: Joi.string().allow(null, ''),
-  // Assuming req.file.path is included in a separate validation for file upload
+  
 });
 
 const updateproductSchema = Joi.object({
@@ -15,24 +14,12 @@ const updateproductSchema = Joi.object({
   description: Joi.string().optional(),
   categoryName: Joi.string().optional(),
   barcode: Joi.string().optional(),
-  // Assuming req.file.path is included in a separate validation for file upload
+  
 });
 
 
 
 
-// Validation middleware
-// export const validateProduct = async (req, res, next) => {
-//   try {
-//     await productSchema.validateAsync(req.body);
-//     if (!req.file) {
-//       return res.status(400).json({ error: 'No file uploaded' });
-//     }
-//     next();
-//   } catch (error) {
-//     VALIDATION_ERROR(res, error);
-//   }
-// };
 
 const validateProductCreate = async (req, res, next) => {
   try {
@@ -50,9 +37,7 @@ const validateProductCreate = async (req, res, next) => {
 const validateProductUpdate = async (req, res, next) => {
   try {
     await updateproductSchema.validateAsync(req.body);
-    if (!req.file) {
-      return res.status(400).json({ error: 'No file uploaded' });
-    }
+    
     next();
   } catch (error) {
     VALIDATION_ERROR(res, error);

@@ -33,8 +33,6 @@ try {
 
 
 
-
-
 // Controller function to create a new category
 export const createCategory = async (req, res) => {
   try {

@@ -1,6 +1,5 @@
 import { to, TE } from "../../helper.js";
 import categories from "../category/category.js";
-import database from "../category/database.js";
 import sequelize from "../../../config/database.js";
 
 
@@ -39,7 +38,7 @@ import sequelize from "../../../config/database.js";
 // Function to get all categories
  const getAllCategories = async (params) => {
 
-    const getRecords = database.findAll();
+    const getRecords = categories.findAll({order: [["createdAt", "DESC"]],});
     const [err, result] = await to(getRecords);
     if (err) TE(err);
     if (!result) TE("Results not found");
@@ -51,7 +50,7 @@ import sequelize from "../../../config/database.js";
 // Function to get a category by its ID
  const getCategoryById = async (categoryId) => {
  
-const getRecord = database.findOneById(categoryId);
+const getRecord = categories.findByPk(categoryId);
 const [err, result] = await to(getRecord);
 if (err) TE(err);
 if (!result) TE("Result not found");
@@ -64,53 +63,47 @@ return result;
  const addCategory = async (data) => {
   
     const categoryId = await generateCategoryId();
-    
-    const createSingleRecord = database.createSingleRecord({ categoryId, ...data });
-
+    const createSingleRecord = categories.create({ categoryId, ...data });
     const [err, result] = await to (createSingleRecord);
 
-    if (err) TE(err.errors[0] ? err.errors[0].message : err);
-
+  if (err) TE(err.errors[0] ? err.errors[0].message : err);
   if (!result) TE("Result not found");
-
   return result;
+};
+
+
+//Function to update category
+const updateCategoryById = async (categoryId, updatedCategoryData) => {
+  const updateRecord = categories.update(updatedCategoryData, {
+    where: { categoryId: categoryId },
+    returning: true, // Ensure it returns the updated record
+    plain: true
+  });
+
+  const [err, result] = await to(updateRecord);
+  if (err) TE(err);
+  if (!result) TE("Result not found");
   
- 
+  // Fetch the updated record to return
+  const updatedRecord = await categories.findByPk(categoryId);
+  if (!updatedRecord) TE("Updated result not found");
+
+  return updatedRecord;
 };
 
 
-
-// Function to update a category by its ID
- const updateCategoryById = async (categoryId, updatedCategoryData) => {
-const updateRecord = database.updateRecord(
-  { where: { categoryId: categoryId } },
-  updatedCategoryData
-);
-
-const [err, result] = await to(updateRecord);
-
-if (err) TE(err.errors[0] ? err.errors[0].message : err);
-
-if (!result) TE("Result not found");
-
-const category = await database.findOneById(categoryId);
-
-return category;
-};
 
 
 
 // Function to delete a category by its ID
- const deleteCategoryById = async (categoryId) => {
-const deleteRecord = database.deleteSingleRecord(categoryId);
+const deleteCategoryById = async (categoryId) => {
+  const deleteRecord = categories.destroy({ where: { categoryId: categoryId } });
 
   const [err, result] = await to(deleteRecord);
-
   if (err) TE(err);
+  if (result === 0) TE("Category not found or already deleted");
 
-  if (!result) TE("Result not found");
-
-  return result;
+  return { message: 'Category successfully deleted' };
 };
 
 
@@ -148,3 +141,32 @@ export  {
   deleteCategoryById,
   mapCategoryNameToId,
 };
+
+
+
+
+
+
+// Function to update a category by its ID
+//  const updateCategoryById = async (categoryId, updatedCategoryData) => {
+  
+//     const category = await categories.findByPk(categoryId);
+//     if (!category) {
+//       return null;
+//     }
+//     const updatedData = await categories.update(updatedCategoryData, {
+//       where: { categoryId: categoryId } // Adding the where clause
+//     });
+// // const updateRecord = categories.update(
+// //   { where: { categoryId: categoryId } },
+// //   updatedCategoryData
+// // );
+
+// const [err, result] = await to(updatedData);
+
+// if (err) TE(err.errors[0] ? err.errors[0].message : err);
+
+// if (!result) TE("Result not found");
+
+// return updatedData;
+// };
