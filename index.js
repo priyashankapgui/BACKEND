@@ -27,6 +27,7 @@ import feedbackrouter from "./src/modules/feedback/routes.js";
 import cartProductRoutes from "./src/modules/cart_Product/routes.js"
 import billProductRouter from "./src/modules/bill_Product/routes.js";
 import ShoppingCart from "./src/modules/Cart_Customer/shoppingcart.js";
+<<<<<<< Updated upstream
 import SuperAdmin from "./src/modules/superAdmin/superAdmin.js";
 import PageAccess from "./src/modules/pageAccess/pageAccess.js";
 import UserRole from "./src/modules/userRole/userRole.js";
@@ -36,6 +37,10 @@ import PermissionRouter from "./src/modules/permission/routes.js";
 import UserRoleRouter from "./src/modules/userRole/routes.js";
 import PageAccessRouter from "./src/modules/pageAccess/routes.js";
 
+=======
+import PermissionRouter from "./src/modules/permission/routes.js";
+import SuperAdminRouter from "./src/modules/superAdmin/routes.js";
+>>>>>>> Stashed changes
 import Stripe from 'stripe';
 
 
@@ -63,12 +68,17 @@ app.use('/', feedbackrouter);
 app.use('/', cartProductRoutes);
 app.use('/', productBatchSumrouter);
 app.use('/', billProductRouter);
+<<<<<<< Updated upstream
 app.use('/', productBatchSumrouter);
 app.use('/', SuperAdminRouter);
 app.use('/', PermissionRouter);
 app.use('/', UserRoleRouter);
 app.use('/', PageAccessRouter)
 
+=======
+app.use('/', PermissionRouter);
+app.use('/', SuperAdminRouter);
+>>>>>>> Stashed changes
 
 
 app.use("/api", Productrouter);
@@ -85,6 +95,8 @@ app.use('/api', feedback);
 app.use('/api', cartProductRoutes);
 app.use('/api', productBatchSumrouter);
 app.use('/api', billProductRouter);
+app.use('/api', PermissionRouter);
+app.use('/api', SuperAdminRouter);
 
 app.use('/Images', express.static('.src/Images'))
 
