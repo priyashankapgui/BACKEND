@@ -16,7 +16,7 @@ import supplierRouter from "./src/modules/supplier/routes.js";
 import Branchrouter from "./src/modules/branch/routes.js";
 import GRNRouter from "./src/modules/GRN/routes.js";
 //import productSupplierRouter from './src/modules/product_Supplier/routes.js';
-import productGRNRouter from "./src/modules/product_GRN/routes.js";
+//import productGRNRouter from "./src/modules/product_GRN/routes.js";
 //import branchSupplierRouter from "./src/modules/branch_Supplier/routes.js";
 import { setupAssociations } from "./src/modules/associationSetup.js";
 import listedProductsRouter from "./src/modules/listedProducts/routes.js";
@@ -27,7 +27,6 @@ import feedbackrouter from "./src/modules/feedback/routes.js";
 import cartProductRoutes from "./src/modules/cart_Product/routes.js"
 import billProductRouter from "./src/modules/bill_Product/routes.js";
 import ShoppingCart from "./src/modules/Cart_Customer/shoppingcart.js";
-<<<<<<< Updated upstream
 import SuperAdmin from "./src/modules/superAdmin/superAdmin.js";
 import PageAccess from "./src/modules/pageAccess/pageAccess.js";
 import UserRole from "./src/modules/userRole/userRole.js";
@@ -36,11 +35,9 @@ import SuperAdminRouter from "./src/modules/superAdmin/routes.js";
 import PermissionRouter from "./src/modules/permission/routes.js";
 import UserRoleRouter from "./src/modules/userRole/routes.js";
 import PageAccessRouter from "./src/modules/pageAccess/routes.js";
-
-=======
-import PermissionRouter from "./src/modules/permission/routes.js";
-import SuperAdminRouter from "./src/modules/superAdmin/routes.js";
->>>>>>> Stashed changes
+import salesRouter from "./src/modules/sales/routes.js";
+import refundBillRouter from "./src/modules/refund_Bill/routes.js";
+import refundBillProductRouter from "./src/modules/refund_Bill_Product/routes.js";
 import Stripe from 'stripe';
 
 
@@ -57,28 +54,26 @@ app.use("/", categoryRouter);
 app.use("/", supplierRouter);
 app.use("/", GRNRouter);
 //app.use('/', productSupplierRouter);
-app.use('/', productGRNRouter);
+//app.use('/', productGRNRouter);
 app.use('/', Branchrouter);
 //app.use('/', branchSupplierRouter);
 app.use('/', EmployeeRouter);
 app.use('/', CustomerRouter)
 app.use('/', listedProductsRouter);
 app.use('/', billRouter);
+app.use('/', billProductRouter);
+app.use('/', refundBillRouter);
+app.use('/', refundBillProductRouter);
+app.use('/', salesRouter);
 app.use('/', feedbackrouter);
 app.use('/', cartProductRoutes);
 app.use('/', productBatchSumrouter);
-app.use('/', billProductRouter);
-<<<<<<< Updated upstream
 app.use('/', productBatchSumrouter);
 app.use('/', SuperAdminRouter);
 app.use('/', PermissionRouter);
 app.use('/', UserRoleRouter);
 app.use('/', PageAccessRouter)
 
-=======
-app.use('/', PermissionRouter);
-app.use('/', SuperAdminRouter);
->>>>>>> Stashed changes
 
 
 app.use("/api", Productrouter);
@@ -88,15 +83,17 @@ app.use("/api", GRNRouter);
 //app.use('/api', productSupplierRouter);
 app.use('/api', EmployeeRouter);
 app.use('/api', CustomerRouter);
-app.use('/api', productGRNRouter);
+//app.use('/api', productGRNRouter);
 app.use('/api', listedProductsRouter);
 app.use('/api', billRouter);
+app.use('/api', billProductRouter);
+app.use('/api', refundBillRouter);
+app.use('/api', refundBillProductRouter);
+app.use('/api', salesRouter);
 app.use('/api', feedback);
 app.use('/api', cartProductRoutes);
 app.use('/api', productBatchSumrouter);
-app.use('/api', billProductRouter);
-app.use('/api', PermissionRouter);
-app.use('/api', SuperAdminRouter);
+
 
 app.use('/Images', express.static('.src/Images'))
 
@@ -164,4 +161,4 @@ app.post('/create-checkout-session', async (req, res) => {
 });
 
 
-export { sequelize, categories, suppliers, grn, products, branches, feedback, ShoppingCart, productBatchSum,SuperAdmin };
+export { sequelize, categories, suppliers, grn, products, branches, feedback, ShoppingCart, productBatchSum, SuperAdmin };

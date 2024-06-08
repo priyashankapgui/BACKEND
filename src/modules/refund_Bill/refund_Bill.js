@@ -1,18 +1,27 @@
 import { DataTypes } from 'sequelize';
 import sequelize from '../../../config/database.js';
+import bill from '../bill/bill.js';
 import branches from '../branch/branch.js';
 
-const bill = sequelize.define('bill', {
-    billNo: {
+const refund_Bill = sequelize.define('refund_Bill', {
+    RTBNo: {
         type: DataTypes.STRING,
         allowNull: false,
         primaryKey: true,
+    },
+    billNo: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        references: {
+            model: bill,
+            key: 'billNo'
+        },
     },
     branchId: {
         type: DataTypes.STRING,
         allowNull: false,
         references: {
-            model: 'branches',
+            model: branches,
             key: 'branchId'
         },
         onDelete: 'CASCADE',
@@ -23,11 +32,11 @@ const bill = sequelize.define('bill', {
         allowNull: false,
     },
     createdAt: {
-        type: 'TIMESTAMP',
+        type: DataTypes.DATE,
         defaultValue: DataTypes.NOW,
         allowNull: false,
     },
-    billedBy: {
+    returnedBy: {
         type: DataTypes.STRING,
         allowNull: false,
     },
@@ -35,18 +44,26 @@ const bill = sequelize.define('bill', {
         type: DataTypes.STRING,
         allowNull: true,
     },
-    contactNo: {
-        type: DataTypes.STRING,
-        allowNull: true,
-    },
     status: {
         type: DataTypes.STRING,
         allowNull: false,
     },
-    
+    reason: {
+        type: DataTypes.STRING,
+        allowNull: false,
+    },
+    updatedAt: {
+        type: DataTypes.DATE,
+        defaultValue: DataTypes.NOW,
+        allowNull: false,
+    },
 }, {
-    tableName: 'bill',
+    tableName: 'refund_Bill',
     timestamps: true,
 });
 
-export default bill;
+// Define associations
+refund_Bill.belongsTo(bill, { foreignKey: 'billNo' });
+refund_Bill.belongsTo(branches, { foreignKey: 'branchId' });
+
+export default refund_Bill;

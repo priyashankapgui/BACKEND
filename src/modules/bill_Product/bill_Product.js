@@ -1,11 +1,9 @@
 import { DataTypes } from "sequelize";
 import sequelize from "../../../config/database.js";
 import Bill from "../bill/bill.js";
-import Product from "../product/product.js";
-import ProductGRN from "../product_GRN/product_GRN.js";
 import ProductBatchSum from "../productBatchSum/productBatchSum.js";
 
-const BillProduct = sequelize.define('BillProduct', {
+const bill_Product = sequelize.define('bill_Product', {
     billNo: {
         type: DataTypes.STRING,
         allowNull: false,
@@ -20,8 +18,17 @@ const BillProduct = sequelize.define('BillProduct', {
         allowNull: false,
         primaryKey: true,
         references: {
-            model: Product,
+            model: ProductBatchSum,
             key: 'productId'
+        }
+    },
+    batchNo: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        primaryKey: true,
+        references: {
+            model: ProductBatchSum,
+            key: 'batchNo'
         }
     },
     barcode: {
@@ -33,20 +40,12 @@ const BillProduct = sequelize.define('BillProduct', {
         allowNull: false
     },
     billQty: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.FLOAT,
         allowNull: false
     },
     sellingPrice: {
         type: DataTypes.FLOAT,
         allowNull: false
-    },
-    batchNo: {
-        type: DataTypes.STRING,
-        allowNull: false
-    },
-    availableQty: {
-        type: DataTypes.INTEGER,
-        allowNull: true
     },
     discount: {
         type: DataTypes.FLOAT,
@@ -59,13 +58,23 @@ const BillProduct = sequelize.define('BillProduct', {
     paymentMethod: {
         type: DataTypes.STRING,
         allowNull: false
-    }
+    },
+    billTotalAmount: {
+        type: DataTypes.FLOAT,
+        allowNull: false
+    },
+    createdAt: {
+        type: 'TIMESTAMP',
+        defaultValue: DataTypes.NOW,
+        allowNull: false,
+    },
+    
 });
 
 // Define associations
-BillProduct.belongsTo(Bill, { foreignKey: 'billNo' });
-BillProduct.belongsTo(Product, { foreignKey: 'productId' });
-BillProduct.belongsTo(ProductGRN, { foreignKey: 'batchNo' });
-BillProduct.belongsTo(ProductBatchSum, { foreignKey: 'discount' });
+bill_Product.belongsTo(Bill, { foreignKey: 'billNo' });
+bill_Product.belongsTo(ProductBatchSum, { foreignKey: 'productId' });
+bill_Product.belongsTo(ProductBatchSum, { foreignKey: 'batchNo' });
+bill_Product.belongsTo(ProductBatchSum, { foreignKey: 'discount' });
 
-export default BillProduct;
+export default bill_Product;
