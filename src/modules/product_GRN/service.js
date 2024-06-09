@@ -1,11 +1,11 @@
 import sequelize from "../../../config/database.js";
-import { Op } from 'sequelize';
 import { to, TE } from "../../helper.js";
 import productGRN from "../product_GRN/product_GRN.js";
 import grn from "../GRN/grn.js";
-import { mapBranchNameToId } from "../../modules/branch/service.js";
 import branches from "../branch/branch.js";
 import suppliers from "../supplier/supplier.js";
+import products from "../product/product.js";
+
 
 
 
@@ -79,14 +79,12 @@ export const calculateTotalAmount = async (invoiceNo) => {
 
 
 
-
 // Function to get GRN data by productId
 export const getGRNDetailsByProductId = async (productId) => {
   try {
-    
     const [productGRNErr, productGRNs] = await to(productGRN.findAll({
       where: { productId },
-      attributes: ['GRN_NO'], 
+      attributes: [[sequelize.fn('DISTINCT', sequelize.col('GRN_NO')), 'GRN_NO']], // Using distinct to get unique GRN_NO
       raw: true, 
     }));
 
@@ -147,38 +145,83 @@ export const getGRNDetailsByProductId = async (productId) => {
 
 
 
+//function to get all grn data using GRN_NO
+export const getGRNDetailsByNo = async (GRN_NO) => {
+  console.log("Fetching GRN details for:", GRN_NO);
+  try {
+    const grnItem = await grn.findOne({
+      where: { GRN_NO },
+      raw: true,
+    });
+    if (!grnItem) {
+      throw new Error("GRN not found");
+    }
+    console.log("GRN details:", grnItem);
 
+    const supplier = await suppliers.findOne({
+      where: { supplierId: grnItem.supplierId },
+      raw: true,
+    });
+    if (!supplier) {
+      throw new Error("Supplier not found for GRN_NO: " + GRN_NO);
+    }
+    console.log("Supplier details:", supplier);
 
+    const branch = await branches.findOne({
+      where: { branchId: grnItem.branchId },
+      raw: true,
+    });
+    if (!branch) {
+      throw new Error("Branch not found for GRN_NO: " + GRN_NO);
+    }
+    console.log("Branch details:", branch);
 
+    // Fetch all productGRN details for the given GRN_NO
+    const productGRNs = await productGRN.findAll({
+      where: { GRN_NO },
+      attributes: ['batchNo', 'productId', 'totalQty', 'sellingPrice', 'purchasePrice', 'freeQty', 'expDate', 'amount'],
+      raw: true,
+    });
+    console.log("ProductGRN details:", productGRNs);
 
+    // Fetch product details and format the result
+    const productGRNsWithDetails = await Promise.all(productGRNs.map(async (productGRN) => {
+      const product = await products.findOne({
+        where: { productId: productGRN.productId },
+        raw: true,
+      });
+      if (!product) {
+        throw new Error("Product not found for productId: " + productGRN.productId);
+      }
 
+      return {
+        productId: productGRN.productId,
+        productName: product.productName,
+        batchNo: productGRN.batchNo,
+        totalQty: productGRN.totalQty,
+        sellingPrice: productGRN.sellingPrice,
+        purchasePrice: productGRN.purchasePrice,
+        freeQty: productGRN.freeQty,
+        expDate: productGRN.expDate,
+        amount: productGRN.amount,
+        
+      };
+    }));
 
+    // Format the final result
+    const result = {
+      GRN_NO: grnItem.GRN_NO,
+      createdAt: grnItem.createdAt,
+      branchName: branch.branchName,
+      supplierName: supplier.supplierName,
+      invoiceNo: grnItem.invoiceNo,
+      productGRNs: productGRNsWithDetails,
+    };
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    console.log("Final result:", result);
+    return result;
+  } catch (error) {
+    console.error('Error fetching GRN details:', error);
+    throw new Error('Failed to fetch GRN details');
+  }
+};

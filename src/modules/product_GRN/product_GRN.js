@@ -101,5 +101,8 @@ const productGRN = sequelize.define(
   }
 );
 
+
+grn.hasMany(productGRN, { foreignKey: 'GRN_NO' });
+
 export default productGRN;
  

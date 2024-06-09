@@ -8,6 +8,7 @@ import suppliers from "./src/modules/supplier/supplier.js";
 import categories from "./src/modules/category/category.js";
 import branches from "./src/modules/branch/branch.js";
 import productBatchSum from "./src/modules/productBatchSum/productBatchSum.js";
+import productBatchUpdateReason from "./src/modules/productBatchUpdateReason/productBatchUpdateReason.js";
 import Productrouter from "./src/modules/product/routes.js";
 import categoryRouter from "./src/modules/category/routes.js";
 import EmployeeRouter from './src/modules/employee/routes.js';
@@ -15,9 +16,7 @@ import CustomerRouter from './src/modules/customer/routes.js';
 import supplierRouter from "./src/modules/supplier/routes.js";
 import Branchrouter from "./src/modules/branch/routes.js";
 import GRNRouter from "./src/modules/GRN/routes.js";
-//import productSupplierRouter from './src/modules/product_Supplier/routes.js';
-//import productGRNRouter from "./src/modules/product_GRN/routes.js";
-//import branchSupplierRouter from "./src/modules/branch_Supplier/routes.js";
+import productBatchUpdateReasonRouter from "./src/modules/productBatchUpdateReason/routes.js";
 import { setupAssociations } from "./src/modules/associationSetup.js";
 import listedProductsRouter from "./src/modules/listedProducts/routes.js";
 import productBatchSumrouter from "./src/modules/productBatchSum/routes.js";
@@ -72,7 +71,8 @@ app.use('/', productBatchSumrouter);
 app.use('/', SuperAdminRouter);
 app.use('/', PermissionRouter);
 app.use('/', UserRoleRouter);
-app.use('/', PageAccessRouter)
+app.use('/', PageAccessRouter);
+app.use('/',productBatchUpdateReasonRouter);
 
 
 
@@ -93,6 +93,7 @@ app.use('/api', salesRouter);
 app.use('/api', feedback);
 app.use('/api', cartProductRoutes);
 app.use('/api', productBatchSumrouter);
+app.use('/api',productBatchUpdateReasonRouter);
 
 
 app.use('/Images', express.static('.src/Images'))
@@ -161,4 +162,4 @@ app.post('/create-checkout-session', async (req, res) => {
 });
 
 
-export { sequelize, categories, suppliers, grn, products, branches, feedback, ShoppingCart, productBatchSum, SuperAdmin };
+export { sequelize, categories, suppliers, grn, products, branches, feedback, ShoppingCart, productBatchSum, SuperAdmin, productBatchUpdateReason,  };

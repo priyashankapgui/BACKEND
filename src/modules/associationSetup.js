@@ -37,7 +37,10 @@ const setupProductGRNAssociations = (products, grn) => {
   grn.belongsToMany(products, { through: productGRN });
 }; 
 
-
+// const setupProductGRNandGRNssociations = (productGRN, grn) => {
+//   grn.hasMany(productGRN, { foreignKey: 'GRN_NO' });
+//   productGRN.belongsTo(grn, { foreignKey: "GRN_NO" });
+// }
 
 const setupCartCustomerAssociations = (ShoppingCart,Customer) => {
   ShoppingCart.hasOne(Customer);
@@ -79,5 +82,6 @@ export const setupAssociations = () => {
   setupCartCustomerAssociations(ShoppingCart,Customer);
   setupCartProductAssociations(ShoppingCart,products);
   setupProductBatchSumAssociations(productBatchSum, productGRN);
+  //setupProductGRNandGRNssociations(productGRN, grn)
 
 };

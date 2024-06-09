@@ -179,42 +179,42 @@ export const getBatchDetailsByProductName = async (productId, branchName) => {
 
 
 
-// Function to adjust the stock quantity
-export const adjustProductGRNQuantity = async (productName, branchName, batchNo, newQuantity) => {
-  try {
-    const [branchErr, branch] = await to(branches.findOne({ where: { branchName: branchName } }));
-    if (branchErr) TE(branchErr);
-    if (!branch) TE(new Error('Branch not found.'));
-    const branchId = branch.branchId;
-    console.log(`Found branchId: ${branchId} for branchName: ${branchName}`);
+// // Function to adjust the stock quantity
+// export const adjustProductGRNQuantity = async (productName, branchName, batchNo, newQuantity) => {
+//   try {
+//     const [branchErr, branch] = await to(branches.findOne({ where: { branchName: branchName } }));
+//     if (branchErr) TE(branchErr);
+//     if (!branch) TE(new Error('Branch not found.'));
+//     const branchId = branch.branchId;
+//     console.log(`Found branchId: ${branchId} for branchName: ${branchName}`);
 
-    const [productErr, product] = await to(products.findOne({ where: { productName: productName } }));
-    if (productErr) TE(productErr);
-    if (!product) TE(new Error('Product not found.'));
-    const productId = product.productId;
-    console.log(`Found productId: ${productId} for productName: ${productName}`);
+//     const [productErr, product] = await to(products.findOne({ where: { productName: productName } }));
+//     if (productErr) TE(productErr);
+//     if (!product) TE(new Error('Product not found.'));
+//     const productId = product.productId;
+//     console.log(`Found productId: ${productId} for productName: ${productName}`);
 
-    // Update the totalAvailableQty with the newQuantity
-    const [updateErr] = await to(
-      productBatchSum.update(
-        { totalAvailableQty: newQuantity },
-        {
-          where: {
-            productId: productId,
-            branchId: branchId,
-            batchNo: batchNo
-          }
-        }
-      )
-    );
-    if (updateErr) TE(updateErr);
+//     // Update the totalAvailableQty with the newQuantity
+//     const [updateErr] = await to(
+//       productBatchSum.update(
+//         { totalAvailableQty: newQuantity },
+//         {
+//           where: {
+//             productId: productId,
+//             branchId: branchId,
+//             batchNo: batchNo
+//           }
+//         }
+//       )
+//     );
+//     if (updateErr) TE(updateErr);
 
-    return true;
-  } catch (error) {
-    console.error("Error adjusting Product Batch Sum quantity:", error);
-    throw error;
-  }
-};
+//     return true;
+//   } catch (error) {
+//     console.error("Error adjusting Product Batch Sum quantity:", error);
+//     throw error;
+//   }
+// };
 
 
 
