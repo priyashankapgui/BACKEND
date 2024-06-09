@@ -179,7 +179,7 @@ export const getGRNDetailsByNo = async (GRN_NO) => {
     // Fetch all productGRN details for the given GRN_NO
     const productGRNs = await productGRN.findAll({
       where: { GRN_NO },
-      attributes: ['batchNo', 'productId', 'totalQty', 'sellingPrice', 'purchasePrice', 'freeQty', 'expDate', 'amount'],
+      attributes: ['batchNo', 'productId', 'totalQty', 'sellingPrice', 'purchasePrice', 'freeQty', 'expDate', 'amount', 'comment'],
       raw: true,
     });
     console.log("ProductGRN details:", productGRNs);
@@ -204,6 +204,7 @@ export const getGRNDetailsByNo = async (GRN_NO) => {
         freeQty: productGRN.freeQty,
         expDate: productGRN.expDate,
         amount: productGRN.amount,
+        comment: productGRN.comment,
         
       };
     }));
