@@ -5,7 +5,7 @@ import products from "../modules/product/product.js";
 import categories from "./category/category.js";
 import bill from "./bill/bill.js";
 import Customer from "./customer/customer.js";
-import ShoppingCart from "./Cart_Customer/shoppingcart.js";
+import ShoppingCart from "./cart_Customer/shoppingcart.js";
 import productBatchSum from "./productBatchSum/productBatchSum.js";
 import productGRN from "./product_GRN/product_GRN.js";
 
@@ -48,6 +48,7 @@ const setupCartProductAssociations = (ShoppingCart, products) => {
   ShoppingCart.belongsToMany(products, { through: "cart_Product", foreignKey: 'cartId' });
   products.belongsToMany(ShoppingCart, { through: "cart_Product", foreignKey: 'productId' });
 }
+
 
 
 const setupProductBatchSumAssociations = (productBatchSum, productGRN) => {

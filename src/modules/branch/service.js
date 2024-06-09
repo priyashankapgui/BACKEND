@@ -1,5 +1,10 @@
-import branches from '../branch/branch.js'
+import { Op } from "sequelize";
+import { to, TE } from "../../helper.js";
+import sequelize from "../../../config/database.js";
+import branches from "../branch/branch.js";
+import database from "./database.js";
 
+// Function to generate branchId
 export const generateBranchId = async () => {
   try {
     // Fetch the latest branch ID
@@ -25,88 +30,72 @@ export const generateBranchId = async () => {
     return newBranchId;
   } catch (error) {
     console.error('Error generating new branch ID:', error);
-    throw new Error('Could not generate new branch ID');
+    TE('Could not generate new branch ID');
   }
-}
+};
 
-
-
+// Function to retrieve all branches from the database
 export const getAllBranches = async () => {
-    try{
-        const branchReq = await branches.findAll();
-        console.log(branchReq);
-        return branchReq;
-    }catch (error) {
-        console.error('Error retrieving branches:', error);
-        throw new Error('Error retrieving branches');
-    }
+  const [err, branchReq] = await to(branches.findAll());
+  if (err) TE("Error retrieving branches: " + err.message);
+  return branchReq;
 };
 
+// Function to retrieve a branch by its ID
 export const getBranchById = async (branchId) => {
-    try {
-        const branchbyId = await branches.findByPk(branchId);
-        return branchbyId;
-    } catch (error) {
-        throw new Error('Error fetching branch: ' + error.message);
-    }
+  const [err, branchById] = await to(branches.findByPk(branchId));
+  if (err) TE("Error fetching branch: " + err.message);
+  if (!branchById) TE("Branch not found");
+  return branchById;
 };
 
+// Function to create a new branch
 export const createBranch = async (branchData) => {
-  try {
-    const branchId = await generateBranchId();
-    
-    // Ensure branchData includes the generated branchId
-    const newBranch = await branches.create({ branchId, ...branchData });
-    return newBranch;
-  } catch (error) {
-    throw new Error('Error creating branch: ' + error.message);
-  }
+  const branchId = await generateBranchId();
+  console.log("Generated branchId:", branchId);
+
+  const createSingleRecord = database.createSingleRecord({ branchId, ...branchData });
+  const [err, result] = await to(createSingleRecord);
+
+  if (err) TE(err.errors[0] ? err.errors[0].message : err);
+  if (!result) TE("Branch creation failed");
+
+  return result;
 };
 
-export const updateBranchById = async (branchId, branchData) => { 
-  try {
-    const branch = await branches.findByPk(branchId);
-    if (!branch) {
-      return null;
-    }
-    const updatedBranch = await branches.update(branchData, {
-      where: { branchId: branchId } // Adding the where clause
-    });
-    return updatedBranch;
-  } catch (error) {
-    throw new Error('Error updating branch: ' + error.message);
-  }
+// Function to update a branch by its ID
+export const updateBranchById = async (branchId, branchData) => {
+  const [err, branch] = await to(branches.findByPk(branchId));
+  if (err) TE("Error fetching branch: " + err.message);
+  if (!branch) TE("Branch not found");
+
+  const [updateErr] = await to(branch.update(branchData));
+  if (updateErr) TE("Error updating branch: " + updateErr.message);
+
+  return branch;
 };
 
-
+// Function to delete a branch by its ID
 export const deleteBranchById = async (branchId) => {
-    try {
-      const branch = await branches.findByPk(branchId);
-      if (!branch) {
-        throw new Error('Product not found');
-      }
-      await branch.destroy();
-      return { message: 'Branch deleted successfully' };
-    } catch (error) {
-      throw new Error('Error deleting branch: ' + error.message);
-    }
-  };
+  const [err, branch] = await to(branches.findByPk(branchId));
+  if (err) TE("Error fetching branch: " + err.message);
+  if (!branch) TE("Branch not found");
 
+  const [deleteErr] = await to(branch.destroy());
+  if (deleteErr) TE("Error deleting branch: " + deleteErr.message);
 
-  export const mapBranchNameToId = async (branchName) => {
-    try {
-      console.log("Mapping branch name to ID:", branchName);
-      const branch = await branches.findOne({
-        where: { branchName: branchName },
-      });
-      if (branch) {
-        return branch.branchId;
-      } else {
-        throw new Error("Branch not found");
-      }
-    } catch (error) {
-      console.error("Error mapping branch name to ID:", error);
-      throw new Error("Error mapping branch name to ID: " + error.message);
-    }
-  };
-  
+  return { message: "Branch deleted successfully" };
+};
+
+// Function to map branch name to ID
+export const mapBranchNameToId = async (branchName) => {
+  const [err, branch] = await to(
+    branches.findOne({
+      where: { branchName: branchName },
+    })
+  );
+  if (err) TE("Error mapping branch name to ID: " + err.message);
+  if (!branch) TE("Branch not found");
+
+  return branch.branchId;
+};
