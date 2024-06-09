@@ -9,7 +9,21 @@ const CreateRefundBillSchema = Joi.object({
     returnedBy: Joi.string().required(),
     customerName: Joi.string().optional(),
     reason: Joi.string().required(),
+    products: Joi.array().items(Joi.object({
+        billNo: Joi.string().required(),
+        branchId: Joi.string().required(),
+        branchName: Joi.string().required(),
+        productId: Joi.string().required(),
+        batchNo: Joi.string().required(),
+        barcode: Joi.string().required(),
+        productName: Joi.string().required(),
+        billQty: Joi.string().required(),
+        returnQty: Joi.string().required(),
+        returnPriceAmount: Joi.string().required(),
+        reason: Joi.string().required(),
+    })).required()
 });
+
 
 // Middleware function to validate refund bill data
 const create = async (req, res, next) => {

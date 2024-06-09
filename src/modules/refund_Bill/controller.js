@@ -1,13 +1,43 @@
 import * as Service from './service.js';
+import * as refundBillProductService from '../refund_Bill_Product/service.js';
 
-export const processRefundController = async (req, res) => {
+
+
+export const createRefundController = async (req, res) => {
     try {
-        const refundData = req.body;
-        const newRefundBill = await Service.processRefund(refundData);
-        res.status(201).json(newRefundBill);
+        const { billNo, branchId, branchName, returnedBy, customerName, status, reason, products } = req.body;
+
+        // Create refund bill entry
+        const newRefundBill = await Service.createRefund({ billNo, branchId, branchName, returnedBy, customerName, status, reason });
+        const { RTBNo } = newRefundBill;
+
+        // Prepare refund bill products
+        const RefundBillProducts = products.map(product => ({
+            RTBNo,
+            billNo: product.billNo,
+            branchId: product.branchId,
+            branchName: product.branchName,
+            productId: product.productId,
+            batchNo: product.batchNo,
+            barcode: product.barcode,
+            productName: product.productName,
+            billQty: product.billQty,
+            returnQty: product.returnQty,
+            returnPriceAmount: product.returnPriceAmount,
+            reason: product.reason,
+        }));
+
+        // Create refund bill products entries
+        const result = await refundBillProductService.createRefund(RefundBillProducts);
+
+        if (result.success) {
+            res.status(201).json({ message: 'Refund Bill and refund_Bill_Product entries created successfully', newRefundBill, newRefundBillProducts: result.newRefundBillProducts });
+        } else {
+            res.status(400).json({ message: 'Validation error creating refund_Bill_Product entries' });
+        }
     } catch (error) {
-        console.error('Failed to process refund:', error);
-        res.status(500).json({ error: error.message });
+        console.error('Error creating Refund Bill and refund_Bill_Product entries:', error);
+        res.status(500).json({ message: 'Failed to create Refund Bill and refund_Bill_Product entries' });
     }
 };
 

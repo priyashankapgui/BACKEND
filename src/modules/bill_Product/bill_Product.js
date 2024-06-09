@@ -1,7 +1,7 @@
-import { DataTypes } from "sequelize";
-import sequelize from "../../../config/database.js";
-import Bill from "../bill/bill.js";
-import ProductBatchSum from "../productBatchSum/productBatchSum.js";
+import { DataTypes } from 'sequelize';
+import sequelize from '../../../config/database.js';
+import bill from '../bill/bill.js';
+import ProductBatchSum from '../productBatchSum/productBatchSum.js';
 
 const bill_Product = sequelize.define('bill_Product', {
     billNo: {
@@ -9,7 +9,7 @@ const bill_Product = sequelize.define('bill_Product', {
         allowNull: false,
         primaryKey: true,
         references: {
-            model: Bill,
+            model: bill,
             key: 'billNo'
         }
     },
@@ -67,14 +67,12 @@ const bill_Product = sequelize.define('bill_Product', {
         type: 'TIMESTAMP',
         defaultValue: DataTypes.NOW,
         allowNull: false,
-    },
-    
+    }
 });
 
-// Define associations
-bill_Product.belongsTo(Bill, { foreignKey: 'billNo' });
-bill_Product.belongsTo(ProductBatchSum, { foreignKey: 'productId' });
-bill_Product.belongsTo(ProductBatchSum, { foreignKey: 'batchNo' });
-bill_Product.belongsTo(ProductBatchSum, { foreignKey: 'discount' });
+bill_Product.belongsTo(bill, { foreignKey: 'billNo', targetKey: 'billNo' });
+bill_Product.belongsTo(ProductBatchSum, { foreignKey: 'productId', targetKey: 'productId' });
+bill_Product.belongsTo(ProductBatchSum, { foreignKey: 'batchNo', targetKey: 'batchNo' });
+
 
 export default bill_Product;

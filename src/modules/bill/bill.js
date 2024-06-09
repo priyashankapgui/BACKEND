@@ -18,10 +18,6 @@ const bill = sequelize.define('bill', {
         onDelete: 'CASCADE',
         onUpdate: 'CASCADE'
     },
-    branchName: {
-        type: DataTypes.STRING,
-        allowNull: false,
-    },
     createdAt: {
         type: 'TIMESTAMP',
         defaultValue: DataTypes.NOW,
@@ -43,10 +39,28 @@ const bill = sequelize.define('bill', {
         type: DataTypes.STRING,
         allowNull: false,
     },
-    
 }, {
     tableName: 'bill',
     timestamps: true,
+    defaultScope: {
+        include: [
+            {
+                model: branches,
+                attributes: ['branchName']
+            }
+        ]
+    },
+    getterMethods: {
+        branchName() {
+            if (this.branches) {
+                return this.branches.branchName;
+            }
+            return null;
+        }
+    }
 });
+
+bill.belongsTo(branches, { foreignKey: 'branchId' });
+
 
 export default bill;
