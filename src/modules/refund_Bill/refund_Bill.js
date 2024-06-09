@@ -1,7 +1,6 @@
 import { DataTypes } from 'sequelize';
 import sequelize from '../../../config/database.js';
 import bill from '../bill/bill.js';
-import branches from '../branch/branch.js';
 
 const refund_Bill = sequelize.define('refund_Bill', {
     RTBNo: {
@@ -20,23 +19,8 @@ const refund_Bill = sequelize.define('refund_Bill', {
     branchId: {
         type: DataTypes.STRING,
         allowNull: false,
-        references: {
-            model: branches,
-            key: 'branchId'
-        },
-        onDelete: 'CASCADE',
-        onUpdate: 'CASCADE'
     },
     branchName: {
-        type: DataTypes.STRING,
-        allowNull: false,
-    },
-    createdAt: {
-        type: DataTypes.DATE,
-        defaultValue: DataTypes.NOW,
-        allowNull: false,
-    },
-    returnedBy: {
         type: DataTypes.STRING,
         allowNull: false,
     },
@@ -52,6 +36,11 @@ const refund_Bill = sequelize.define('refund_Bill', {
         type: DataTypes.STRING,
         allowNull: false,
     },
+    createdAt: {
+        type: DataTypes.DATE,
+        defaultValue: DataTypes.NOW,
+        allowNull: false,
+    },
     updatedAt: {
         type: DataTypes.DATE,
         defaultValue: DataTypes.NOW,
@@ -64,6 +53,15 @@ const refund_Bill = sequelize.define('refund_Bill', {
 
 // Define associations
 refund_Bill.belongsTo(bill, { foreignKey: 'billNo' });
-refund_Bill.belongsTo(branches, { foreignKey: 'branchId' });
+
+refund_Bill.addHook('beforeValidate', async (refundBill) => {
+    // Fetch branchId, branchName, and customerName using billNo
+    const billDetails = await bill.findByPk(refundBill.billNo);
+    if (billDetails) {
+        refundBill.branchId = billDetails.branchId;
+        refundBill.branchName = billDetails.branchName;
+        refundBill.customerName = billDetails.customerName;
+    }
+});
 
 export default refund_Bill;

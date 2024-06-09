@@ -44,7 +44,7 @@ export const generateRTBNo = async (branchId) => {
 };
 
 // Function to process refund
-export const processRefund = async (refundData) => {
+export const createRefund = async (refundData) => {
     const { billNo, branchId, returnedBy, customerName, reason, branchName } = refundData;
 
     // Generate refund bill number
@@ -59,7 +59,7 @@ export const processRefund = async (refundData) => {
         returnedBy,
         customerName,
         reason,
-        status: 'Refunded', // or any appropriate status
+        status: 'Refunded', 
     });
 
     // Fetch the original bill products

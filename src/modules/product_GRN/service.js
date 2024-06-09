@@ -7,7 +7,18 @@ import suppliers from "../supplier/supplier.js";
 import products from "../product/product.js";
 
 
-
+//=================================================
+export const getAllProductGRN = async () => {
+  try{
+      const branchReq = await productGRN.findAll();
+      console.log(branchReq);
+      return branchReq;
+  }catch (error) {
+      console.error('Error retrieving branches:', error);
+      throw new Error('Error retrieving branches');
+  }
+};
+//===============================================
 
 
  //Function to create GRN 
