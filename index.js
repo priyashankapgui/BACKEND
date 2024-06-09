@@ -23,7 +23,6 @@ import productBatchSumrouter from "./src/modules/productBatchSum/routes.js";
 import billRouter from "./src/modules/bill/routes.js";
 import feedback from "./src/modules/feedback/feedback.js";
 import feedbackrouter from "./src/modules/feedback/routes.js";
-import cartProductRoutes from "./src/modules/cart_Product/routes.js"
 import billProductRouter from "./src/modules/bill_Product/routes.js";
 import SuperAdmin from "./src/modules/superAdmin/superAdmin.js";
 import PageAccess from "./src/modules/pageAccess/pageAccess.js";
@@ -70,7 +69,6 @@ app.use('/', refundBillRouter);
 app.use('/', refundBillProductRouter);
 app.use('/', salesRouter);
 app.use('/', feedbackrouter);
-app.use('/', cartProductRoutes);
 app.use('/', productBatchSumrouter);
 app.use('/', productBatchSumrouter);
 app.use('/', SuperAdminRouter);
@@ -95,9 +93,7 @@ app.use('/api', refundBillRouter);
 app.use('/api', refundBillProductRouter);
 app.use('/api', salesRouter);
 app.use('/api', feedback);
-app.use('/api', cartProductRoutes);
 app.use('/api', productBatchSumrouter);
-app.use('/api', billProductRouter);
 app.use('/api', cartRoutes);
 
 app.use('/Images', express.static('.src/Images'))

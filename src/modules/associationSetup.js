@@ -50,6 +50,7 @@ const setupCartProductAssociations = (ShoppingCart, products) => {
 }
 
 
+
 const setupProductBatchSumAssociations = (productBatchSum, productGRN) => {
   productBatchSum.belongsTo(productGRN, {
     foreignKey: 'productId',
