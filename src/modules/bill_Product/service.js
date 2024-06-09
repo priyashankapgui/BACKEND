@@ -1,19 +1,36 @@
 import sequelize from '../../../config/database.js';
-import { SUCCESS, ERROR } from "../../helper.js";
+import BillProduct from './bill_Product.js';
 import { Codes } from "./constants.js";
 
 const { SUC_CODES } = Codes;
 
-import BillProduct from './bill_Product.js';
-
-export const addBillProduct = async (billProductData) => {
+export const createBillProducts = async (billProducts) => {
     try {
-        const newBillProduct = await BillProduct.create(billProductData);
-        // Assuming adjustProductQuantity is a function you have implemented elsewhere
-        await adjustProductQuantity(billProductData.productId, billProductData.branchName, billProductData.batchNo, -billProductData.billQty);
-        return newBillProduct;
+        if (!Array.isArray(billProducts)) {
+            throw new Error('bill_Product entries should be an array');
+        }
+
+        const newBillProducts = [];
+
+        for (const entry of billProducts) {
+            try {
+                const result = await BillProduct.create(entry);
+                newBillProducts.push(result);
+            } catch (error) {
+                if (error.name === 'SequelizeValidationError') {
+                    console.error('Validation error for entry:', entry, error.errors);
+                    throw error;
+                } else {
+                    console.error('Error creating entry:', entry, error);
+                    throw error;
+                }
+            }
+        }
+
+        return { success: true, newBillProducts };
     } catch (error) {
-        throw new Error('Failed to add BillProduct');
+        console.error('Error creating bill_Product:', error.message);
+        throw new Error('Error creating bill_Product: ' + error.message);
     }
 };
 
@@ -26,7 +43,7 @@ export const getAllBillProducts = async () => {
     }
 };
 
-export const getBillProductsByBillNo = async (billNo) => {
+export const getBillProductsByBillNumber = async (billNo) => {
     try {
         const billProducts = await BillProduct.findAll({ where: { billNo } });
         return billProducts;

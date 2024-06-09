@@ -1,7 +1,6 @@
 import { DataTypes } from "sequelize";
 import sequelize from "../../../config/database.js";
 import suppliers from "../supplier/supplier.js";
-import bill from "../bill/bill.js";
 
 const branches = sequelize.define('branches', {
     branchId: {

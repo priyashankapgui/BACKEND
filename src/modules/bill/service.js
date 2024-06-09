@@ -1,18 +1,10 @@
-import sequelize from '../../../config/database.js';
 import { Op } from 'sequelize';
-import bill from '../bill/bill.js';
+import bill from './bill.js';
 import branches from '../branch/branch.js';
-import { SUCCESS, ERROR } from "../../helper.js";
-import { Codes } from "../bill/constants.js";
 
-const { SUC_CODES } = Codes;
-
-const generateBillNo = async (branchId) => {
-    console.log(`Generating bill number for branchId: ${branchId}`);
-
+const generateBillNumber = async (branchId) => {
     const branch = await branches.findByPk(branchId);
     if (!branch) {
-        console.error(`Branch not found for branchId: ${branchId}`);
         throw new Error('Branch not found');
     }
 
@@ -42,40 +34,45 @@ const generateBillNo = async (branchId) => {
     return billNo;
 };
 
-export const getAllBillData = async () => {
+export const createBill = async ({ branchId, billedBy, customerName, contactNo, status }) => {
     try {
-        const billDataReq = await bill.findAll();
-        console.log(billDataReq);
-        return billDataReq;
+        const billNo = await generateBillNumber(branchId);
+
+        const newBill = await bill.create({
+            billNo,
+            branchId,
+            billedBy,
+            customerName,
+            contactNo,
+            status,
+        });
+
+        return newBill;
     } catch (error) {
-        console.error('Error retrieving bill all data:', error);
-        throw new Error('Error retrieving bill all data');
+        throw new Error('Error creating bill: ' + error.message);
     }
 };
 
-export const getbillDataByNoService = async (billNo) => {
+export const getAllBills = async () => {
     try {
-        const billDataByNo = await bill.findByPk(billNo);
-        return billDataByNo;
+        const bills = await bill.findAll();
+        return bills;
     } catch (error) {
-        throw new Error('Error fetching bill data by billNo: ' + error.message);
+        console.error('Error retrieving all bills:', error);
+        throw new Error('Error retrieving all bills');
     }
 };
 
-export const addbillDataService = async (billData) => {
+export const getBillByNumber = async (billNo) => {
     try {
-        console.log('billData:', billData);
-        const billNo = await generateBillNo(billData.branchId);
-        billData.billNo = billNo;
-        const newBillData = await bill.create(billData);
-        return newBillData;
-    } catch (err) {
-        console.log("There was an issue adding the bill data to the database", err);
-        throw new Error('Failed to add bill data');
+        const bill = await bill.findByPk(billNo);
+        return bill;
+    } catch (error) {
+        throw new Error('Error fetching bill by number: ' + error.message);
     }
 };
 
-export const cancellbillDatabyNoService = async (billNo) => {
+export const cancelBillByNumber = async (billNo) => {
     try {
         const billToCancel = await bill.findByPk(billNo);
         if (!billToCancel) {
@@ -90,7 +87,7 @@ export const cancellbillDatabyNoService = async (billNo) => {
     }
 };
 
-export const updateCustomerDetailsByBillNo = async (billNo, customerData) => {
+export const updateCustomerDetailsByBillNumber = async (billNo, customerData) => {
     try {
         const billToUpdate = await bill.findByPk(billNo);
         if (!billToUpdate) {

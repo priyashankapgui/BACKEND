@@ -1,51 +1,55 @@
 import { DataTypes } from 'sequelize';
 import sequelize from '../../../config/database.js';
 import refund_Bill from '../refund_Bill/refund_Bill.js';
-import BillProduct from '../bill_Product/bill_Product.js';
+import billProduct from '../bill_Product/bill_Product.js';
 
 const refund_Bill_Product = sequelize.define('refund_Bill_Product', {
     RTBNo: {
         type: DataTypes.STRING,
         allowNull: false,
+        primaryKey: true,
         references: {
             model: refund_Bill,
             key: 'RTBNo'
         },
-        primaryKey: true,
         onDelete: 'CASCADE',
         onUpdate: 'CASCADE'
     },
     productId: {
         type: DataTypes.STRING,
         allowNull: false,
+        primaryKey: true,
         references: {
-            model: BillProduct,
+            model: billProduct,
             key: 'productId'
         },
-        primaryKey: true,
         onDelete: 'CASCADE',
         onUpdate: 'CASCADE'
     },
     batchNo: {
         type: DataTypes.STRING,
         allowNull: false,
+        primaryKey: true,
         references: {
-            model: BillProduct,
+            model: billProduct,
             key: 'batchNo'
         },
-        primaryKey: true,
         onDelete: 'CASCADE',
         onUpdate: 'CASCADE'
     },
     productName: {
         type: DataTypes.STRING,
-        allowNull: false
+        allowNull: false,
+    },
+    billQty: {
+        type: DataTypes.FLOAT,
+        allowNull: false,
     },
     returnQty: {
         type: DataTypes.FLOAT,
         allowNull: false,
     },
-    returnAmount: {
+    returnPriceAmount: {
         type: DataTypes.FLOAT,
         allowNull: false,
     },
@@ -76,7 +80,7 @@ const refund_Bill_Product = sequelize.define('refund_Bill_Product', {
 
 // Define associations
 refund_Bill_Product.belongsTo(refund_Bill, { foreignKey: 'RTBNo' });
-refund_Bill_Product.belongsTo(BillProduct, { foreignKey: 'productId' });
-refund_Bill_Product.belongsTo(BillProduct, { foreignKey: 'batchNo' });
+refund_Bill_Product.belongsTo(billProduct, { foreignKey: 'productId' });
+refund_Bill_Product.belongsTo(billProduct, { foreignKey: 'batchNo' });
 
 export default refund_Bill_Product;

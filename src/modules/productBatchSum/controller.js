@@ -120,7 +120,31 @@ export const getBatchSumByBranchIdController = async (req, res) => {
 };
 
 
+export const handleBilling = async (req, res) => {
+  try {
+    const { billedProducts, branchId } = req.body;
 
+    await ProductBatchSumService.handleBilling(billedProducts, branchId);
+
+    res.status(200).json({ message: 'Billing processed successfully.' });
+  } catch (error) {
+    console.error("Error processing billing:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+export const handleBillCancellation = async (req, res) => {
+  try {
+    const { canceledProducts, branchId } = req.body;
+
+    await ProductBatchSumService.handleBillCancellation(canceledProducts, branchId);
+
+    res.status(200).json({ message: 'Bill cancellation processed successfully.' });
+  } catch (error) {
+    console.error("Error processing bill cancellation:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
 
 
 

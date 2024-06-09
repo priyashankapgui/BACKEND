@@ -25,7 +25,6 @@ import billRouter from "./src/modules/bill/routes.js";
 import feedback from "./src/modules/feedback/feedback.js";
 import feedbackrouter from "./src/modules/feedback/routes.js";
 import cartProductRoutes from "./src/modules/cart_Product/routes.js"
-import billProductRouter from "./src/modules/bill_Product/routes.js";
 import ShoppingCart from "./src/modules/Cart_Customer/shoppingcart.js";
 import SuperAdmin from "./src/modules/superAdmin/superAdmin.js";
 import PageAccess from "./src/modules/pageAccess/pageAccess.js";
@@ -37,7 +36,6 @@ import UserRoleRouter from "./src/modules/userRole/routes.js";
 import PageAccessRouter from "./src/modules/pageAccess/routes.js";
 import salesRouter from "./src/modules/sales/routes.js";
 import refundBillRouter from "./src/modules/refund_Bill/routes.js";
-import refundBillProductRouter from "./src/modules/refund_Bill_Product/routes.js";
 import Stripe from 'stripe';
 
 
@@ -61,9 +59,7 @@ app.use('/', EmployeeRouter);
 app.use('/', CustomerRouter)
 app.use('/', listedProductsRouter);
 app.use('/', billRouter);
-app.use('/', billProductRouter);
 app.use('/', refundBillRouter);
-app.use('/', refundBillProductRouter);
 app.use('/', salesRouter);
 app.use('/', feedbackrouter);
 app.use('/', cartProductRoutes);
@@ -86,9 +82,7 @@ app.use('/api', CustomerRouter);
 //app.use('/api', productGRNRouter);
 app.use('/api', listedProductsRouter);
 app.use('/api', billRouter);
-app.use('/api', billProductRouter);
 app.use('/api', refundBillRouter);
-app.use('/api', refundBillProductRouter);
 app.use('/api', salesRouter);
 app.use('/api', feedback);
 app.use('/api', cartProductRoutes);
