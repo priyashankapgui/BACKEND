@@ -35,5 +35,6 @@ const generateOnlineBillNo = async (branchId) => {
     }
 
     const onlineBillNo = `${branchPrefix}-B${yearSuffix}${newBillNumber.toString().padStart(6, '0')}`;
-    return billNo;
+    return onlineBillNo;
 };
+
