@@ -25,7 +25,6 @@ import feedback from "./src/modules/feedback/feedback.js";
 import feedbackrouter from "./src/modules/feedback/routes.js";
 import cartProductRoutes from "./src/modules/cart_Product/routes.js"
 import billProductRouter from "./src/modules/bill_Product/routes.js";
-import ShoppingCart from "./src/modules/cart_Customer/shoppingcart.js";
 import SuperAdmin from "./src/modules/superAdmin/superAdmin.js";
 import PageAccess from "./src/modules/pageAccess/pageAccess.js";
 import UserRole from "./src/modules/userRole/userRole.js";
@@ -38,6 +37,9 @@ import salesRouter from "./src/modules/sales/routes.js";
 import refundBillRouter from "./src/modules/refund_Bill/routes.js";
 import refundBillProductRouter from "./src/modules/refund_Bill_Product/routes.js";
 import cartRoutes from "./src/modules/cart_Product/routes.js"
+import ShoppingCart from "./src/modules/cart_Customer/shoppingcart.js";
+import onlineBill from "./src/modules/online_Bill/onlineBill.js";
+
 
 import Stripe from 'stripe';
 
@@ -95,7 +97,6 @@ app.use('/api', salesRouter);
 app.use('/api', feedback);
 app.use('/api', cartProductRoutes);
 app.use('/api', productBatchSumrouter);
-
 app.use('/api', billProductRouter);
 app.use('/api', cartRoutes);
 
@@ -165,4 +166,4 @@ app.post('/create-checkout-session', async (req, res) => {
 });
 
 
-export { sequelize, categories, suppliers, grn, products, branches, feedback, ShoppingCart, productBatchSum, SuperAdmin };
+export { sequelize, categories, suppliers, grn, products, branches, feedback, ShoppingCart, productBatchSum, SuperAdmin, onlineBill };
