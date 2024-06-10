@@ -1,3 +1,4 @@
+import sequelize from '../../../config/database.js';
 import Permission from './permission.js';
 
 export const getAllPermissionsGroup = async (groupName) => {
@@ -26,3 +27,15 @@ export const getPermissions = async (userRoleId) => {
         throw new Error(error.message);
     }
 };
+
+export const getPermissionsWithPageAccess = async (userRoleId) => {
+    try {
+        const permissions = await sequelize.query("select * from permission join pageaccess on permission.pageAccessId = pageaccess.pageId where userRoleId = :userRoleId", {
+            replacements: { userRoleId },
+            type: sequelize.QueryTypes.SELECT
+        });
+        return permissions;
+    } catch (error) {
+        throw new Error(error.message);
+    }
+}
