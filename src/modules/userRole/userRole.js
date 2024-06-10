@@ -14,7 +14,10 @@ const UserRole = sequelize.define(
     userRoleName: {
       type: DataTypes.STRING,
       allowNull: false,
-      unique: true,
+      unique: {
+        args: true,
+        msg: "User Role already exists",
+      },
     },
     branchId: {
       type: DataTypes.STRING,
@@ -29,5 +32,8 @@ const UserRole = sequelize.define(
     tableName: "userRole",
   }
 );
+
+UserRole.belongsTo(branches, {foreignKey: "branchId",});
+branches.hasMany(UserRole, {foreignKey: "branchId",});
 
 export default UserRole;

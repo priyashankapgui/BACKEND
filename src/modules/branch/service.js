@@ -40,6 +40,30 @@ export const getAllBranches = async () => {
   if (err) TE("Error retrieving branches: " + err.message);
   return branchReq;
 };
+//if the user logged in has a specific branch name, only that branch will be returned
+export const getBranchByName = async (branchName) => {
+  try {
+    const branch = await branches.findOne({
+      where: { branchName: branchName },
+    });
+    return branch;
+  } catch (error) {
+    throw new Error('Error fetching branch: ' + error.message);
+  }
+};
+
+export const getAllBranchesWeb = async () => {
+    try{
+        const branchReq = await branches.findAll({
+            attributes: ['branchId', 'branchName']
+        });
+        return branchReq;
+    }catch (error) {
+        console.error('Error retrieving branches:', error);
+        throw new Error('Error retrieving branches');
+    }
+};
+
 
 // Function to retrieve a branch by its ID
 export const getBranchById = async (branchId) => {

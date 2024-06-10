@@ -31,7 +31,7 @@ export const superAdminLogin = async (req, res) => {
             token: token,
             user: {
                 userID: userID,
-                role: "superadmin",
+                role: data.userRoleName,
                 userName: user.superAdminName,
                 email: user.email,
                 phone: user.phone,
@@ -70,7 +70,6 @@ export const updateSuperAdmin = async (req, res) => {
     const decoded = jwt.verify(token, ACCESS_TOKEN);
     const role = decoded.role;
     const userID = decoded.userID;
-    const superAdminID = req.params.superAdminID;
     const updatedSuperAdminData = req.body;
     if (role != "superAdmin" && userID != superAdminID) {
         res.status(403).json({ error: "Unauthorized" });
