@@ -1,12 +1,12 @@
 import express from "express";
 import {
-    handleLoginCustomer,
     forgotPasswordCustomer,
     resetPasswordCustomer,
 } from "./service.js";
 import{
     registerNewCustomer,
     getCustomer,
+    handleLoginCustomer
 } from "../customer/controller.js";
 
 

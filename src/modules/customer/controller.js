@@ -1,6 +1,7 @@
 import {
     registerCustomer,
-    getCustomerById
+    getCustomerById,
+    loginCustomerService,
     
 } from "../customer/service.js";       
 
@@ -31,14 +32,18 @@ export const getCustomer = async (req, res) => {
     }
 }
 
-// export const handleLogin = async (req, res) => {
-//     const { email, password } = req.body;
-//     try {
-//       const user = await handleLoginCustomer(email, password);
-//         return res.status(200).json(user);
-//     }
-//     catch (error) {
-//         return res.status(400).json({ message: error.message });
-//     }
-// }
-
+export const handleLoginCustomer = async (req, res) => {
+    const { email, password } = req.body;
+    if (!email || !password) {
+      return res
+        .status(400)
+        .json({ message: "email and password are required" });
+    }
+    try {
+      const result = await loginCustomerService(email, password);
+      return res.status(200).json(result);
+    } catch (error) {
+      console.error("Login error:", error);
+      return res.status(500).json({ message: error.message });
+    }
+  };

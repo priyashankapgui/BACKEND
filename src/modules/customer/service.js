@@ -9,32 +9,26 @@ import emailjs from "@emailjs/nodejs";
 
 export const registerCustomer = async (customer) => {
     const { email,password,phone } = customer;
-
-    // Check if the email already exists
-    // const existingCustomer = await Customer.findOne({ where: { email: email } });
-    // if (existingCustomer) {
-    //     throw new Error("Email already exists");
-    // }
-
+    //Check if the email already exists
+    const existingCustomer = await Customer.findOne({ where: { email: email } });
+    if (existingCustomer) {
+        throw new Error("Email already exists");
+    }
     // Validate email
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
         throw new Error("Invalid email format");
     }
-
     // Validate password
     if (!/^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,20}$/.test(password)) {
         throw new Error("Invalid password format");
         
     }
-
     // Validate phone number
     const phoneRegex = /^[0-9]{10}$/;
     if (!phoneRegex.test(phone)) {
         throw new Error("Invalid phone number");
     }
-
-
     try{
         const newCustomer = await Customer.create(customer);
         return newCustomer;
@@ -52,60 +46,42 @@ export const getCustomerById = async (customerId) => {
     }
 };
 
+export const loginCustomerService = async (email, password) => {
+  const user = await Customer.findOne({ where: { email: email } });
+  if (!user) {
+    throw new Error("Invalid Credentials");
+  }
+  const storedPassword = await user.password;
+  const passwordMatch = await bcrypt.compare(password, storedPassword);
+  if (passwordMatch) {
+    const accessToken = jwt.sign(
+      {
+        customerId: user.customerId,
+        email: user.email,
+      },
+      ACCESS_TOKEN,
+      {
+        expiresIn: "8h",
+      }
+    );
+    // Return token and user information
+    return {
+      message: "Login successful",
+      token: accessToken,
+      user: {
+        customerId: user.customerId,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        phone: user.phone,
+        address: user.address,
+      },
+    };
+  } else {
+    throw new Error("Invalid Credentials");
+  }
+};
 
-// Function to handle login
-export const handleLoginCustomer = async (req, res) => {
-    const { email, password } = req.body;
-  
-    if (!email || !password) {
-      return res
-        .status(400)
-        .json({ message: "email and password are required" });
-    }
-  
-    try {
-      // Find the user in the database based on the provided email
-      const user = await Customer.findOne({ where: { email: email } });
-  
-      if (!user) {
-        return res.status(404).json({ message: "Invalid Credentials" });
-      }
-  
-      const storedPassword = await user.password;
-      const passwordMatch = await bcrypt.compare(password, storedPassword);
-      console.log(passwordMatch);
-      if (passwordMatch) {
-        const accessToken = jwt.sign(
-          {
-            customerId: user.customerId,
-            email: user.email,
-          },
-          ACCESS_TOKEN,
-          {
-            expiresIn: "8h",
-          }
-        );
-        // Send token and user information in response
-        return res.status(200).json({
-          message: "Login successful",
-          token: accessToken,
-          user: {
-            customerId: user.customerId,
-            firstName: user.firstName,
-            lastName:user.lastName,
-            email: user.email,
-            phone: user.phone,
-            address: user.address,
-          },
-        });
-      } else if (!passwordMatch) {
-        return res.status(401).json({ message: "Invalid Credentials" });
-      }
-    } catch (error) {
-      console.error("Login error:", error);
-      return res.status(500).json({ message: "Internal server error" });
-    }
-  };
 
   export const forgotPasswordCustomer = async (req, res) => {
     const { email } = req.body;
