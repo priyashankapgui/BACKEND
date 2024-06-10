@@ -9,7 +9,7 @@ productBatchSumrouter.get('/product-batch-details', ProductBatchSumController.ge
 productBatchSumrouter.get('/product-batch-sum/:productId', ProductBatchSumController.getProductSumBatchByProductIdController); 
 productBatchSumrouter.get('/product-batch-sum/barcode/:barcode', ProductBatchSumController.getProductSumBatchByBarcodeController); 
 productBatchSumrouter.get('/product-batch-sum/branch/:branchId', ProductBatchSumController.getBatchSumByBranchIdController); 
-productBatchSumrouter.get("/adjust-stock", ProductBatchSumController.adjustProductQuantity); // this endpont is for adjust the stcok quantity
+productBatchSumrouter.get("/adjust-stock", ProductBatchSumController.getProductBatchDetailsController); // this endpont is for adjust the stcok quantity and price
 
 //New
 productBatchSumrouter.get('/products/branch/:branchName', ProductBatchSumController.getAllProductsByBranchController);

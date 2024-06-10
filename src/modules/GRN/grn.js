@@ -3,6 +3,7 @@ import sequelize from "../../../config/database.js";
 import suppliers from "../supplier/supplier.js";
 import branches from "../branch/branch.js";
 
+
 const grn = sequelize.define(
   "grn",
   {
@@ -46,5 +47,7 @@ const grn = sequelize.define(
     timestamps: true,
   }
 );
+
+
 
 export default grn;
