@@ -202,4 +202,4 @@ export const getProductBatchDetails = async (productId, branchName) => {
   }));
 
   return results;
-};
+}; 
