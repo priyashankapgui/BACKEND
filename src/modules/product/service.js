@@ -56,8 +56,10 @@ export const getAllProducts = async () => {
   const mappedResult = result.map(product => ({
     productId: product.productId,
     productName: product.productName,
+    barcode: product.barcode,
     categoryName: product.category.categoryName,
     description: product.description,
+
   }));
 
   return mappedResult;
