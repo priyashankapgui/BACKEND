@@ -5,6 +5,7 @@ import jwt from "jsonwebtoken";
 import { SECRET } from "../../../config/config.js";
 const { SECRET_KEY: ACCESS_TOKEN } = SECRET;
 import emailjs from "@emailjs/nodejs";
+import UserRole from "../userRole/userRole.js";
 
 export const getAllSuperAdmins = async () => {
   try {
@@ -25,6 +26,8 @@ export const handleSuperAdminLogin = async (superAdminId, password) => {
     if (!isPasswordValid) {
       throw new Error("Invalid credentials");
     }
+    const userRole = await UserRole.findByPk(superAdmin.userRoleId);
+    const userRoleName = userRole.userRoleName;
     const token = jwt.sign(
       {
         userID: superAdmin.superAdminId,
@@ -35,7 +38,7 @@ export const handleSuperAdminLogin = async (superAdminId, password) => {
         expiresIn: "8h",
       }
     );
-    return { token: token, superAdmin: superAdmin };
+    return { token: token, superAdmin: superAdmin, userRoleName: userRoleName};
   } catch (error) {
     throw new Error(error.message);
   }

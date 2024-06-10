@@ -31,7 +31,7 @@ export const superAdminLogin = async (req, res) => {
             token: token,
             user: {
                 userID: userID,
-                role: "superadmin",
+                role: data.userRoleName,
                 userName: user.superAdminName,
                 email: user.email,
                 phone: user.phone,
