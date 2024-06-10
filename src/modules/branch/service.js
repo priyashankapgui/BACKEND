@@ -42,6 +42,18 @@ export const getAllBranches = async () => {
     }
 };
 
+export const getAllBranchesWeb = async () => {
+    try{
+        const branchReq = await branches.findAll({
+            attributes: ['branchId', 'branchName']
+        });
+        return branchReq;
+    }catch (error) {
+        console.error('Error retrieving branches:', error);
+        throw new Error('Error retrieving branches');
+    }
+};
+
 export const getBranchById = async (branchId) => {
     try {
         const branchbyId = await branches.findByPk(branchId);
@@ -50,6 +62,17 @@ export const getBranchById = async (branchId) => {
         throw new Error('Error fetching branch: ' + error.message);
     }
 };
+
+export const getBranchByName = async (branchName) => {
+    try {
+      const branch = await branches.findOne({
+        where: { branchName: branchName },
+      });
+      return branch;
+    } catch (error) {
+      throw new Error('Error fetching branch: ' + error.message);
+    }
+  };
 
 export const createBranch = async (branchData) => {
   try {

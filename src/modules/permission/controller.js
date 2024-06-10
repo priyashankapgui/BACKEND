@@ -1,4 +1,4 @@
-import {getAllPermissionsGroup, getPermissions} from './service.js';
+import {getAllPermissionsGroup, getPermissions, getPermissionsWithPageAccess} from './service.js';
 import jwt from 'jsonwebtoken';
 import { SECRET } from '../../../config/config.js';
 const ACCESS_TOKEN = SECRET.SECRET_KEY;
@@ -40,6 +40,20 @@ export const getUserRolePermissions = async (req, res) => {
     try {
         const permissions = await getPermissions(userRoleId);
         res.status(200).json({permissions: permissions});
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+}
+
+export const getUserRolePermissionsByToken = async (req, res) => {
+    const authHeader = req.headers["authorization"];
+    const token = authHeader.split(" ")[1];
+    try {
+        const decoded = jwt.verify(token, ACCESS_TOKEN);
+        const userRoleId = decoded.userRoleId;
+        const permissions = await getPermissionsWithPageAccess(userRoleId);
+        console.log(permissions);
+        res.status(200).json(permissions);
     } catch (error) {
         res.status(500).json({ error: error.message });
     }

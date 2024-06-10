@@ -41,11 +41,16 @@ export const registerCustomer = async (customer) => {
         }catch(error){
             throw new Error("Error creating customer: " + error.message);
         }
-        
-
     };
 
-
+export const getCustomerById = async (customerId) => {
+    try {
+        const customer = await Customer.findByPk(customerId);
+        return customer;
+    } catch (error) {
+        throw new Error("Error fetching customer: " + error.message);
+    }
+};
 
 
 // Function to handle login
@@ -80,16 +85,14 @@ export const handleLoginCustomer = async (req, res) => {
             expiresIn: "8h",
           }
         );
-  
-        //console.log(passwordMatch);
-  
         // Send token and user information in response
         return res.status(200).json({
           message: "Login successful",
           token: accessToken,
           user: {
             customerId: user.customerId,
-            customerName: user.firstName + " " + user.lastName,
+            firstName: user.firstName,
+            lastName:user.lastName,
             email: user.email,
             phone: user.phone,
             address: user.address,
@@ -106,7 +109,6 @@ export const handleLoginCustomer = async (req, res) => {
 
   export const forgotPasswordCustomer = async (req, res) => {
     const { email } = req.body;
-  
     if (!email) {
       return res.status(400).json({ message: "Email is required" });
     }
@@ -124,9 +126,7 @@ export const handleLoginCustomer = async (req, res) => {
             expiresIn: "5m",
           }
         );
-  
         const resetLink = `http://localhost:3000/login/forgotpw/resetpw?token=${passwordResetToken}`;
-  
         emailjs.init({
           publicKey: "U4RoOjKB87mzLhhqW",
           privateKey: process.env.EMAILJS_API_KEY,
@@ -137,8 +137,6 @@ export const handleLoginCustomer = async (req, res) => {
             throttle: 10000,
           },
         });
-  
-        
         const templateParams = {
           resetLink: resetLink,
           receiver_name: user.firstName,
@@ -166,7 +164,6 @@ export const handleLoginCustomer = async (req, res) => {
       return res.status(500).json({ message: "Internal server error" });
     }
   };
-
 
   export const resetPasswordCustomer = async (req, res) => {
     const { resetToken, newPassword, confirmPassword } = req.body;

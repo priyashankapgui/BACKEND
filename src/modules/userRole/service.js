@@ -31,6 +31,18 @@ export const getRole = async (userRoleId) => {
     }
 }
 
+export const getRolesByBranch = async (branchName) => {
+    try{
+        const userRoles = await sequelize.query("select userRoleId, userRoleName, ur.branchId, branchName from userrole as ur left join branches as b on ur.branchId=b.branchId where branchName = :branchName;", {
+            replacements: { branchName: branchName }
+        });
+        return userRoles[0];
+    }
+    catch(error){
+        throw new Error(error.message);
+    }
+}
+
 export const updateRole = async (userRoleId, userRoleName, branch, t) => {
     if (!userRoleName) {
         throw new Error("User role name is required");
@@ -76,7 +88,17 @@ export const updatePermissionsForUserRole = async (userRoleId, checkedPages, t) 
 };
 
 export const handleUserRoleDelete = async (userRoleId, t) => {
-    const deletedUser = await UserRole.destroy({where: {userRoleId: userRoleId}, transaction: t});
-    const deletedPermissions = await Permission.destroy({where: {userRoleId: userRoleId}, transaction: t});
-    return {deletedUser, deletedPermissions};
+    try{
+        const deletedUser = await UserRole.destroy({where: {userRoleId: userRoleId}, transaction: t});
+        const deletedPermissions = await Permission.destroy({where: {userRoleId: userRoleId}, transaction: t});
+        return {deletedUser, deletedPermissions};
+    }
+    catch(error){
+        if(error.name === 'SequelizeForeignKeyConstraintError'){
+            throw new Error("There are Users associated with this User Role. Cannot delete");
+        }
+        else{
+            throw new Error(error.message);
+        }
+    }
 };

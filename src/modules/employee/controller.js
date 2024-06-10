@@ -5,17 +5,36 @@ import {
   createEmployee,
   updateEmployeeById,
   deleteEmployeeById,
-  handleEmployeeResetPassword
+  handleEmployeeResetPassword,
+  getEmployeesByBranch,
+  updateEmployeePersonalInfo
 } from "../employee/service.js";
 import { SECRET } from "../../../config/config.js";
-import jwt from "jsonwebtoken";
-import { handleSuperAdminResetPassword } from "../superAdmin/service.js";
+import jwt, { decode } from "jsonwebtoken";
+import { handleSuperAdminResetPassword, updateSuperAdminById } from "../superAdmin/service.js";
 const ACCESS_TOKEN = SECRET.SECRET_KEY;
 
 export const getEmployees = async (req, res) => {
+  const authHeader = req.headers["authorization"];
+  if (!authHeader) {
+    return res.status(401).json({ error: 'No authorization header' });
+  }
+  const token = authHeader.split(" ")[1];
+  if (!token) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
   try {
-    const employees = await getAllEmployees();
-    res.status(200).json(employees);
+    const decoded = jwt.verify(token, ACCESS_TOKEN);
+    const userRoleId = decoded.userRoleId;
+    const branchName = decoded.branchName;
+    if(userRoleId === 1 && !branchName){
+      const employees = await getAllEmployees();
+      res.status(200).json(employees);
+    }
+    else{
+      const employees = await getEmployeesByBranch(branchName);
+      res.status(200).json(employees);
+    }
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -78,6 +97,38 @@ export const updateEmployee = async (req, res) => {
     }
   }
 };
+
+export const updatePersonalInfo = async (req, res) => {
+  const authHeader = req.headers["authorization"];
+  const token = authHeader.split(" ")[1];
+  const decoded = jwt.verify(token, ACCESS_TOKEN);
+  const employeeId = decoded.employeeId || decoded.userID;
+  const updatedEmployeeData = req.body;
+  console.log(updatedEmployeeData, employeeId);
+  try {
+    let updatedEmployee;
+    if(employeeId.startsWith("SA")){
+      updatedEmployeeData.superAdminName = updatedEmployeeData.employeeName;
+      updatedEmployee = await updateSuperAdminById(employeeId, updatedEmployeeData);
+    }
+    else{
+      updatedEmployee = await updateEmployeePersonalInfo(employeeId, updatedEmployeeData);
+    }
+    if (!updatedEmployee) {
+      res.status(404).json({ error: "Couldn't Update" });
+      return;
+    }
+    res.status(200).json(updatedEmployee);
+  } 
+  catch (error) {
+    if(error.message === "Unauthorized"){
+      res.status(403).json({ error: error.message });
+    }
+    else{
+    res.status(500).json({ error: error.message });
+    }
+  }
+}
 
 export const deleteEmployee = async (req, res) => {
   const authHeader = req.headers["authorization"];
