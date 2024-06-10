@@ -53,6 +53,17 @@ export const getAllBranchesWeb = async () => {
     }
 };
 
+export const getBranchByName = async (branchName) => {
+  try {
+    const branch = await branches.findOne({
+      where: { branchName: branchName },
+    });
+    return branch;
+  } catch (error) {
+    throw new Error('Error fetching branch: ' + error.message);
+  }
+};
+
 // Function to retrieve a branch by its ID
 export const getBranchById = async (branchId) => {
   const [err, branchById] = await to(branches.findByPk(branchId));

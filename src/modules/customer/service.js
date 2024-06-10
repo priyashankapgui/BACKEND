@@ -167,7 +167,8 @@ export const loginCustomerService = async (email, password) => {
         return res
           .status(400)
           .json({ message: "New password cannot be the same as old password" });
-      }
+
+        }
   
       
       user.password = newPassword;
