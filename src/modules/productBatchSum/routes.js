@@ -11,4 +11,9 @@ productBatchSumrouter.get('/product-batch-sum/barcode/:barcode', ProductBatchSum
 productBatchSumrouter.get('/product-batch-sum/branch/:branchId', ProductBatchSumController.getBatchSumByBranchIdController); 
 productBatchSumrouter.get("/adjust-stock", ProductBatchSumController.adjustProductQuantity); // this endpont is for adjust the stcok quantity
 
+//New
+productBatchSumrouter.get('/products/branch/:branchName', ProductBatchSumController.getAllProductsByBranchController);
+productBatchSumrouter.get('/product-details/:productId/branch/:branchName', ProductBatchSumController.getProductDetailsByBranchController);
+
+
 export default productBatchSumrouter;

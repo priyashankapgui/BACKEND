@@ -1,4 +1,3 @@
-//import { updateProductBatchSum, getBatchDetailsByProductName, getAllProductBatchSumData, getProductSumBatchByProductId, getProductSumBatchByBarcode, getBatchSumByBranchId, adjustProductGRNQuantity } from "../productBatchSum/service.js";
 import * as ProductBatchSumService from "../productBatchSum/service.js";
 import products from "../product/product.js";
 import { SUCCESS, ERROR } from "../../helper.js";
@@ -6,9 +5,41 @@ import { Codes } from "../productBatchSum/constants.js";
 
 const { SUC_CODES } = Codes;
 
+// New controller function to get all products by branch
+export const getAllProductsByBranchController = async (req, res) => {
+  const { branchName } = req.params;
 
+  if (!branchName) {
+    return res.status(400).json({ error: "Missing branchName in request parameters" });
+  }
 
-//Function to get all 
+  try {
+    const products = await ProductBatchSumService.getAllProductsByBranch(branchName);
+    res.status(200).json(products);
+  } catch (error) {
+    console.error("Error retrieving products by branch:", error);
+    res.status(500).json({ error: "An error occurred while retrieving products by branch" });
+  }
+};
+
+// New controller function to get product details by branch and product ID
+export const getProductDetailsByBranchController = async (req, res) => {
+  const { productId, branchName } = req.params;
+
+  if (!productId || !branchName) {
+    return res.status(400).json({ error: "Missing productId or branchName in request parameters" });
+  }
+
+  try {
+    const productDetails = await ProductBatchSumService.getProductDetailsByBranch(productId, branchName);
+    res.status(200).json(productDetails);
+  } catch (error) {
+    console.error("Error retrieving product details by branch:", error);
+    res.status(500).json({ error: "An error occurred while retrieving product details by branch" });
+  }
+};
+
+// Existing controller functions
 export const getAllProductBatchSumController = async (req, res) => {
   try {
     const allData = await ProductBatchSumService.getAllProductBatchSumData();
@@ -19,10 +50,6 @@ export const getAllProductBatchSumController = async (req, res) => {
   }
 };
 
-
-
-
-// Controller function to retrieve batch details by productName and branchNo for check price 
 export const getBatchDetailsByProductNameController = async (req, res) => {
   try{
     const { productId, branchName } = req.body;
@@ -35,38 +62,28 @@ export const getBatchDetailsByProductNameController = async (req, res) => {
 
     const result = await ProductBatchSumService.getBatchDetailsByProductName(productId, branchName);
 
-  SUCCESS(res, SUC_CODES, result, req.span);
+    SUCCESS(res, SUC_CODES, result, req.span);
   } catch (err) {
     console.log(err);
     ERROR(res, err, res.span);
   }
 };
 
-
-
-
-//Function for adjust the stock quantity
 export const adjustProductQuantity = async (req, res) => {
   try {
     const { productName, branchName, batchNo, newQuantity } = req.body;
 
-    
     await ProductBatchSumService.adjustProductGRNQuantity(productName, branchName, batchNo, newQuantity);
 
     const result = await products.findOne({ where: { productName } });
 
     SUCCESS(res, SUC_CODES, result, req.span);
-    } catch (err) {
-      console.log(err);
-      ERROR(res, err, res.span);
-    }
+  } catch (err) {
+    console.log(err);
+    ERROR(res, err, res.span);
+  }
 };
 
-
-
-
-
-// Controller function to get ProductBatchSum by productId
 export const getProductSumBatchByProductIdController = async (req, res) => {
   const { productId } = req.params;
 
@@ -82,11 +99,6 @@ export const getProductSumBatchByProductIdController = async (req, res) => {
   }
 };
 
-
-
-
-
-// Controller function to get ProductBatchSum by barcode
 export const getProductSumBatchByBarcodeController = async (req, res) => {
   const { barcode } = req.params;
 
@@ -102,8 +114,6 @@ export const getProductSumBatchByBarcodeController = async (req, res) => {
   }
 };
 
-
-// Controller function to get ProductBatchSum by branchId
 export const getBatchSumByBranchIdController = async (req, res) => {
   const { branchId } = req.params;
 
@@ -115,10 +125,9 @@ export const getBatchSumByBranchIdController = async (req, res) => {
     const productBatchSumData = await ProductBatchSumService.getBatchSumByBranchId(branchId);
     res.status(200).json(productBatchSumData);
   } catch (error) {
-    res.status(500).json({ error: "An error occurred while retrieving the ProductBatchSum by branchId" });
+    res.status (500).json({ error: "An error occurred while retrieving the ProductBatchSum by branchId" });
   }
 };
-
 
 export const handleBilling = async (req, res) => {
   try {
@@ -145,22 +154,3 @@ export const handleBillCancellation = async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 };
-
-
-
-
-// export const updateProductBatchSumController = async (req, res) => {
-//   console.log("searching for data1");
-//   const { productId, batchNo, branchId } = req.body;
-
-//   if (!productId || !batchNo) {
-//     return res.status(400).json({ error: "Missing productId or batchNo in request body" });
-//   }
-
-//   try {
-//     await ProductBatchSumService.updateProductBatchSum(productId, batchNo, branchId);
-//     res.status(200).json({ message: `ProductBatchSum updated for productId ${productId}, batchNo ${batchNo}` });
-//   } catch (error) {
-//     res.status(500).json({ error: "An error occurred while updating the ProductBatchSum" });
-//   }
-// };
