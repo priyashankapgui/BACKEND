@@ -70,7 +70,6 @@ export const updateSuperAdmin = async (req, res) => {
     const decoded = jwt.verify(token, ACCESS_TOKEN);
     const role = decoded.role;
     const userID = decoded.userID;
-    const superAdminID = req.params.superAdminID;
     const updatedSuperAdminData = req.body;
     if (role != "superAdmin" && userID != superAdminID) {
         res.status(403).json({ error: "Unauthorized" });

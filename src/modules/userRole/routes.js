@@ -4,13 +4,18 @@ import {
   getUserRoles,
   createUserRole,
   createUserRoleWithPermissions,
+  updateUserRoleWithPermissions,
+  deleteUserRolWithPermissions,
 } from "./controller.js";
+import { authenticateTokenWithPermission } from "../../middleware/authenticationMiddleware.js";
 
 const UserRoleRouter = express.Router();
 
 UserRoleRouter.get("/userRole/:userRoleId", getUserRole);
 UserRoleRouter.get("/userRoles", getUserRoles);
 UserRoleRouter.post("/userRole", createUserRole);
-UserRoleRouter.post("/userRoleWithPermissions", createUserRoleWithPermissions);
+UserRoleRouter.post("/userRoleWithPermissions", authenticateTokenWithPermission('accounts/user-roles'), createUserRoleWithPermissions);
+UserRoleRouter.put("/userRoleWithPermissions/:userRoleId", authenticateTokenWithPermission('accounts/user-roles'), updateUserRoleWithPermissions);
+UserRoleRouter.delete("/userRoleWithPermissions/:userRoleId", authenticateTokenWithPermission('accounts/user-roles'), deleteUserRolWithPermissions);
 
 export default UserRoleRouter;
