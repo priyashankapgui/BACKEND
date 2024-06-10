@@ -1,9 +1,6 @@
-import { v4 as uuidv4 } from 'uuid';
 import { to, TE } from "../../helper.js";
-import products from "../product/product.js";
 import grn from "../GRN/grn.js";
 import suppliers from "../supplier/supplier.js";
-import { mapSupplierNameToId } from "../../modules/supplier/service.js"; 
 import { mapBranchNameToId } from "../../modules/branch/service.js";
 import branches from "../branch/branch.js";
 import productGRN from '../product_GRN/product_GRN.js';
@@ -206,6 +203,7 @@ export const getGRNByInvoiceNo = async (invoiceNo) => {
 
 
 
+// 
 // Function to get GRNs by date range
 export const getGRNsByDateRange = async (startDate, endDate) => {
   const getGRNs = grn.findAll({
@@ -242,6 +240,7 @@ export const getGRNsByDateRange = async (startDate, endDate) => {
 
   return result;
 };
+
 
 
 
@@ -288,79 +287,6 @@ export const getGRNBySupplierId = async (supplierId) => {
 };
 
 
-
-
-// Function to get GRN by branchId
-// export const getGRNByBranchId = async (branchName) => {
-
-//   try {
-//     // Find the branch first to get the branchId
-//     const branch = await branches.findOne({
-//       where: { branchName },
-//       attributes: ['branchId'],
-//       raw: true,
-//     });
-
-//     console.log("branch", branch);
-
-//     if (!branch) {
-//       throw new Error(`Branch not found for branchName: ${branchName}`);
-//     }
-
-//     const branchId = branch.branchId;
-//     console.log("branchId", branchId);
-
-
-//   const getGRNs = grn.findAll({
-//     where: { branchId },
-//     attributes: ['GRN_NO', 'createdAt', 'supplierId', 'invoiceNo'],
-//     raw: true,
-//   });
-
-//   const [err, grnItems] = await to(getGRNs);
-//   if (err) TE(err);
-//   if (!grnItems || grnItems.length === 0) TE(`No GRNs found for branchId: ${branchId}`);
-
-//   const resultPromises = grnItems.map(async (grnItem) => {
-//     const { GRN_NO, supplierId } = grnItem;
-
-//     const getSupplier = suppliers.findOne({
-//       where: { supplierId },
-//       attributes: ['supplierName'],
-//       raw: true,
-//     });
-
-//     const [supplierErr, supplier] = await to(getSupplier);
-//     if (supplierErr) TE(supplierErr);
-//     if (!supplier) TE(`Supplier not found for supplierId: ${supplierId}`);
-
-//     const getBranch = branches.findOne({
-//       where: { branchId },
-//       attributes: ['branchName'],
-//       raw: true,
-//     });
-
-//     const [branchErr, branch] = await to(getBranch);
-//     if (branchErr) TE(branchErr);
-//     if (!branch) TE(`Branch not found for branchId: ${branchId}`);
-
-//     return {
-//       GRN_NO,
-//       createdAt: grnItem.createdAt,
-//       branchName: branch.branchName,
-//       supplierName: supplier.supplierName,
-//       invoiceNo: grnItem.invoiceNo,
-//     };
-//   });
-
-//   const [resultErr, results] = await to(Promise.all(resultPromises));
-//   if (resultErr) TE(resultErr);
-
-
-//   return results;
-
-
-// };
 
 
 // Function to get GRN by branchId
@@ -470,6 +396,57 @@ export const getGRNsByBranchAndSupplier = async (branchName, supplierId) => {
 
 
 
+// Function to get GRN data by branchName and productId
+export const getGRNsByBranchAndProduct = async (branchName, productId) => {
+  const getBranch = branches.findOne({
+    where: { branchName }
+  });
+
+  const [branchErr, branch] = await to(getBranch);
+  if (branchErr) throw new Error(`Error fetching branch: ${branchErr.message}`);
+  if (!branch) throw new Error(`Branch not found for branchName: ${branchName}`);
+
+  const getProductGRNs = productGRN.findAll({
+    where: { productId },
+    attributes: ['GRN_NO']
+  });
+
+  const [productGRNErr, productGRNs] = await to(getProductGRNs);
+  if (productGRNErr) throw new Error(`Error fetching product GRNs: ${productGRNErr.message}`);
+  if (!productGRNs || productGRNs.length === 0) throw new Error('No product GRNs found for this product');
+
+  const grnNos = productGRNs.map(grn => grn.GRN_NO);
+
+  const getGRNs = grn.findAll({
+    where: {
+      GRN_NO: {
+        [Op.in]: grnNos
+      },
+      branchId: branch.branchId
+    },
+    attributes: ['GRN_NO', 'createdAt', 'invoiceNo'],
+    include: [{
+      model: suppliers,
+      attributes: ['supplierName'],
+      required: true
+    }],
+    raw: true
+  });
+
+  const [grnErr, grnItems] = await to(getGRNs);
+  if (grnErr) throw new Error(`Error fetching GRNs: ${grnErr.message}`);
+  if (!grnItems || grnItems.length === 0) throw new Error('No GRNs found for this branch and product');
+
+  const results = grnItems.map(grnItem => ({
+    GRN_NO: grnItem.GRN_NO,
+    createdAt: grnItem.createdAt,
+    branchName: branchName,
+    supplierName: grnItem['supplier.supplierName'], 
+    invoiceNo: grnItem.invoiceNo,
+  }));
+
+  return results;
+};
 
 
 
