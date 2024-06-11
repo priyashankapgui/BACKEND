@@ -1,192 +1,198 @@
 import { Op } from "sequelize";
+import { to, TE } from "../../helper.js";
 import products from "../product/product.js";
 import categories from "../category/category.js";
-import productRouter from "../product/routes.js";
-import sequelize from "../../../config/database.js";
-//import productSupplier from "../product_Supplier/product_Supplier.js";
-import suppliers from "../supplier/supplier.js";
+import { mapCategoryNameToId } from "../../modules/category/service.js";
 
-// Function to retrieve all products with their associated categories
-export const getAllProducts = async () => {
-  try {
-    const productsReq = await products.findAll({
-      
-      include: [
-        //associated model should be loaded along with the main model
-        {
-          model: categories,
-          as: "category",
-          attributes: ["categoryId", "categoryName", "description"],
-        },
-      ],
-    });
-    console.log(productsReq);
-    return productsReq;
-  } catch (error) {
-    console.error("Error retrieving products:", error);
-    throw new Error("Error retrieving products");
-  }
-};
 
-// Function to retrieve a product by its ID with its associated category
-export const getProductById = async (productId) => {
-  try {
-    const productbyId = await products.findByPk(productId, {
-      include: {
-        model: categories,
-        as: "category",
-        attributes: ["categoryName", "description"],
-      },
-    });
-    return productbyId;
-  } catch (error) {
-    throw new Error("Error fetching product: " + error.message);
-  }
-};
 
-// Function to search products by name using a partial match
-export const searchProductsByName = async (productName) => {
-  try {
-    const searchResults = await products.findAll({
-      where: {
-        productName: {
-          [Op.like]: `%${productName}%`, // Using Sequelize's like operator to search for partial matches
-        },
-      },
-    });
-    return searchResults;
-  } catch (error) {
-    console.error("Error searching products:", error);
-    throw new Error("Error searching products");
-  }
-};
 
-// Function to search products by category name
-export const searchProductsByCategoryName = async (categoryName) => {
+//function to generate the productId
+export const generateProductID = async () => {
   try {
-    const category = await categories.findOne({
-      where: { categoryName },
+
+    const latestProduct = await products.findOne({
+      order: [['productId', 'DESC']],
+      attributes: ['productId'],
     });
 
-    if (!category) {
-      return [];
+    let newProductId;
+
+    if (latestProduct && latestProduct.productId) {
+   
+      const numericPart = parseInt(latestProduct.productId.substring(1), 10);
+      const incrementedNumericPart = numericPart + 1;
+
+      newProductId = `P${incrementedNumericPart.toString().padStart(4, '0')}`;
+    } else {
+ 
+      newProductId = 'P0001';
     }
-    const categoryId = category.categoryId;
-    const productsInCategory = await products.findAll({
-      where: { categoryId },
-      attributes: [
-        "productId",
-        "productName",
-        "description",
-        "image",
-        "createdAt",
-        "updatedAt",
-      ],
-    });
 
-    return productsInCategory;
+    return newProductId;
   } catch (error) {
-    console.error("Error retrieving products by category name:", error);
-    throw new Error("Error retrieving products by category name");
+    console.error('Error generating new product ID:', error);
+    throw new Error('Could not generate new product ID');
   }
+}
+
+
+
+//function yo get all products
+export const getAllProducts = async () => {
+  const getRecords = products.findAll({
+    order: [['createdAt', 'DESC']],
+    include: [{
+      model: categories,
+      as: 'category', 
+      attributes: ['categoryName']
+    }]
+  });
+
+  const [err, result] = await to(getRecords);
+  if (err) TE(err);
+  if (!result) TE("Results not found");
+
+  const mappedResult = result.map(product => ({
+    productId: product.productId,
+    productName: product.productName,
+    categoryName: product.category.categoryName,
+    description: product.description,
+  }));
+
+  return mappedResult;
 };
 
-// Function to add a new product
+
+
+//Function to get product using productId
+export const getProductById = async (productId) => {
+  const getProduct = products.findOne({
+    where: { productId },
+  });
+  const [err, product] = await to(getProduct);
+  if (err) TE(err);
+  if (!product) TE("Product not found");
+
+  const getCategory = categories.findOne({
+    where: { categoryId: product.categoryId },
+  });
+  const [categoryErr, category] = await to(getCategory);
+  if (categoryErr) TE(categoryErr);
+  if (!category) TE("Category not found");
+
+  const result = {
+    productId: product.productId,
+    productName: product.productName,
+    categoryName: category.categoryName,
+    description: product.description,
+    barcode: product.barcode
+  };
+
+  return result;
+};
+
+
+
+
+
+//function to get product details by categoryName
+export const getProductsByCategoryName = async (categoryId) => {
+
+  const getCategory = categories.findOne({
+    where: { categoryId: categoryId },
+  });
+  const [categoryErr, category] = await to(getCategory);
+  if (categoryErr) TE(categoryErr);
+  if (!category) TE("Category not found");
+
+
+  const [productsErr, productsList] = await to(
+    products.findAll({ where: { categoryId } })
+  );
+  if (productsErr) TE(productsErr);
+  if (!productsList || productsList.length === 0) TE("No products found");
+
+  const results = await Promise.all(
+    productsList.map(async (product) => {
+    
+      const [productDetailsErr, productDetails] = await to(
+        products.findOne({ where: { productId: product.productId } })
+      );
+      if (productDetailsErr) TE(productDetailsErr);
+      if (!productDetails) TE(`Product details not found for productId: ${product.productId}`);
+
+      return {
+        productId: productDetails.productId,
+        productName: productDetails.productName,
+        categoryName: category.categoryName,
+        description: productDetails.description,
+      };
+    })
+  );
+
+  return results;
+};
+
+
+
+ //Function to add product
 export const addProduct = async (productData) => {
-  try {
-    const newProduct = await products.create(productData);
-    return newProduct;
-  } catch (error) {
-    throw new Error("Error creating product: " + error.message);
-  }
+
+  const {  productName, description, categoryName, barcode, image } = productData;
+  console.log("product",productName);
+  const productId = await generateProductID();
+  console.log("productId",productId);
+
+  const categoryId = await mapCategoryNameToId(categoryName);
+    if (!categoryId) {
+      return res.status(404).json({ error: "Category not found" });
+    }
+
+  const createSingleRecord = products.create({ productId, productName, categoryId, description, barcode , image});
+
+  const [err, result] = await to (createSingleRecord);
+
+  if (err) TE(err.errors[0] ? err.errors[0].message : err);
+
+if (!result) TE("Result not found");
+
+return result;
+
 };
+
+
 
 // Function to update a product by its ID
 export const updateProductById = async (productId, updatedProductData) => {
-  try {
-    const product = await products.findByPk(productId);
-    if (!product) {
-      throw new Error("Product not found");
-    }
-    await product.update(updatedProductData);
-    return product;
-  } catch (error) {
-    throw new Error("Error updating product: " + error.message);
-  }
+  const updateRecord = products.update(updatedProductData, {
+    where: { productId: productId },
+    returning: true, 
+    plain: true
+  });
+
+  const [err, result] = await to(updateRecord);
+  if (err) TE(err);
+  if (!result) TE("Result not found");
+
+  const updatedRecord = await products.findByPk(productId);
+  if (!updatedRecord) TE("Updated result not found");
+
+  return updatedRecord;
 };
+
+
 
 // Function to delete a product by its ID
 export const deleteProductById = async (productId) => {
-  try {
-    const product = await products.findByPk(productId);
-    if (!product) {
-      throw new Error("Product not found");
-    }
-    await product.destroy();
-    return { message: "Product deleted successfully" };
-  } catch (error) {
-    throw new Error("Error deleting product: " + error.message);
-  }
+  const deleteRecord = products.destroy({ where: { productId: productId } });
+
+  const [err, result] = await to(deleteRecord);
+  if (err) TE(err);
+  if (result === 0) TE("Product not found or already deleted");
+
+  return { message: 'Product successfully deleted' };
 };
 
 
-// Service function to get productId by productName
-export const getProductIdByProductNameService = async (productName) => {
-  try {
-    const product = await products.findOne({
-      where: { productName },
-      attributes: ['productId']
-    });
 
-    return product ? product.productId : null;
-  } catch (error) {
-    console.error("Error fetching productId by productName:", error);
-    throw new Error("Error fetching productId by productName");
-  }
-};
-
-
-// // Service function to get productId and corresponding supplierName by productName
-// export const getProductDetailsByProductName = async (productName) => {
-//   try {
-//     // Find the product by productName
-//     const product = await products.findOne({
-//       where: { productName },
-//       include: [
-//         {
-//           model: productSupplier,
-//           include: [suppliers] // Include suppliers association
-//         }
-//       ]
-//     });
-
-//     if (!product) {
-//       return null; // Return null if product not found
-//     }
-
-//     // Extract productId and corresponding supplierName
-//     const productId = product.productId;
-//     const supplierName = product.product_Suppliers.length > 0 ? product.product_Suppliers[0].supplier.supplierName : null;
-
-//     return { productId, supplierName };
-//   } catch (error) {
-//     console.error("Error fetching product details by productName:", error);
-//     throw new Error("Error fetching product details by productName");
-//   }
-// };
-
-export const searchSuppliersByProductName = async (productId) => {
-  try {
-    // Query the productSupplier model to find suppliers for the given productId
-    const suppliersDetails = await productSupplier.findAll({
-      where: { productId },
-      include: [{ model: suppliers, attributes: ['branchName', 'supplierId', 'supplierName', 'regNo', 'email', 'address', 'contactNo'] }]
-    });
-
-    return suppliersDetails;
-  } catch (error) {
-    // Log and throw any errors that occur during the process
-    console.error("Error searching suppliers by product ID:", error);
-    throw new Error("Error getting suppliers by product ID");
-  }
-}; 

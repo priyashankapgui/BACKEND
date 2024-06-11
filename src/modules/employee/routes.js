@@ -5,25 +5,24 @@ import {
   createNewEmployee,
   updateEmployee,
   deleteEmployee,
+  resetEmployeePassword,
+  updatePersonalInfo,
 } from "../employee/controller.js";
-import { handleLogin, forgotPassword,passwordReset,verify,verifyAdmin , verifySuperAdmin} from "../employee/service.js";
-import { authenticateToken } from "../../middleware/authenticationMiddleware.js";
+import { handleLogin, forgotPassword} from "../employee/service.js";
+import { authenticateToken, authenticateTokenWithPermission } from "../../middleware/authenticationMiddleware.js";
 
 
 const EmployeeRouter = express.Router();
 
-EmployeeRouter.get("/employees", authenticateToken,getEmployees);
-EmployeeRouter.post("/employees",authenticateToken, createNewEmployee);
-EmployeeRouter.get("/employees/:employeeId",authenticateToken, getEmployee);
-EmployeeRouter.put("/employees/:employeeId", authenticateToken, updateEmployee);
-EmployeeRouter.delete("/employees/:employeeId",authenticateToken, deleteEmployee);
+EmployeeRouter.get("/employees", authenticateTokenWithPermission('accounts'), getEmployees);
+EmployeeRouter.post("/employees",authenticateTokenWithPermission('accounts'), createNewEmployee);
+EmployeeRouter.get("/employees/:employeeId",authenticateTokenWithPermission('accounts'), getEmployee);
+EmployeeRouter.put("/employees/:employeeId",authenticateTokenWithPermission('accounts'), updateEmployee);
+EmployeeRouter.post("/employees/selfUpdate", updatePersonalInfo)
+EmployeeRouter.delete("/employees/:employeeId",authenticateTokenWithPermission('accounts'), deleteEmployee);
 EmployeeRouter.post("/api/login", handleLogin);
 EmployeeRouter.post("/api/login/fp", forgotPassword);
-EmployeeRouter.post("/api/login/resetpw", passwordReset);
+EmployeeRouter.post("/api/login/resetpw", resetEmployeePassword);
 
-
-EmployeeRouter.get("/api/employees/verify", authenticateToken,verify);
-EmployeeRouter.get("/api/employees/verifyAdmin", authenticateToken,verifyAdmin);
-EmployeeRouter.get("/api/employees/verifySuperAdmin", authenticateToken,verifySuperAdmin);
     
 export default EmployeeRouter;

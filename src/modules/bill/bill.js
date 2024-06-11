@@ -1,0 +1,66 @@
+import { DataTypes } from 'sequelize';
+import sequelize from '../../../config/database.js';
+import branches from '../branch/branch.js';
+
+const bill = sequelize.define('bill', {
+    billNo: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        primaryKey: true,
+    },
+    branchId: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        references: {
+            model: 'branches',
+            key: 'branchId'
+        },
+        onDelete: 'CASCADE',
+        onUpdate: 'CASCADE'
+    },
+    createdAt: {
+        type: 'TIMESTAMP',
+        defaultValue: DataTypes.NOW,
+        allowNull: false,
+    },
+    billedBy: {
+        type: DataTypes.STRING,
+        allowNull: false,
+    },
+    customerName: {
+        type: DataTypes.STRING,
+        allowNull: true,
+    },
+    contactNo: {
+        type: DataTypes.STRING,
+        allowNull: true,
+    },
+    status: {
+        type: DataTypes.STRING,
+        allowNull: false,
+    },
+}, {
+    tableName: 'bill',
+    timestamps: true,
+    defaultScope: {
+        include: [
+            {
+                model: branches,
+                attributes: ['branchName']
+            }
+        ]
+    },
+    getterMethods: {
+        branchName() {
+            if (this.branches) {
+                return this.branches.branchName;
+            }
+            return null;
+        }
+    }
+});
+
+bill.belongsTo(branches, { foreignKey: 'branchId' });
+
+
+export default bill;

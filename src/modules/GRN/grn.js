@@ -3,23 +3,20 @@ import sequelize from "../../../config/database.js";
 import suppliers from "../supplier/supplier.js";
 import branches from "../branch/branch.js";
 
-
-
 const grn = sequelize.define(
   "grn",
   {
     GRN_NO: {
-      type: DataTypes.STRING, 
+      type: DataTypes.STRING,
       allowNull: false,
       primaryKey: true,
     },
     invoiceNo: {
       type: DataTypes.STRING,
-      allowNull: false,  
+      allowNull: false,
     },
-   
     branchId: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.STRING,
       allowNull: false,
       references: {
         model: branches,
@@ -29,7 +26,7 @@ const grn = sequelize.define(
       },
     },
     supplierId: {
-      type: DataTypes.INTEGER, 
+      type: DataTypes.STRING,
       allowNull: false,
       references: {
         model: suppliers,
@@ -37,7 +34,12 @@ const grn = sequelize.define(
         onDelete: "CASCADE",
         onUpdate: "CASCADE"
       },
-    }, 
+    },
+    createdAt: {
+      type: DataTypes.DATE,
+      defaultValue: DataTypes.NOW,
+      allowNull: false
+    },
   },
   {
     tableName: "grn",
@@ -45,14 +47,4 @@ const grn = sequelize.define(
   }
 );
 
-grn.belongsTo(suppliers, { foreignKey: "supplierId" });
-grn.belongsTo(branches, { foreignKey: "branchId"} );
-
-
-export const setupProductGRNAssociations = () => {
-  grn.belongsToMany(products, { through: "product_GRN" });
-};
-
 export default grn;
-
-
