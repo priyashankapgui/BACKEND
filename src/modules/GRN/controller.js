@@ -13,6 +13,7 @@ const { SUC_CODES } = Codes;
 export const createGRNAndProduct = async (req, res) => {
   try {
     const { invoiceNo, supplierId, branchName, products } = req.body;
+    console.log("supplierId",supplierId);
 
     const grndata = await GRNService.addGRN(invoiceNo, supplierId, branchName);
 
@@ -102,23 +103,32 @@ try {
 };
 
 
-//Function to get grn in date range
+
+// Function to get GRNs in date range
 export const getGRNsByDateRangeController = async (req, res) => {
   const { startDate, endDate } = req.query;
- 
+
   if (!startDate || !endDate) {
     return res.status(400).json({ message: 'Start date and end date are required' });
   }
 
-  try {
-    const result = await GRNService.getGRNsByDateRange(startDate, endDate);
-  SUCCESS(res, SUC_CODES, result, req.span);
-} catch (error) {
-  console.log(error);
+  // Validate date format
+  const start = new Date(startDate);
+  const end = new Date(endDate);
 
-  ERROR(res, error, res.span);
-}
+  if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+    return res.status(400).json({ message: 'Invalid date format' });
+  }
+
+  try {
+    const result = await GRNService.getGRNsByDateRange(start, end);
+    SUCCESS(res, SUC_CODES, result, req.span);
+  } catch (error) {
+    console.error('Error fetching GRNs by date range:', error);
+    ERROR(res, error, req.span);
+  }
 };
+
 
 
 
@@ -195,6 +205,26 @@ SUCCESS(res, SUC_CODES, result, req.span);
 };
 
 
+// Function to get GRN data using branchName and productId
+export const getGRNsByBranchAndProductController = async (req, res) => {
+  try {
+    const { branchName, productId } = req.query;
+
+    if (!branchName || !productId) {
+      return res.status(400).json({ message: 'branchName and productId are required' });
+    }
+
+    const result = await GRNService.getGRNsByBranchAndProduct(branchName, productId);
+    SUCCESS(res, SUC_CODES, result, req.span);
+  } catch (error) {
+    console.log(error);
+  
+    ERROR(res, error, res.span);
+  }
+  };
+
+
+
 
 
 // Controller function to calculate total amount by invoice number
@@ -217,7 +247,22 @@ SUCCESS(res, SUC_CODES, result, req.span);
 };
 
 
+//Function to get all details of a grn using GRN_NO
+export const getGRNDetailsController = async (req, res) => {
+  const { GRN_NO } = req.query;
+  console.log("grn",GRN_NO);
 
+  try {
+    const result = await ProductGRNService.getGRNDetailsByNo(GRN_NO);
+    console.log("hanee",result);
+
+    SUCCESS(res, SUC_CODES, result, req.span);
+  } catch (error) {
+    console.log(error);
+  
+    ERROR(res, error, res.span);
+  }
+  };
 
 
 

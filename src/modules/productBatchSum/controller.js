@@ -1,5 +1,6 @@
 //import { updateProductBatchSum, getBatchDetailsByProductName, getAllProductBatchSumData, getProductSumBatchByProductId, getProductSumBatchByBarcode, getBatchSumByBranchId, adjustProductGRNQuantity } from "../productBatchSum/service.js";
 import * as ProductBatchSumService from "../productBatchSum/service.js";
+import * as Service from '../productBatchUpdateReason/service.js'
 import products from "../product/product.js";
 import { SUCCESS, ERROR } from "../../helper.js";
 import { Codes } from "../productBatchSum/constants.js";
@@ -22,10 +23,16 @@ export const getAllProductBatchSumController = async (req, res) => {
 
 
 
+
+
+
+
+
+
 // Controller function to retrieve batch details by productName and branchNo for check price 
 export const getBatchDetailsByProductNameController = async (req, res) => {
   try{
-    const { productId, branchName } = req.body;
+    const { productId, branchName } = req.query;
     console.log("product", productId);
     console.log("branch", branchName);
 
@@ -145,6 +152,23 @@ export const handleBillCancellation = async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 };
+
+
+
+
+// get details of updated STock and price
+export const getProductBatchDetailsController = async (req, res) => {
+  const { productId, branchName } = req.query;
+
+  try {
+    const result = await Service.getProductBatchDetails(productId, branchName);
+    SUCCESS(res, SUC_CODES, result, req.span);
+  } catch (err) {
+    console.log(err);
+    ERROR(res, err, res.span);
+  }
+};
+
 
 
 

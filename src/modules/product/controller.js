@@ -75,7 +75,7 @@ try {
 
 
 
-
+//Function to create a product
 export const createProduct = async (req, res) => {
   const { productName, description, categoryName, barcode } = req.body;
  
@@ -145,7 +145,7 @@ export const deleteProduct = async (req, res) => {
 
 //Function to get active stock
 export const getTotalQuantityByBranchAndProduct = async (req, res) => {
-  try {
+  try { 
     const { branchName, productId } = req.query;
     const result = await ProductBatchSumService.getProductTotalQuantity(branchName, productId);
 SUCCESS(res, SUC_CODES, result, req.span);
