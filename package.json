@@ -13,6 +13,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@azure/storage-blob": "^12.23.0",
     "@emailjs/nodejs": "^2.2.0",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
@@ -27,6 +28,7 @@
     "nodemon": "^3.1.0",
     "path": "^0.12.7",
     "sequelize": "^6.37.3",
+    "sharp": "^0.33.4",
     "stripe": "^15.8.0",
     "uuid": "^9.0.1"
   },

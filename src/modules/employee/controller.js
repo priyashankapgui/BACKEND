@@ -55,9 +55,8 @@ export const getEmployee = async (req, res) => {
 };
 
 export const createNewEmployee = async (req, res) => {
-  const employee = req.body;
   try {
-    const newEmployee = await createEmployee(employee);
+    const newEmployee = await createEmployee(req);
     res.status(201).json({
       message: "Employee created successfully",
       employee: newEmployee,
@@ -187,4 +186,3 @@ export const resetEmployeePassword = async (req, res) => {
     }
   }
 }
-

@@ -7,6 +7,7 @@ import branches from "../branch/branch.js";
 import UserRole from "../userRole/userRole.js";
 import sequelize from "../../../config/database.js";
 import { raw } from "mysql2";
+import { imageUploadwithCompression } from "../../blobService/utils.js";
 
 const salt = bcrypt.genSaltSync(10);
 const { SECRET_KEY: ACCESS_TOKEN } = SECRET;
@@ -107,8 +108,9 @@ export const getEmployeeById = async (employeeId) => {
   }
 };
 
-export const createEmployee = async (employee) => {
+export const createEmployee = async (req) => {
   // const newEmployeeId = await generateEmployeeId();
+  console.log(req.body.employee);
   const {
     employeeId,
     employeeName,
@@ -117,8 +119,7 @@ export const createEmployee = async (employee) => {
     phone,
     address,
     userRoleName,
-  } = employee;
-
+  } = JSON.parse(req.body.employee);
   // Check if the employeeId already exists
   const existingEmployee = await Employee.findOne({
     where: { employeeId: employeeId },
@@ -146,6 +147,7 @@ export const createEmployee = async (employee) => {
     throw new Error("Invalid password format");
   }
 
+  const t = await sequelize.transaction();
   try {
     const newEmployee = await Employee.create({
       employeeId,
@@ -155,9 +157,12 @@ export const createEmployee = async (employee) => {
       userRoleId,
       phone,
       address,
-    });
+    }, { transaction: t });
+    await imageUploadwithCompression(req.file, "cms-data", employeeId);
+    await t.commit();
     return newEmployee;
   } catch (error) {
+    await t.rollback();
     throw new Error("Error creating employee: " + error.message);
   }
 };
