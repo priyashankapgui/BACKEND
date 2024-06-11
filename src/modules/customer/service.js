@@ -46,6 +46,19 @@ export const getCustomerById = async (customerId) => {
     }
 };
 
+export const updateCustomerService = async (customerId, updatedCustomerData) => {
+    try {
+        const customer = await Customer.findByPk(customerId);
+        if (!customer) {
+            throw new Error("Customer not found");
+        }
+        const customerData = await customer.update(updatedCustomerData);
+        return customerData;
+    } catch (error) {
+        throw new Error("Error updating customer: " + error.message);
+    }
+};
+
 export const loginCustomerService = async (email, password) => {
   const user = await Customer.findOne({ where: { email: email } });
   if (!user) {

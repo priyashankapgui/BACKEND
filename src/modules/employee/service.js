@@ -168,7 +168,7 @@ export const updateEmployeeById = async (
   role,
   branch
 ) => {
-  console.log(employeeData, employeeId, role, branch);
+  //console.log(employeeData, employeeId, role, branch);
   const branchRow = await branches.findOne({
     where: { branchName: employeeData.branchName },
   });

@@ -15,22 +15,22 @@ const {
   DATABASE_PORT
 } = process.env;
 
-const certPath = path.resolve(DATABASE_SSL_CA);
-if (!fs.existsSync(certPath)) {
-  throw new Error(`SSL certificate not found at path: ${certPath}`);
-}
+// const certPath = path.resolve(DATABASE_SSL_CA);
+// if (!fs.existsSync(certPath)) {
+//   throw new Error(`SSL certificate not found at path: ${certPath}`);
+// }
 
 const sequelize = new Sequelize(DATABASE_NAME, DATABASE_USERNAME, DATABASE_PASSWORD, {
   host: DATABASE_HOST,
   port: DATABASE_PORT,
   dialect: 'mysql',
-  dialectOptions: {
-    ssl: {
-      ca: fs.readFileSync(certPath),
-      rejectUnauthorized: false
-    },
-    connectTimeout: 60000
-  },
+  // dialectOptions: {
+  //   ssl: {
+  //     ca: fs.readFileSync(certPath),
+  //     rejectUnauthorized: false
+  //   },
+  //   connectTimeout: 60000
+  // },
   pool: {
     max: 5,
     min: 0,
