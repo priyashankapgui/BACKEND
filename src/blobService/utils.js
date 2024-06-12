@@ -14,8 +14,8 @@ Example usage of processForm() and imageUploadTest() in routes.js
 Example usage of imageUpload in a service.js
   export const imageUploadTest = async (req, res) => {
     try {
-      await imageUploadMultiple(req.files, "cms-product", "product");
-      res.status(200).json({ message: "Images uploaded successfully" });
+      const response = await imageUploadMultiple(req.files, "cms-product", "product");
+      res.status(200).json({ message: response.message, fileNames: response.fileNames });
     } catch (error) {
       res.status(500).json({ error: error.message });
     }
@@ -91,7 +91,7 @@ export const imageUpload = async (file, containerName, fileName) => {
     console.error(error);
     throw new Error(error.message);
   }
-}
+};
 
 /**
  * Uploads an image to Azure Blob Storage with compression.
@@ -108,7 +108,7 @@ export const imageUploadwithCompression = async (
   file,
   containerName,
   fileName,
-  imageFormat = 'png',
+  imageFormat = "png",
   resizeWidth = 200,
   quality = 70
 ) => {
@@ -165,12 +165,13 @@ export const imageUploadMultiple = async (
   containerName,
   commonFileName,
   shouldCompress = false,
-  imageFormat = 'png',
+  imageFormat = "png",
   resizeWidth = 200,
   quality = 70
 ) => {
   const __filename = fileURLToPath(import.meta.url);
   const __dirname = dirname(__filename);
+  const fileNames = [];
   try {
     for (let i = 0; i < files.length; i++) {
       let finalPath = files[i].path;
@@ -189,6 +190,7 @@ export const imageUploadMultiple = async (
       }
 
       await uploadToBlob(containerName, `${commonFileName}(${i})`, finalPath);
+      fileNames.push(`${commonFileName}(${i})`);
 
       fs.unlink(files[i].path, (err) => {
         if (err) {
@@ -204,9 +206,9 @@ export const imageUploadMultiple = async (
       }
     }
     console.log("Images uploaded successfully");
-    return { message: "Images uploaded successfully" };
+    return { message: "Images uploaded successfully", fileNames: fileNames};
   } catch (error) {
     console.error(error);
     throw new Error(error.message);
   }
-}
+};
