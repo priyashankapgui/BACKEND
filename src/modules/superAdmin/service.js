@@ -6,6 +6,8 @@ import { SECRET } from "../../../config/config.js";
 const { SECRET_KEY: ACCESS_TOKEN } = SECRET;
 import emailjs from "@emailjs/nodejs";
 import UserRole from "../userRole/userRole.js";
+import { imageUploadwithCompression } from "../../blobService/utils.js";
+import sequelize from "../../../config/database.js";
 
 export const getAllSuperAdmins = async () => {
   try {
@@ -112,15 +114,21 @@ export const handleSuperAdminResetPassword = async (userId, newPassword) => {
   return;
 }
 
-export const updateSuperAdminById = async (superAdminID, updatedSuperAdminData) => {
+export const updateSuperAdminById = async (req, superAdminID, updatedSuperAdminData) => {
+  const t  = await sequelize.transaction();
   try {
     const superAdmin = await SuperAdmin.findByPk(superAdminID);
     if (!superAdmin) {
       throw new Error("SuperAdmin not found");
+      }
+    const updatedSuperAdmin = await superAdmin.update(updatedSuperAdminData, { transaction: t });
+    if (req.file) {
+      await imageUploadwithCompression(req.file, 'cms-data', superAdminID);
     }
-    const updatedSuperAdmin = await superAdmin.update(updatedSuperAdminData);
+    await t.commit();
     return updatedSuperAdmin;
   } catch (error) {
+    await t.rollback();
     throw new Error("Error updating superAdmin: " + error.message);
   }
 };

@@ -7,7 +7,7 @@ import branches from "../branch/branch.js";
 import UserRole from "../userRole/userRole.js";
 import sequelize from "../../../config/database.js";
 import { raw } from "mysql2";
-import { imageUploadwithCompression } from "../../blobService/utils.js";
+import { imageUploadMultiple, imageUploadwithCompression } from "../../blobService/utils.js";
 
 const salt = bcrypt.genSaltSync(10);
 const { SECRET_KEY: ACCESS_TOKEN } = SECRET;
@@ -168,6 +168,7 @@ export const createEmployee = async (req) => {
 };
 
 export const updateEmployeeById = async (
+  req,
   employeeId,
   employeeData,
   role,
@@ -177,13 +178,16 @@ export const updateEmployeeById = async (
   const branchRow = await branches.findOne({
     where: { branchName: employeeData.branchName },
   });
-  const userRoleId = await UserRole.findOne({
+  const userRole = await UserRole.findOne({
     where: { userRoleName: employeeData.userRoleName },
   });
-  if (!userRoleId) {
+  if (!userRole) {
     throw new Error("User role does not exist");
   }
-  employeeData.userRoleId = userRoleId.userRoleId;
+  if (userRole.userRoleId === 1){
+    throw new Error("Cannot assign super admin role to employee");
+  }
+  employeeData.userRoleId = userRole.userRoleId;
   const employee = await Employee.findByPk(employeeId);
   console.log(employee);
   if (!employee) {
@@ -192,27 +196,40 @@ export const updateEmployeeById = async (
   try {
     if (role == 1 || branch === branchRow.branchName) {
       console.log(employeeData);
-      const updatedEmployee = await employee.update(employeeData);
+      const t = await sequelize.transaction();
+      const updatedEmployee = await employee.update(employeeData, {transaction: t});
+      if (req.file) {
+        await imageUploadwithCompression(req.file, "cms-data", employeeId);
+      }
+      await t.commit();
       return updatedEmployee;
     } else {
       throw new Error("Unauthorized");
     }
   } catch (error) {
+    await t.rollback();
     throw new Error("Error updating employee: " + error.message);
   }
 };
 
-export const updateEmployeePersonalInfo = async (employeeId, employeeData) => {
+export const updateEmployeePersonalInfo = async (req, employeeId, employeeData) => {
   const employee = await Employee.findByPk(employeeId);
   if (!employee) {
     throw new Error("Employee not found");
   }
+  const t = await sequelize.transaction();
   try {
     const updatedEmployee = await employee.update(employeeData, {
       fields: ["employeeName", "email", "phone", "address", "password"],
+      transaction: t,
     });
+    if(req.file){
+      await imageUploadwithCompression(req.file, "cms-data", employeeId);
+    }
+    await t.commit();
     return updatedEmployee;
   } catch (error) {
+    await t.rollback();
     throw new Error("Error updating employee: " + error.message);
   }
 };
@@ -381,3 +398,4 @@ export const handleEmployeeResetPassword = async (userId, newPassword) => {
   await user.save();
   return;
 };
+

@@ -47,7 +47,10 @@ const Employee = sequelize.define('employee', {
             key: 'userRoleId',
             },
         onDelete: "RESTRICT",
-        onUpdate: "CASCADE"
+        onUpdate: "CASCADE",
+        validate: {
+            notIn: [[1]]
+        }
     },
     }, 
     { 

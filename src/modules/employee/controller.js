@@ -73,10 +73,11 @@ export const updateEmployee = async (req, res) => {
   const role = decoded.userRoleId;
   const branch = decoded.branchName;
   const employeeId = req.params.employeeId;
-  const updatedEmployeeData = req.body;
+  const updatedEmployeeData = JSON.parse(req.body.data); 
   
   try {
     const updatedEmployee = await updateEmployeeById(
+      req,
       employeeId,
       updatedEmployeeData,
       role,
@@ -98,20 +99,20 @@ export const updateEmployee = async (req, res) => {
 };
 
 export const updatePersonalInfo = async (req, res) => {
-  const authHeader = req.headers["authorization"];
-  const token = authHeader.split(" ")[1];
-  const decoded = jwt.verify(token, ACCESS_TOKEN);
-  const employeeId = decoded.employeeId || decoded.userID;
-  const updatedEmployeeData = req.body;
-  console.log(updatedEmployeeData, employeeId);
   try {
+    const authHeader = req.headers["authorization"];
+    const token = authHeader.split(" ")[1];
+    const decoded = jwt.verify(token, ACCESS_TOKEN);
+    const employeeId = decoded.employeeId || decoded.userID;
+    const updatedEmployeeData = JSON.parse(req.body.data);;
+    console.log(updatedEmployeeData, employeeId);
     let updatedEmployee;
     if(employeeId.startsWith("SA")){
       updatedEmployeeData.superAdminName = updatedEmployeeData.employeeName;
-      updatedEmployee = await updateSuperAdminById(employeeId, updatedEmployeeData);
+      updatedEmployee = await updateSuperAdminById(req, employeeId, updatedEmployeeData);
     }
     else{
-      updatedEmployee = await updateEmployeePersonalInfo(employeeId, updatedEmployeeData);
+      updatedEmployee = await updateEmployeePersonalInfo(req, employeeId, updatedEmployeeData);
     }
     if (!updatedEmployee) {
       res.status(404).json({ error: "Couldn't Update" });
