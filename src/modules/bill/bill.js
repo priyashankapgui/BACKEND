@@ -35,10 +35,19 @@ const bill = sequelize.define('bill', {
         type: DataTypes.STRING,
         allowNull: true,
     },
+    paymentMethod: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
     status: {
         type: DataTypes.STRING,
         allowNull: false,
     },
+    createdAt: {
+        type: 'TIMESTAMP',
+        defaultValue: DataTypes.NOW,
+        allowNull: false,
+    }
 }, {
     tableName: 'bill',
     timestamps: true,

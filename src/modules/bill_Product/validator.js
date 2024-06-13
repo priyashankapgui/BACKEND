@@ -11,7 +11,6 @@ const createBillProductSchema = Joi.object({
     sellingPrice: Joi.number().required(),
     discount: Joi.number().optional(),
     amount: Joi.number().required(),
-    paymentMethod: Joi.string().required(),
     billTotalAmount: Joi.number().required()
 });
 

@@ -44,6 +44,7 @@ export const createBill = async ({ branchId, billedBy, customerName, contactNo, 
             billedBy,
             customerName,
             contactNo,
+            paymentMethod,
             status,
         });
 

@@ -6,6 +6,7 @@ const createBillSchema = Joi.object({
     billedBy: Joi.string().required(),
     customerName: Joi.string().optional(),
     contactNo: Joi.string().optional(),
+    paymentMethod: Joi.string().required(),
     status: Joi.string().required(),
     products: Joi.array().items(Joi.object({
         productId: Joi.string().required(),
@@ -16,7 +17,6 @@ const createBillSchema = Joi.object({
         sellingPrice: Joi.number().required(),
         discount: Joi.number().optional(),
         amount: Joi.number().required(),
-        paymentMethod: Joi.string().required(),
         billTotalAmount: Joi.number().required()
     })).required()
 });

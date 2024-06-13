@@ -55,10 +55,6 @@ const bill_Product = sequelize.define('bill_Product', {
         type: DataTypes.FLOAT,
         allowNull: false
     },
-    paymentMethod: {
-        type: DataTypes.STRING,
-        allowNull: false
-    },
     billTotalAmount: {
         type: DataTypes.FLOAT,
         allowNull: false

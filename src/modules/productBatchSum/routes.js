@@ -3,17 +3,10 @@ import * as ProductBatchSumController from '../productBatchSum/controller.js';
 
 const productBatchSumrouter = express.Router();
 
-//productBatchSumrouter.post('/update-product-batch-sum', updateProductBatchSumController);
-productBatchSumrouter.get('/product-batch-sum', ProductBatchSumController.getAllProductBatchSumController); 
-productBatchSumrouter.get('/product-batch-details', ProductBatchSumController.getBatchDetailsByProductNameController); // this endpoint is for ckeck price
-productBatchSumrouter.get('/product-batch-sum/:productId', ProductBatchSumController.getProductSumBatchByProductIdController); 
-productBatchSumrouter.get('/product-batch-sum/barcode/:barcode', ProductBatchSumController.getProductSumBatchByBarcodeController); 
-productBatchSumrouter.get('/product-batch-sum/branch/:branchId', ProductBatchSumController.getBatchSumByBranchIdController); 
-productBatchSumrouter.get("/adjust-stock", ProductBatchSumController.getProductBatchDetailsController); // this endpont is for adjust the stcok quantity and price
-
-//New
-productBatchSumrouter.get('/products/branch/:branchName', ProductBatchSumController.getAllProductsByBranchController);
-productBatchSumrouter.get('/product-details/:productId/branch/:branchName', ProductBatchSumController.getProductDetailsByBranchController);
-
+productBatchSumrouter.get('/product-batch-sum', ProductBatchSumController.getAllProductBatchSumController);
+productBatchSumrouter.get('/product-batch-details', ProductBatchSumController.getBatchDetailsByProductNameController);
+productBatchSumrouter.get("/adjust-stock", ProductBatchSumController.getProductBatchDetailsController);
+productBatchSumrouter.get('/products-by-branch', ProductBatchSumController.getAllProductsByBranchController);
+productBatchSumrouter.get('/products-by-barcode', ProductBatchSumController.getProductsByBarcodeController);
 
 export default productBatchSumrouter;

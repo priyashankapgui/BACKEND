@@ -212,64 +212,6 @@ export const getAllProductBatchSumData = async () => {
 
 
 
-export const getProductDetailsByBranch = async (productId, branchName) => {
-  try {
-    const [branchErr, branch] = await to(
-      branches.findOne({ where: { branchName }, attributes: ['branchId', 'branchName'] })
-    );
-    if (branchErr) TE(branchErr);
-    if (!branch) TE("Branch not found");
-
-    const branchId = branch.branchId;
-
-    const [productErr, product] = await to(
-      productBatchSum.findOne({
-        where: { productId, branchId },
-        attributes: ['productId', 'productName', 'batchNo', 'expDate', 'sellingPrice', 'totalAvailableQty']
-      })
-    );
-    if (productErr) TE(productErr);
-    if (!product) TE("Product not found");
-
-    return product;
-  } catch (error) {
-    console.error("Error retrieving product details by branch:", error);
-    throw new Error("Error retrieving product details by branch: " + error.message);
-  }
-};
-
-
-
-// Function to get ProductBatchSum by productId
-export const getProductSumBatchByProductId = async (productId) => {
-  try {
-    const productBatchSumData = await productBatchSum.findByPk(productId);
-    return productBatchSumData;
-  } catch (error) {
-    throw new Error("Error retrieving ProductBatchSum by productId: " + error.message);
-  }
-};
-
-// Function to get ProductBatchSum by barcode
-export const getProductSumBatchByBarcode = async (barcode) => {
-  try {
-    const productBatchSumData = await productBatchSum.findOne({ where: { barcode: barcode } });
-    return productBatchSumData;
-  } catch (error) {
-    throw new Error('Error fetching product by barcode: ' + error.message);
-  }
-};
-
-// Function to get ProductBatchSum by branchId
-export const getBatchSumByBranchId = async (branchId) => {
-  try {
-    const productBatchSumData = await productBatchSum.findOne({ where: { branchId: branchId } });
-    return productBatchSumData;
-  } catch (error) {
-    throw new Error('Error fetching product by barcode: ' + error.message);
-  }
-};
-
 // Handling billing process
 export const handleBilling = async (billedProducts, branchId) => {
   const updates = billedProducts.map(async (billedProduct) => {
@@ -340,4 +282,78 @@ export const handleRefund = async (refundedProducts, branchId) => {
   });
 
   await Promise.all(updates);
+};
+
+
+export const getAllProductsByBranch = async (searchTerm, branchId) => {
+  try {
+    const products = await productBatchSum.findAll({
+      where: {
+        branchId: branchId,
+        [Op.or]: [
+          { productId: { [Op.like]: `%${searchTerm}%` } },
+          { productName: { [Op.like]: `%${searchTerm}%` } }
+        ]
+      }
+    });
+
+    if (!products || products.length === 0) {
+      return []; // Return an empty array if no products found
+    }
+
+    return products.map(product => {
+      if (!product.barcode) {
+        console.error('Product does not have a barcode:', product);
+      }
+
+      return {
+        productId: product.productId,
+        productName: product.productName,
+        batchNo: product.batchNo,
+        barcode: product.barcode,
+        totalAvailableQty: product.totalAvailableQty,
+        discount: product.discount,
+        branchId: product.branchId,
+        branchName: product.branchName,
+        expDate: product.expDate,
+        sellingPrice: product.sellingPrice,
+      };
+    });
+  } catch (error) {
+    console.error('Error retrieving products data by branch:', error);
+    throw new Error('Error retrieving products data by branch');
+  }
+};
+
+export const getProductsByBarcode = async (barcode, branchId) => {
+  try {
+    const products = await productBatchSum.findAll({
+      where: {
+        branchId: branchId,
+        barcode: barcode
+      }
+    });
+
+    if (!products || products.length === 0) {
+      return []; // Return an empty array if no products found
+    }
+
+    return products.map(product => {
+      return {
+        productId: product.productId,
+        productName: product.productName,
+        batchNo: product.batchNo,
+        barcode: product.barcode,
+        totalAvailableQty: product.totalAvailableQty,
+        discount: product.discount,
+        branchId: product.branchId,
+        branchName: product.branchName,
+        expDate: product.expDate,
+        sellingPrice: product.sellingPrice,
+      };
+    });
+  } catch (error) {
+    console.error('Error retrieving products data by barcode:', error);
+    throw new Error('Error retrieving products data by barcode');
+  }
 };
