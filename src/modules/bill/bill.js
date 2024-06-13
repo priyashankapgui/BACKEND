@@ -11,16 +11,9 @@ const bill = sequelize.define('bill', {
     branchId: {
         type: DataTypes.STRING,
         allowNull: false,
-        references: {
-            model: 'branches',
-            key: 'branchId'
-        },
-        onDelete: 'CASCADE',
-        onUpdate: 'CASCADE'
     },
-    createdAt: {
-        type: 'TIMESTAMP',
-        defaultValue: DataTypes.NOW,
+    branchName: {
+        type: DataTypes.STRING,
         allowNull: false,
     },
     billedBy: {
@@ -39,6 +32,10 @@ const bill = sequelize.define('bill', {
         type: DataTypes.STRING,
         allowNull: false
     },
+    billTotalAmount: {
+        type: DataTypes.FLOAT,
+        allowNull: false
+    },
     status: {
         type: DataTypes.STRING,
         allowNull: false,
@@ -47,29 +44,41 @@ const bill = sequelize.define('bill', {
         type: 'TIMESTAMP',
         defaultValue: DataTypes.NOW,
         allowNull: false,
+    },
+    updatedAt: {
+        type: DataTypes.DATE,
+        defaultValue: DataTypes.NOW,
+        allowNull: false,
     }
 }, {
     tableName: 'bill',
-    timestamps: true,
-    defaultScope: {
-        include: [
-            {
-                model: branches,
-                attributes: ['branchName']
-            }
-        ]
-    },
-    getterMethods: {
-        branchName() {
-            if (this.branches) {
-                return this.branches.branchName;
-            }
-            return null;
-        }
+    timestamps: false,
+});
+
+// Set up association
+bill.belongsTo(branches, { foreignKey: 'branchId', targetKey: 'branchId' });
+
+// Hook to set branchName
+bill.addHook('beforeCreate', async (bill, options) => {
+    console.log("Before Create Hook Called");
+    const branch = await branches.findByPk(bill.branchId);
+    if (branch) {
+        bill.branchName = branch.branchName;
+        console.log(`Branch Name Set: ${bill.branchName}`);
+    } else {
+        throw new Error('Branch not found');
     }
 });
 
-bill.belongsTo(branches, { foreignKey: 'branchId' });
-
+bill.addHook('beforeUpdate', async (bill, options) => {
+    console.log("Before Update Hook Called");
+    const branch = await branches.findByPk(bill.branchId);
+    if (branch) {
+        bill.branchName = branch.branchName;
+        console.log(`Branch Name Set: ${bill.branchName}`);
+    } else {
+        throw new Error('Branch not found');
+    }
+});
 
 export default bill;

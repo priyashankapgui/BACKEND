@@ -55,15 +55,15 @@ const bill_Product = sequelize.define('bill_Product', {
         type: DataTypes.FLOAT,
         allowNull: false
     },
-    billTotalAmount: {
-        type: DataTypes.FLOAT,
-        allowNull: false
-    },
     createdAt: {
         type: 'TIMESTAMP',
         defaultValue: DataTypes.NOW,
         allowNull: false,
     }
+
+}, {
+    tableName: 'bill_Product',
+    timestamps: false,
 });
 
 bill_Product.belongsTo(bill, { foreignKey: 'billNo', targetKey: 'billNo' });

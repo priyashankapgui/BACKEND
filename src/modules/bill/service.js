@@ -2,6 +2,8 @@ import { Op } from 'sequelize';
 import bill from './bill.js';
 import branches from '../branch/branch.js';
 
+
+// Generate Bill Number
 const generateBillNumber = async (branchId) => {
     const branch = await branches.findByPk(branchId);
     if (!branch) {
@@ -34,18 +36,24 @@ const generateBillNumber = async (branchId) => {
     return billNo;
 };
 
-export const createBill = async ({ branchId, billedBy, customerName, contactNo, status }) => {
+// Create Bill
+export const createBill = async ({ branchId, branchName, billedBy, customerName, contactNo, paymentMethod, billTotalAmount,createdAt }) => {
     try {
+        // Generate bill number
         const billNo = await generateBillNumber(branchId);
 
+        // Explicitly set status to 'Completed'
         const newBill = await bill.create({
             billNo,
             branchId,
+            branchName,
             billedBy,
             customerName,
             contactNo,
             paymentMethod,
-            status,
+            billTotalAmount,
+            status: 'Completed',
+            createdAt,
         });
 
         return newBill;
@@ -54,32 +62,51 @@ export const createBill = async ({ branchId, billedBy, customerName, contactNo, 
     }
 };
 
+// Function to get all bills
 export const getAllBills = async () => {
     try {
         const bills = await bill.findAll();
-        return bills;
+        if (!bills) {
+            throw new Error("No bills found");
+        }
+        return bills.map(billProduct => ({
+            billNo: billProduct.billNo,
+            branchId: billProduct.branchId,
+            branchName: billProduct.branchName,
+            billedBy: billProduct.billedBy,
+            customerName: billProduct.customerName,
+            contactNo: billProduct.contactNo,
+            paymentMethod: billProduct.paymentMethod,
+            billTotalAmount: billProduct.billTotalAmount,
+            status: billProduct.status,
+            createdAt: billProduct.createdAt,
+        }));
     } catch (error) {
-        console.error('Error retrieving all bills:', error);
-        throw new Error('Error retrieving all bills');
+        throw new Error('Error fetching all bills: ' + error.message);
     }
 };
 
+// Get Bill by Number
 export const getBillByNumber = async (billNo) => {
     try {
-        const bill = await bill.findByPk(billNo);
-        return bill;
+        const billInstance = await bill.findByPk(billNo);
+        if (!billInstance) {
+            throw new Error('Bill not found');
+        }
+        return billInstance;
     } catch (error) {
         throw new Error('Error fetching bill by number: ' + error.message);
     }
 };
 
+// Cancel Bill by Number
 export const cancelBillByNumber = async (billNo) => {
     try {
         const billToCancel = await bill.findByPk(billNo);
         if (!billToCancel) {
             throw new Error('Bill not found');
         }
-        billToCancel.status = 'canceled';
+        billToCancel.status = 'Canceled';
         await billToCancel.save();
         return billToCancel;
     } catch (error) {
@@ -88,6 +115,7 @@ export const cancelBillByNumber = async (billNo) => {
     }
 };
 
+// Update Customer Details by Bill Number
 export const updateCustomerDetailsByBillNumber = async (billNo, customerData) => {
     try {
         const billToUpdate = await bill.findByPk(billNo);

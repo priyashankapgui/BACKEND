@@ -9,10 +9,7 @@ import ShoppingCart from "./cart_Customer/shoppingcart.js";
 import productBatchSum from "./productBatchSum/productBatchSum.js";
 import productGRN from "./product_GRN/product_GRN.js";
 
-const setupBranchBillAssociations = (branches, bill) => {
-  branches.hasMany(bill, { foreignKey: "branchId", as: "bill" });
-  bill.belongsTo(branches, { foreignKey: "branchId" });
-};
+
 
 const setupGRNSupplierAssociations = (grn, suppliers) => { 
   suppliers.hasMany(grn, { foreignKey: "supplierId", as: "grns" });
@@ -79,7 +76,6 @@ export const setupAssociations = () => {
   setupGRNBranchAssociations(grn, branches);
   setupCategoryAssociations(categories, products);
   setupProductGRNAssociations(products, grn);
-  setupBranchBillAssociations(branches, bill);
   setupCartCustomerAssociations(ShoppingCart,Customer);
   setupCartProductAssociations(ShoppingCart,products);
   setupProductBatchSumAssociations(productBatchSum, productGRN);
