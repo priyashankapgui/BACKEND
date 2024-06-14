@@ -7,11 +7,14 @@ import {
   deleteEmployeeById,
   handleEmployeeResetPassword,
   getEmployeesByBranch,
-  updateEmployeePersonalInfo
+  updateEmployeePersonalInfo,
+  handleLogin
 } from "../employee/service.js";
 import { SECRET } from "../../../config/config.js";
 import jwt, { decode } from "jsonwebtoken";
 import { handleSuperAdminResetPassword, updateSuperAdminById } from "../superAdmin/service.js";
+import Employee from "./employee.js";
+import SuperAdmin from "../superAdmin/superAdmin.js";
 const ACCESS_TOKEN = SECRET.SECRET_KEY;
 
 export const getEmployees = async (req, res) => {
@@ -154,6 +157,21 @@ export const deleteEmployee = async (req, res) => {
   }
 };
 
+export const loginEmployee = async (req, res) => {
+  const { employeeId, password } = req.body;
+  if (!employeeId || !password) {
+    res.status(400).json({ message: "Missing required fields" });
+    return;
+  }
+  try {
+    const data = await handleLogin(employeeId, password);
+    res.status(200).json(data);
+  } 
+  catch (error) {
+    res.status(error.status || 500).json({ error: error.message });
+  }
+}
+
 export const resetEmployeePassword = async (req, res) => {
   const { resetToken, newPassword, confirmPassword } = req.body;
   if (!resetToken || !newPassword || !confirmPassword) {
@@ -185,5 +203,22 @@ export const resetEmployeePassword = async (req, res) => {
     } else {
       res.status(500).json({ error: error.message });
     }
+  }
+}
+
+export const logoutEmployee = async (req, res) => {
+  try {
+    const authHeader = req.headers["authorization"];
+    const token = authHeader.split(" ")[1];
+    const decoded = jwt.verify(token, ACCESS_TOKEN);
+    const employeeId = decoded.employeeId || decoded.userID;
+    if (employeeId.startsWith("SA")){
+      await SuperAdmin.update({ currentAccessToken: null }, { where: { superAdminId: employeeId } });
+    } else {
+      await Employee.update({ currentAccessToken: null }, { where: { employeeId: employeeId } });
+    }
+    res.status(200).json({ message: "Logged out successfully" });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
 }

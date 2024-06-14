@@ -40,8 +40,20 @@ const SuperAdmin = sequelize.define('superAdmin', {
             onUpdate: "CASCADE"
         }
     },
-    
+    failedLoginAttempts:{
+        type: DataTypes.INTEGER,
+        defaultValue: 0,
+        allowNull:true,
+    },
+    loginAttemptTime :{
+        type: DataTypes.DATE,
+        allowNull:true, 
     }, 
+    currentAccessToken: {
+        type: DataTypes.STRING,
+        allowNull: true,
+    }, 
+    },
     { 
         tableName: 'superAdmin',
         hooks: {

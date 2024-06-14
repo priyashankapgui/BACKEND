@@ -1,6 +1,7 @@
 import sequelize from "./config/database.js";
 import express from "express";
 import cors from "cors";
+import dotenv from "dotenv";
 import grn from "./src/modules/GRN/grn.js";
 import products from "./src/modules/product/product.js";
 import suppliers from "./src/modules/supplier/supplier.js";
@@ -42,8 +43,7 @@ import productBatchUpdateReasonRouter from "./src/modules/productBatchUpdateReas
 
 import Stripe from 'stripe';
 
-
-
+dotenv.config();
 
 const app = express();
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
@@ -101,7 +101,7 @@ setupAssociations();
 
 
 
-sequelize.sync()
+sequelize.sync({alter:true})
   .then(() => {
     console.log("Database synchronized");
     app.listen(8080, () => {
