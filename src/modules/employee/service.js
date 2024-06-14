@@ -2,12 +2,13 @@ import Employee from "../employee/employee.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import emailjs from "@emailjs/nodejs";
-import { SECRET } from "../../../config/config.js";
+import { AUTH, SECRET } from "../../../config/config.js";
 import branches from "../branch/branch.js";
 import UserRole from "../userRole/userRole.js";
 import sequelize from "../../../config/database.js";
 import { raw } from "mysql2";
 import { imageUploadMultiple, imageUploadwithCompression } from "../../blobService/utils.js";
+import ResponseError from "../../ResponseError.js";
 
 const salt = bcrypt.genSaltSync(10);
 const { SECRET_KEY: ACCESS_TOKEN } = SECRET;
@@ -259,69 +260,69 @@ export const deleteEmployeeById = async (employeeId, role, branch) => {
   }
 };
 
-export const handleLogin = async (req, res) => {
-  const { employeeId, password } = req.body;
-
-  if (!employeeId || !password) {
-    return res
-      .status(400)
-      .json({ error: "Username and password are required" });
+export const handleLogin = async (employeeId, password) => {
+  const tempUser = await Employee.findByPk(employeeId);
+  if (!tempUser) {
+    throw new ResponseError(404, "Employee not found")
   }
+  if (tempUser.failedLoginAttempts >= AUTH.MAX_FAILED_ATTEMPTS && tempUser.loginAttemptTime > new Date(new Date() - AUTH.FAILED_ATTEMPT_TIMEOUT)) {
+    const remainingTime = Math.round((tempUser.loginAttemptTime - new Date(new Date() - AUTH.FAILED_ATTEMPT_TIMEOUT)) / (60*1000));
+    throw new ResponseError(401, `This Account has been locked, please try again in ${remainingTime} minutes`);
+  }
+  tempUser.loginAttemptTime = new Date();
+  const storedPassword = tempUser.password;
+  const passwordMatch = await bcrypt.compare(password, storedPassword);
+  if (passwordMatch) {
+    const data = await handleLoginSuccess(employeeId);
+    tempUser.currentAccessToken = data.token;
+    tempUser.failedLoginAttempts = 0;
+    await tempUser.save();
+    return data;
+  } 
+  else {
+    tempUser.failedLoginAttempts = (tempUser.failedLoginAttempts || 0) + 1;
+    await tempUser.save();
+    throw new ResponseError(401, "Invalid credentials");
+  }
+};
 
-  try {
-    // Find the user in the database based on the provided empID
-    const user = await Employee.findByPk(employeeId, {
-      raw: true,
-      attributes: {
-        include: ["userRole.userRoleName", "userRole.branch.branchName"],
+export const handleLoginSuccess = async (employeeId) => {
+  const user = await Employee.findByPk(employeeId, {
+    raw: true,
+    attributes: {
+      include: ["userRole.userRoleName", "userRole.branch.branchName"],
+    },
+    include: [
+      {
+        model: UserRole,
+        include: [{ model: branches, attributes: [] }],
+        attributes: [],
       },
-      include: [
-        {
-          model: UserRole,
-          include: [{ model: branches, attributes: [] }],
-          attributes: [],
-        },
-      ],
-    });
-    if (!user) {
-      return res.status(404).json({ error: "Invalid Credentials" });
-    }
-
-    const storedPassword = user.password;
-    const passwordMatch = await bcrypt.compare(password, storedPassword);
-
-    if (passwordMatch) {
-      const accessToken = jwt.sign(
-        {
-          employeeId: user.employeeId,
-          role: user.userRoleName,
-          userRoleId: user.userRoleId,
-          branchName: user.branchName,
-        },
-        ACCESS_TOKEN,
-        { expiresIn: "8h" }
-      );
-
-      return res.status(200).json({
-        message: "Login successful",
-        token: accessToken,
-        user: {
-          userID: user.employeeId,
-          branchName: user.branchName,
-          userName: user.employeeName,
-          email: user.email,
-          role: user.userRoleName,
-          phone: user.phone,
-          address: user.address,
-        },
-      });
-    } else {
-      return res.status(401).json({ error: "Invalid Credentials" });
-    }
-  } catch (error) {
-    console.error("Login error:", error);
-    return res.status(500).json({ error: "Internal server error" });
-  }
+    ],
+  });
+  const accessToken = jwt.sign(
+    {
+      employeeId: user.employeeId,
+      role: user.userRoleName,
+      userRoleId: user.userRoleId,
+      branchName: user.branchName,
+    },
+    ACCESS_TOKEN,
+    { expiresIn: "8h" }
+  );
+  return {
+    message: "Login successful",
+    token: accessToken,
+    user: {
+      userID: user.employeeId,
+      branchName: user.branchName,
+      userName: user.employeeName,
+      email: user.email,
+      role: user.userRoleName,
+      phone: user.phone,
+      address: user.address,
+    },
+  };
 };
 
 export const forgotPassword = async (req, res) => {
