@@ -148,18 +148,22 @@ export const createEmployee = async (req) => {
     throw new Error("Invalid password format");
   }
 
+  
+
   const t = await sequelize.transaction();
   try {
     const newEmployee = await Employee.create({
       employeeId,
       employeeName,
-      email,
+      email: email !== "" ? email : undefined,
       password,
       userRoleId,
-      phone,
-      address,
+      phone: phone !== "" ? phone : undefined,
+      address: address !== "" ? address : undefined,
     }, { transaction: t });
-    await imageUploadwithCompression(req.file, "cms-data", employeeId);
+    if (req.file){
+      await imageUploadwithCompression(req.file, "cms-data", employeeId);
+    }
     await t.commit();
     return newEmployee;
   } catch (error) {
@@ -336,7 +340,11 @@ export const forgotPassword = async (req, res) => {
     const user = await Employee.findOne({ where: { employeeId: employeeId } });
     if (!user) {
       return res.status(404).json({ message: "Employee ID not found" });
-    } else {
+    }
+    else if (!user.email) {
+      return res.status(400).json({ message: "Email not given, Please contact an Admin" });
+    }
+    else {
       const passwordResetToken = jwt.sign(
         {
           userId: user.employeeId,
