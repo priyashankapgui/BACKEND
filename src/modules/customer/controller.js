@@ -3,6 +3,7 @@ import {
     getCustomerById,
     loginCustomerService,
     updateCustomerService,
+    updatePasswordService,
     
 } from "../customer/service.js";       
 
@@ -50,6 +51,25 @@ export const updateCustomer = async (req , res) => {
         res.status(500).json({ error: error.message });
     }
 };
+
+export const updatePassword = async (req, res) => {
+    const customerId = req.params.customerId;
+    const { oldPassword, newPassword } = req.body;
+    try {
+      const updatedCustomer = await updatePasswordService(
+        customerId,
+        oldPassword,
+        newPassword
+      );
+      if (!updatedCustomer) {
+        res.status(404).json({ error: "Couldn't Update the Password" });
+        return;
+      }
+      res.status(200).json(updatedCustomer);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  };
 
 export const handleLoginCustomer = async (req, res) => {
     const { email, password } = req.body;
