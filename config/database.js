@@ -15,10 +15,25 @@ const {
   DATABASE_PORT
 } = process.env;
 
+<<<<<<< Updated upstream
 // const certPath = path.resolve(DATABASE_SSL_CA);
 // if (!fs.existsSync(certPath)) {
 //   throw new Error(`SSL certificate not found at path: ${certPath}`);
 // }
+=======
+// Check if all required environment variables are set
+if (!DATABASE_HOST || !DATABASE_USERNAME || !DATABASE_PASSWORD || !DATABASE_NAME || !DATABASE_SSL_CA || !DATABASE_PORT) {
+  throw new Error('One or more required environment variables are missing.');
+}
+
+const certPath = path.resolve(DATABASE_SSL_CA);
+
+console.log(`Resolved SSL certificate path: ${certPath}`);
+
+if (!fs.existsSync(certPath)) {
+  throw new Error(`SSL certificate not found at path: ${certPath}`);
+}
+>>>>>>> Stashed changes
 
 const sequelize = new Sequelize(DATABASE_NAME, DATABASE_USERNAME, DATABASE_PASSWORD, {
   host: DATABASE_HOST,
@@ -41,6 +56,7 @@ const sequelize = new Sequelize(DATABASE_NAME, DATABASE_USERNAME, DATABASE_PASSW
 });
 
 export default sequelize;
+
 
 
 
