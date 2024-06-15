@@ -43,12 +43,12 @@ export const updateCustomer = async (req , res) => {
             updatedCustomerData
         );
         if (!updatedCustomer) {
-            res.status(404).json({ error: "Couldn't Update the Customer" });
+            res.status(404).json({ message: "Couldn't Update the Customer" });
             return;
         }
         res.status(200).json(updatedCustomer);
     }catch(error){
-        res.status(500).json({ error: error.message });
+        res.status(500).json({ message: error.message });
     }
 };
 
@@ -62,12 +62,12 @@ export const updatePassword = async (req, res) => {
         newPassword
       );
       if (!updatedCustomer) {
-        res.status(404).json({ error: "Couldn't Update the Password" });
+        res.status(404).json({ message: "Couldn't Update the Password" });
         return;
       }
       res.status(200).json(updatedCustomer);
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      res.status(500).json({ message: error.message });
     }
   };
 
@@ -86,3 +86,4 @@ export const handleLoginCustomer = async (req, res) => {
       return res.status(500).json({ message: error.message });
     }
   };
+

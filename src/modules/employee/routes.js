@@ -9,7 +9,7 @@ import {
   updatePersonalInfo,
 } from "../employee/controller.js";
 import { handleLogin, forgotPassword} from "../employee/service.js";
-import { authenticateToken, authenticateTokenWithPermission } from "../../middleware/authenticationMiddleware.js";
+import {authenticateTokenWithPermission } from "../../middleware/authenticationMiddleware.js";
 
 
 const EmployeeRouter = express.Router();
