@@ -12,10 +12,7 @@ import onlineBill from "./online_Bill/onlineBill.js";
 import { HasMany } from "sequelize";
 import online_Bill_Products from "./online_Bill_Products/online_Bill_Products.js";
 
-const setupBranchBillAssociations = (branches, bill) => {
-  branches.hasMany(bill, { foreignKey: "branchId", as: "bill" });
-  bill.belongsTo(branches, { foreignKey: "branchId" });
-};
+
 
 const setupGRNSupplierAssociations = (grn, suppliers) => { 
   suppliers.hasMany(grn, { foreignKey: "supplierId", as: "grns" });
@@ -106,7 +103,6 @@ export const setupAssociations = () => {
   setupGRNBranchAssociations(grn, branches);
   setupCategoryAssociations(categories, products);
   setupProductGRNAssociations(products, grn);
-  setupBranchBillAssociations(branches, bill);
   setupCartCustomerAssociations(ShoppingCart,Customer);
   setupCartProductAssociations(ShoppingCart,products);
   setupProductBatchSumAssociations(productBatchSum, productGRN);
