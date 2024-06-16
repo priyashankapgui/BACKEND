@@ -1,5 +1,6 @@
 import ShoppingCart from '../cart_Customer/shoppingcart.js';
 import CartProduct from '../cart_Product/cartProduct.js';
+import ProductBatchSum from '../productBatchSum/productBatchSum.js';
 
 export const getCartItems = async (req, res) => {
   try {
@@ -12,14 +13,31 @@ export const getCartItems = async (req, res) => {
 };
 
 export const addToCart = async (req, res) => {
-  const { productId, productName, sellingPrice, quantity, discount } = req.body;
+  const { productId, productName,branchId, sellingPrice, quantity, discount } = req.body;
 
   try {
+    // Find or create a shopping cart
     const [cart, created] = await ShoppingCart.findOrCreate({ where: {} });
+
+    // Fetch the batch number with the longest expiry date for the given productId
+    const productBatch = await ProductBatchSum.findOne({
+      where: { productId },
+      order: [['expDate', 'DESC']]
+    });
+
+    if (!productBatch) {
+      return res.status(404).json({ message: 'Product batch not found' });
+    }
+
+    const { batchNo } = productBatch;
+
+    // Create a cart product entry
     await CartProduct.create({
       cartId: cart.cartId,
       productId,
       productName,
+      batchNo,
+      branchId,
       sellingPrice,
       quantity,
       discount,
@@ -67,4 +85,3 @@ export const deleteCartItem = async (req, res) => {
     res.status(500).json({ message: 'Internal server error' });
   }
 };
-

@@ -8,6 +8,9 @@ import Customer from "./customer/customer.js";
 import ShoppingCart from "./cart_Customer/shoppingcart.js";
 import productBatchSum from "./productBatchSum/productBatchSum.js";
 import productGRN from "./product_GRN/product_GRN.js";
+import onlineBill from "./online_Bill/onlineBill.js";
+import { HasMany } from "sequelize";
+import online_Bill_Products from "./online_Bill_Products/online_Bill_Products.js";
 
 const setupBranchBillAssociations = (branches, bill) => {
   branches.hasMany(bill, { foreignKey: "branchId", as: "bill" });
@@ -52,7 +55,31 @@ const setupCartProductAssociations = (ShoppingCart, products) => {
   products.belongsToMany(ShoppingCart, { through: "cart_Product", foreignKey: 'productId' });
 }
 
+const setupBranchOnlineBillAssociation = (productBatchSum,onlineBill) =>{
+  branches.hasMany(onlineBill,{foreignKey:"branchId",as:"OnlineBill"});
+  onlineBill.belongsTo(branches,{foreignKey:"branchId"});
+}
 
+const setupCustomerOnlineBillAssociation = (Customer,onlineBill) =>{
+  Customer.hasMany(onlineBill,{foreignKey:"customerId",as:"OnlineBill"});
+  onlineBill.belongsTo(Customer,{foreignKey:"customerId"});
+}
+
+const setupOnlineBillProductBatchAssociation = (onlineBill, productBatchSum, online_Bill_Products) => {
+  onlineBill.belongsToMany(productBatchSum, {
+      through: online_Bill_Products,
+      foreignKey: 'onlineBillNo',
+      otherKey: ['productId', 'batchNo', 'branchId'],
+      as: 'ProductBatches'
+  });
+
+  productBatchSum.belongsToMany(onlineBill, {
+      through: online_Bill_Products,
+      foreignKey: ['productId', 'batchNo', 'branchId'],
+      otherKey: 'onlineBillNo',
+      as: 'OnlineBills'
+  });
+};
 
 const setupProductBatchSumAssociations = (productBatchSum, productGRN) => {
   productBatchSum.belongsTo(productGRN, {
@@ -83,6 +110,9 @@ export const setupAssociations = () => {
   setupCartCustomerAssociations(ShoppingCart,Customer);
   setupCartProductAssociations(ShoppingCart,products);
   setupProductBatchSumAssociations(productBatchSum, productGRN);
+  setupBranchOnlineBillAssociation(branches,onlineBill);
+  setupCustomerOnlineBillAssociation(Customer,onlineBill);
+  setupOnlineBillProductBatchAssociation(onlineBill, productBatchSum, online_Bill_Products)
   //setupProductGRNandGRNssociations(productGRN, grn)
 
 };
