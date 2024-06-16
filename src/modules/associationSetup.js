@@ -8,6 +8,10 @@ import Customer from "./customer/customer.js";
 import ShoppingCart from "./cart_Customer/shoppingcart.js";
 import productBatchSum from "./productBatchSum/productBatchSum.js";
 import productGRN from "./product_GRN/product_GRN.js";
+import stockTransfer from "./stockTransfer/stockTransfer.js";
+import TransferProduct from "./TransferProduct/TransferProduct.js";
+import TransferProductBatch from "./TransferProductBatch/TransferProductBatch.js";
+
 
 const setupBranchBillAssociations = (branches, bill) => {
   branches.hasMany(bill, { foreignKey: "branchId", as: "bill" });
@@ -15,7 +19,7 @@ const setupBranchBillAssociations = (branches, bill) => {
 };
 
 const setupGRNSupplierAssociations = (grn, suppliers) => { 
-  suppliers.hasMany(grn, { foreignKey: "supplierId", as: "grns" });
+  suppliers.hasMany(grn, { foreignKey: "supplierId", as: "grns" }); 
   grn.belongsTo(suppliers, { foreignKey: "supplierId" });
 }; 
 
@@ -52,12 +56,16 @@ const setupCartProductAssociations = (ShoppingCart, products) => {
   products.belongsToMany(ShoppingCart, { through: "cart_Product", foreignKey: 'productId' });
 }
 
+const setupProductStockTransferAssociations = (products, stockTransfer) => {
+  stockTransfer.belongsToMany(products, { through: "Transfer_Product", foreignKey: 'STN_NO' });
+  products.belongsToMany(stockTransfer, { through: "Transfer_Product", foreignKey: 'productId' });
+}
 
 
 const setupProductBatchSumAssociations = (productBatchSum, productGRN) => {
   productBatchSum.belongsTo(productGRN, {
     foreignKey: 'productId',
-    targetKey: 'productId',
+    targetKey: 'productId', 
     as: 'productGRN',
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
@@ -73,6 +81,48 @@ const setupProductBatchSumAssociations = (productBatchSum, productGRN) => {
 };
 
 
+const setupStockTransferProductBatchAssociations = (TransferProduct, TransferProductBatch) => {
+
+  TransferProduct.hasMany(TransferProductBatch, {
+    foreignKey: 'STN_NO',
+    sourceKey: 'STN_NO',
+    as: 'batchesBySTN_NO',
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE'
+  });
+  
+  TransferProduct.hasMany(TransferProductBatch, {
+    foreignKey: 'productId',
+    sourceKey: 'productId',
+    as: 'batchesByProductId',
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE'
+  });
+  
+  TransferProductBatch.belongsTo(TransferProduct, {
+    foreignKey: 'STN_NO',
+    targetKey: 'STN_NO',
+    as: 'transferProductBySTN_NO',
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE'
+  });
+  
+  TransferProductBatch.belongsTo(TransferProduct, {
+    foreignKey: 'productId',
+    targetKey: 'productId',
+    as: 'transferProductByProductId',
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE'
+  });
+  
+
+
+};
+
+
+
+
+
 
 export const setupAssociations = () => {
   setupGRNSupplierAssociations(grn, suppliers);
@@ -84,5 +134,7 @@ export const setupAssociations = () => {
   setupCartProductAssociations(ShoppingCart,products);
   setupProductBatchSumAssociations(productBatchSum, productGRN);
   //setupProductGRNandGRNssociations(productGRN, grn)
+  setupProductStockTransferAssociations (products, stockTransfer);
+  setupStockTransferProductBatchAssociations (TransferProduct, TransferProductBatch);
 
 };
