@@ -13,20 +13,20 @@ export const getCartItems = async (req, res) => {
 };
 
 export const addToCart = async (req, res) => {
-  const { productId, productName,branchId, sellingPrice, quantity, discount } = req.body;
+  const { productId, productName, branchId, sellingPrice, quantity, discount } = req.body;
 
   try {
     // Find or create a shopping cart
     const [cart, created] = await ShoppingCart.findOrCreate({ where: {} });
 
-    // Fetch the batch number with the longest expiry date for the given productId
+    // Fetch the batch number with the longest expiry date for the given productId and branchId
     const productBatch = await ProductBatchSum.findOne({
-      where: { productId },
+      where: { productId, branchId },
       order: [['expDate', 'DESC']]
     });
 
     if (!productBatch) {
-      return res.status(404).json({ message: 'Product batch not found' });
+      return res.status(404).json({ message: 'Product batch not found in the selected branch' });
     }
 
     const { batchNo } = productBatch;
