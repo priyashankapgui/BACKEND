@@ -2,11 +2,13 @@ import Employee from "../employee/employee.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import emailjs from "@emailjs/nodejs";
-import { SECRET } from "../../../config/config.js";
+import { AUTH, SECRET } from "../../../config/config.js";
 import branches from "../branch/branch.js";
 import UserRole from "../userRole/userRole.js";
 import sequelize from "../../../config/database.js";
 import { raw } from "mysql2";
+import { imageUploadMultiple, imageUploadwithCompression } from "../../blobService/utils.js";
+import ResponseError from "../../ResponseError.js";
 
 const salt = bcrypt.genSaltSync(10);
 const { SECRET_KEY: ACCESS_TOKEN } = SECRET;
@@ -107,8 +109,9 @@ export const getEmployeeById = async (employeeId) => {
   }
 };
 
-export const createEmployee = async (employee) => {
+export const createEmployee = async (req) => {
   // const newEmployeeId = await generateEmployeeId();
+  console.log(req.body.employee);
   const {
     employeeId,
     employeeName,
@@ -117,8 +120,7 @@ export const createEmployee = async (employee) => {
     phone,
     address,
     userRoleName,
-  } = employee;
-
+  } = JSON.parse(req.body.employee);
   // Check if the employeeId already exists
   const existingEmployee = await Employee.findOne({
     where: { employeeId: employeeId },
@@ -146,23 +148,32 @@ export const createEmployee = async (employee) => {
     throw new Error("Invalid password format");
   }
 
+  
+
+  const t = await sequelize.transaction();
   try {
     const newEmployee = await Employee.create({
       employeeId,
       employeeName,
-      email,
+      email: email !== "" ? email : undefined,
       password,
       userRoleId,
-      phone,
-      address,
-    });
+      phone: phone !== "" ? phone : undefined,
+      address: address !== "" ? address : undefined,
+    }, { transaction: t });
+    if (req.file){
+      await imageUploadwithCompression(req.file, "cms-data", employeeId);
+    }
+    await t.commit();
     return newEmployee;
   } catch (error) {
+    await t.rollback();
     throw new Error("Error creating employee: " + error.message);
   }
 };
 
 export const updateEmployeeById = async (
+  req,
   employeeId,
   employeeData,
   role,
@@ -172,13 +183,16 @@ export const updateEmployeeById = async (
   const branchRow = await branches.findOne({
     where: { branchName: employeeData.branchName },
   });
-  const userRoleId = await UserRole.findOne({
+  const userRole = await UserRole.findOne({
     where: { userRoleName: employeeData.userRoleName },
   });
-  if (!userRoleId) {
+  if (!userRole) {
     throw new Error("User role does not exist");
   }
-  employeeData.userRoleId = userRoleId.userRoleId;
+  if (userRole.userRoleId === 1){
+    throw new Error("Cannot assign super admin role to employee");
+  }
+  employeeData.userRoleId = userRole.userRoleId;
   const employee = await Employee.findByPk(employeeId);
   console.log(employee);
   if (!employee) {
@@ -187,27 +201,40 @@ export const updateEmployeeById = async (
   try {
     if (role == 1 || branch === branchRow.branchName) {
       console.log(employeeData);
-      const updatedEmployee = await employee.update(employeeData);
+      const t = await sequelize.transaction();
+      const updatedEmployee = await employee.update(employeeData, {transaction: t});
+      if (req.file) {
+        await imageUploadwithCompression(req.file, "cms-data", employeeId);
+      }
+      await t.commit();
       return updatedEmployee;
     } else {
       throw new Error("Unauthorized");
     }
   } catch (error) {
+    await t.rollback();
     throw new Error("Error updating employee: " + error.message);
   }
 };
 
-export const updateEmployeePersonalInfo = async (employeeId, employeeData) => {
+export const updateEmployeePersonalInfo = async (req, employeeId, employeeData) => {
   const employee = await Employee.findByPk(employeeId);
   if (!employee) {
     throw new Error("Employee not found");
   }
+  const t = await sequelize.transaction();
   try {
     const updatedEmployee = await employee.update(employeeData, {
       fields: ["employeeName", "email", "phone", "address", "password"],
+      transaction: t,
     });
+    if(req.file){
+      await imageUploadwithCompression(req.file, "cms-data", employeeId);
+    }
+    await t.commit();
     return updatedEmployee;
   } catch (error) {
+    await t.rollback();
     throw new Error("Error updating employee: " + error.message);
   }
 };
@@ -237,69 +264,69 @@ export const deleteEmployeeById = async (employeeId, role, branch) => {
   }
 };
 
-export const handleLogin = async (req, res) => {
-  const { employeeId, password } = req.body;
-
-  if (!employeeId || !password) {
-    return res
-      .status(400)
-      .json({ error: "Username and password are required" });
+export const handleLogin = async (employeeId, password) => {
+  const tempUser = await Employee.findByPk(employeeId);
+  if (!tempUser) {
+    throw new ResponseError(404, "Employee not found")
   }
+  if (tempUser.failedLoginAttempts >= AUTH.MAX_FAILED_ATTEMPTS && tempUser.loginAttemptTime > new Date(new Date() - AUTH.FAILED_ATTEMPT_TIMEOUT)) {
+    const remainingTime = Math.round((tempUser.loginAttemptTime - new Date(new Date() - AUTH.FAILED_ATTEMPT_TIMEOUT)) / (60*1000));
+    throw new ResponseError(401, `This Account has been locked, please try again in ${remainingTime} minutes`);
+  }
+  tempUser.loginAttemptTime = new Date();
+  const storedPassword = tempUser.password;
+  const passwordMatch = await bcrypt.compare(password, storedPassword);
+  if (passwordMatch) {
+    const data = await handleLoginSuccess(employeeId);
+    tempUser.currentAccessToken = data.token;
+    tempUser.failedLoginAttempts = 0;
+    await tempUser.save();
+    return data;
+  } 
+  else {
+    tempUser.failedLoginAttempts = (tempUser.failedLoginAttempts || 0) + 1;
+    await tempUser.save();
+    throw new ResponseError(401, "Invalid credentials");
+  }
+};
 
-  try {
-    // Find the user in the database based on the provided empID
-    const user = await Employee.findByPk(employeeId, {
-      raw: true,
-      attributes: {
-        include: ["userRole.userRoleName", "userRole.branch.branchName"],
+export const handleLoginSuccess = async (employeeId) => {
+  const user = await Employee.findByPk(employeeId, {
+    raw: true,
+    attributes: {
+      include: ["userRole.userRoleName", "userRole.branch.branchName"],
+    },
+    include: [
+      {
+        model: UserRole,
+        include: [{ model: branches, attributes: [] }],
+        attributes: [],
       },
-      include: [
-        {
-          model: UserRole,
-          include: [{ model: branches, attributes: [] }],
-          attributes: [],
-        },
-      ],
-    });
-    if (!user) {
-      return res.status(404).json({ error: "Invalid Credentials" });
-    }
-
-    const storedPassword = user.password;
-    const passwordMatch = await bcrypt.compare(password, storedPassword);
-
-    if (passwordMatch) {
-      const accessToken = jwt.sign(
-        {
-          employeeId: user.employeeId,
-          role: user.userRoleName,
-          userRoleId: user.userRoleId,
-          branchName: user.branchName,
-        },
-        ACCESS_TOKEN,
-        { expiresIn: "8h" }
-      );
-
-      return res.status(200).json({
-        message: "Login successful",
-        token: accessToken,
-        user: {
-          userID: user.employeeId,
-          branchName: user.branchName,
-          userName: user.employeeName,
-          email: user.email,
-          role: user.userRoleName,
-          phone: user.phone,
-          address: user.address,
-        },
-      });
-    } else {
-      return res.status(401).json({ error: "Invalid Credentials" });
-    }
-  } catch (error) {
-    console.error("Login error:", error);
-    return res.status(500).json({ error: "Internal server error" });
-  }
+    ],
+  });
+  const accessToken = jwt.sign(
+    {
+      employeeId: user.employeeId,
+      role: user.userRoleName,
+      userRoleId: user.userRoleId,
+      branchName: user.branchName,
+    },
+    ACCESS_TOKEN,
+    { expiresIn: "8h" }
+  );
+  return {
+    message: "Login successful",
+    token: accessToken,
+    user: {
+      userID: user.employeeId,
+      branchName: user.branchName,
+      userName: user.employeeName,
+      email: user.email,
+      role: user.userRoleName,
+      phone: user.phone,
+      address: user.address,
+    },
+  };
 };
 
 export const forgotPassword = async (req, res) => {
@@ -313,7 +340,11 @@ export const forgotPassword = async (req, res) => {
     const user = await Employee.findOne({ where: { employeeId: employeeId } });
     if (!user) {
       return res.status(404).json({ message: "Employee ID not found" });
-    } else {
+    }
+    else if (!user.email) {
+      return res.status(400).json({ message: "Email not given, Please contact an Admin" });
+    }
+    else {
       const passwordResetToken = jwt.sign(
         {
           userId: user.employeeId,
@@ -376,3 +407,13 @@ export const handleEmployeeResetPassword = async (userId, newPassword) => {
   await user.save();
   return;
 };
+
+export const imageUploadTest = async (req, res) => {
+  try {
+    const response = await imageUploadMultiple(req.files, "cms-product", "product");
+    res.status(200).json({ message: response.message, fileNames: response.fileNames });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+}
+

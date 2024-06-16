@@ -18,11 +18,8 @@ export const verifyPermissions = async (req, res) => {
     const token = data.token;
     const groupName = data.groupName;
     try {
-        console.log(req.body);
         const decoded = jwt.verify(token, ACCESS_TOKEN);
-        console.log(decoded);
         const userRoleId = decoded.userRoleId;
-        console.log(userRoleId);
         const permissionsGroup = await getAllPermissionsGroup(groupName);
         if (permissionsGroup.includes(userRoleId)) {
             res.status(200).json({ message: "Permission Granted" });
