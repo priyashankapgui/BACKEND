@@ -5,14 +5,14 @@ const createBranchSchema = Joi.object({
   branchName: Joi.string().required(),
   address: Joi.string().required(),
   email: Joi.string().email().required(),
-  contactNumber: Joi.string().pattern(/^[0-9]{10}$/).required()
+  contactNumber: Joi.string().required()
 });
 
 const updateBranchSchema = Joi.object({
   branchName: Joi.string().optional(),
   address: Joi.string().optional(),
   email: Joi.string().email().optional(),
-  contactNumber: Joi.string().pattern(/^[0-9]{10,15}$/).optional()
+  contactNumber: Joi.string().optional()
 }).min(1); 
 
 const create = async (req, res, next) => {

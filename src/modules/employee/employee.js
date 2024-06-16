@@ -7,49 +7,65 @@ import { validate } from 'uuid';
 
 
 const Employee = sequelize.define('employee', {
-    employeeId: {
-        type: DataTypes.STRING,
-        allowNull: false,
-        primaryKey: true,
-      },
-    
-    employeeName: {
-        type: DataTypes.STRING,
-        allowNull: false,
-    },
-    email: {
-        type: DataTypes.STRING,
-        allowNull: false,
-        validate: {
-            isEmail: true,
+        employeeId: {
+            type: DataTypes.STRING,
+            allowNull: false,
+            primaryKey: true,
         },
-    },
-    password: {
-        type: DataTypes.STRING,
-        allowNull: false,
-    },
-    phone: {
-        type: DataTypes.STRING,
-        allowNull: false,
-        validate: {
-            is: /^(?:7|0|(?:\+94))[0-9]{9,10}$/,
+        
+        employeeName: {
+            type: DataTypes.STRING,
+            allowNull: false,
         },
-    },
-    address: {
-        type: DataTypes.STRING,
-        allowNull: false,
-    },
-    userRoleId:{
-        type: DataTypes.INTEGER,
-        allowNull: false,
-        references: {
-            model: UserRole,
-            key: 'userRoleId',
+        email: {
+            type: DataTypes.STRING,
+            allowNull: true,
+            validate: {
+                isEmail: true,
             },
-        onDelete: "RESTRICT",
-        onUpdate: "CASCADE"
+        },
+        password: {
+            type: DataTypes.STRING,
+            allowNull: false,
+        },
+        phone: {
+            type: DataTypes.STRING,
+            allowNull: true,
+            validate: {
+                is: /^(?:7|0|(?:\+94))[0-9]{9,10}$/,
+            },
+        },
+        address: {
+            type: DataTypes.STRING,
+            allowNull: true,
+        },
+        userRoleId:{
+            type: DataTypes.INTEGER,
+            allowNull: false,
+            references: {
+                model: UserRole,
+                key: 'userRoleId',
+                },
+            onDelete: "RESTRICT",
+            onUpdate: "CASCADE",
+            validate: {
+                notIn: [[1]]
+            }
+        },
+        failedLoginAttempts:{
+            type: DataTypes.INTEGER,
+            defaultValue: 0,
+            allowNull:true,
+        },
+        loginAttemptTime :{
+            type: DataTypes.DATE,
+            allowNull:true, 
+        }, 
+        currentAccessToken: {
+            type: DataTypes.STRING,
+            allowNull: true,
+        },
     },
-    }, 
     { 
         tableName: 'employee',
         hooks: {
@@ -75,15 +91,6 @@ const Employee = sequelize.define('employee', {
                     const saltRounds = bcrypt.genSaltSync(10); 
                     employee.password = await bcrypt.hash(employee.password, saltRounds);
                 }
-                // // Check if branch and branchId are related
-                // const relatedBranch = await branches.findOne({
-                //     where: {
-                //         branchId: employee.branchId
-                //     }
-                // });
-                // if (relatedBranch.dataValues.branchName !== employee.branchName) {
-                //     throw new Error('BranchName and branchId are not related');
-                // }
                 },
             },
         },
