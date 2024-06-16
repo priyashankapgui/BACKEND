@@ -7,5 +7,5 @@ export default {
     Controller: BranchController,
     Service: BranchServices,
     Routes: BranchRoutes,
-    Supplier: branches
+    branches: branches
 };

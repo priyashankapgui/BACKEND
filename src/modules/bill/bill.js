@@ -11,17 +11,6 @@ const bill = sequelize.define('bill', {
     branchId: {
         type: DataTypes.STRING,
         allowNull: false,
-        references: {
-            model: 'branches',
-            key: 'branchId'
-        },
-        onDelete: 'CASCADE',
-        onUpdate: 'CASCADE'
-    },
-    createdAt: {
-        type: 'TIMESTAMP',
-        defaultValue: DataTypes.NOW,
-        allowNull: false,
     },
     billedBy: {
         type: DataTypes.STRING,
@@ -35,32 +24,34 @@ const bill = sequelize.define('bill', {
         type: DataTypes.STRING,
         allowNull: true,
     },
+    paymentMethod: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
+    billTotalAmount: {
+        type: DataTypes.FLOAT,
+        allowNull: false
+    },
     status: {
         type: DataTypes.STRING,
         allowNull: false,
     },
+    createdAt: {
+        type: 'TIMESTAMP',
+        defaultValue: DataTypes.NOW,
+        allowNull: false,
+    },
+    updatedAt: {
+        type: DataTypes.DATE,
+        defaultValue: DataTypes.NOW,
+        allowNull: false,
+    }
 }, {
     tableName: 'bill',
-    timestamps: true,
-    defaultScope: {
-        include: [
-            {
-                model: branches,
-                attributes: ['branchName']
-            }
-        ]
-    },
-    getterMethods: {
-        branchName() {
-            if (this.branches) {
-                return this.branches.branchName;
-            }
-            return null;
-        }
-    }
+    timestamps: false,
 });
 
-bill.belongsTo(branches, { foreignKey: 'branchId' });
-
+// Set up association
+bill.belongsTo(branches, { foreignKey: 'branchId', targetKey: 'branchId' });
 
 export default bill;
