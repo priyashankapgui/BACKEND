@@ -15,30 +15,32 @@ const {
   DATABASE_PORT
 } = process.env;
 
-// Check if all required environment variables are set
-if (!DATABASE_HOST || !DATABASE_USERNAME || !DATABASE_PASSWORD || !DATABASE_NAME || !DATABASE_SSL_CA || !DATABASE_PORT) {
-  throw new Error('One or more required environment variables are missing.');
-}
+// // Check if all required environment variables are set
+// if (!DATABASE_HOST || !DATABASE_USERNAME || !DATABASE_PASSWORD || !DATABASE_NAME || !DATABASE_SSL_CA || !DATABASE_PORT) {
+//   throw new Error('One or more required environment variables are missing.');
+// }
 
-const certPath = path.resolve(DATABASE_SSL_CA);
+// const certPath = path.resolve(DATABASE_SSL_CA);
 
-console.log(`Resolved SSL certificate path: ${certPath}`);
+// console.log(`Resolved SSL certificate path: ${certPath}`);
 
-if (!fs.existsSync(certPath)) {
-  throw new Error(`SSL certificate not found at path: ${certPath}`);
-}
+// if (!fs.existsSync(certPath)) {
+//   throw new Error(`SSL certificate not found at path: ${certPath}`);
+// }
 
 const sequelize = new Sequelize(DATABASE_NAME, DATABASE_USERNAME, DATABASE_PASSWORD, {
   host: DATABASE_HOST,
   port: DATABASE_PORT,
   dialect: 'mysql',
   dialectOptions: {
-    ssl: {
-      ca: fs.readFileSync(certPath),
-      rejectUnauthorized: false
-    },
-    connectTimeout: 60000
+    // ssl: {
+    //   ca: fs.readFileSync(certPath),
+    //   rejectUnauthorized: false
+    // },
+    connectTimeout: 60000,
+    timezone: '+05:30',
   },
+  timezone: '+05:30',
   pool: {
     max: 5,
     min: 0,

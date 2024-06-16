@@ -198,10 +198,10 @@ export const updateEmployeeById = async (
   if (!employee) {
     throw new Error("Employee not found");
   }
+  const t = await sequelize.transaction();
   try {
-    if (role == 1 || branch === branchRow.branchName) {
+    if (role == 1 || (role!=userRole.userRoleId && branch === branchRow.branchName)) {
       console.log(employeeData);
-      const t = await sequelize.transaction();
       const updatedEmployee = await employee.update(employeeData, {transaction: t});
       if (req.file) {
         await imageUploadwithCompression(req.file, "cms-data", employeeId);
