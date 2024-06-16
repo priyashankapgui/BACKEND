@@ -36,6 +36,8 @@ import refundBillRouter from "./src/modules/refund_Bill/routes.js";
 import cartRoutes from "./src/modules/cart_Product/routes.js"
 import ShoppingCart from "./src/modules/cart_Customer/shoppingcart.js";
 import onlineBill from "./src/modules/online_Bill/onlineBill.js";
+import onlineBillRoutes from "./src/modules/online_Bill/routes.js";
+import online_bill_product from "./src/modules/online_Bill_Products/routes.js";
 import ProductBatchUpdateReason from "./src/modules/productBatchUpdateReason/productBatchUpdateReason.js";
 import productBatchUpdateReasonRouter from "./src/modules/productBatchUpdateReason/routes.js";
 
@@ -74,6 +76,8 @@ app.use('/', PermissionRouter);
 app.use('/', UserRoleRouter);
 app.use('/', PageAccessRouter)
 app.use('/', cartRoutes);
+app.use('/', onlineBillRoutes);
+app.use('/', online_bill_product);
 app.use('/',productBatchUpdateReasonRouter);
 
 
@@ -92,6 +96,8 @@ app.use('/api', salesRouter);
 app.use('/api', feedback);
 app.use('/api', productBatchSumrouter);
 app.use('/api', cartRoutes);
+app.use('/api', onlineBillRoutes);
+app.use('/api', online_bill_product);
 app.use('/api',productBatchUpdateReasonRouter);
 
 app.use('/Images', express.static('.src/Images'))
