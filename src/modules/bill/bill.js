@@ -12,10 +12,6 @@ const bill = sequelize.define('bill', {
         type: DataTypes.STRING,
         allowNull: false,
     },
-    branchName: {
-        type: DataTypes.STRING,
-        allowNull: false,
-    },
     billedBy: {
         type: DataTypes.STRING,
         allowNull: false,
@@ -57,28 +53,5 @@ const bill = sequelize.define('bill', {
 
 // Set up association
 bill.belongsTo(branches, { foreignKey: 'branchId', targetKey: 'branchId' });
-
-// Hook to set branchName
-bill.addHook('beforeCreate', async (bill, options) => {
-    console.log("Before Create Hook Called");
-    const branch = await branches.findByPk(bill.branchId);
-    if (branch) {
-        bill.branchName = branch.branchName;
-        console.log(`Branch Name Set: ${bill.branchName}`);
-    } else {
-        throw new Error('Branch not found');
-    }
-});
-
-bill.addHook('beforeUpdate', async (bill, options) => {
-    console.log("Before Update Hook Called");
-    const branch = await branches.findByPk(bill.branchId);
-    if (branch) {
-        bill.branchName = branch.branchName;
-        console.log(`Branch Name Set: ${bill.branchName}`);
-    } else {
-        throw new Error('Branch not found');
-    }
-});
 
 export default bill;

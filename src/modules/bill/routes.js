@@ -11,4 +11,5 @@ billRouter.put('/bills/:billNo', Validator.update, Controller.updateCustomerDeta
 billRouter.put('/bills/cancel/:billNo', Controller.cancelBillByNumberController);
 billRouter.get('/bills-all', Controller.getBillDetailsController);
 
+
 export default billRouter;

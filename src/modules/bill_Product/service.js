@@ -1,7 +1,7 @@
 import sequelize from '../../../config/database.js';
 import bill from '../bill/bill.js';
-import BillProduct from './bill_Product.js'; 
-import Product from '../product/product.js'; 
+import BillProduct from './bill_Product.js';
+import Product from '../product/product.js';
 import { Codes } from "./constants.js";
 
 const { SUC_CODES } = Codes;
@@ -47,7 +47,7 @@ export const getBillProductsByBillNumber = async (billNo) => {
 
         const billProducts = await BillProduct.findAll({
             where: { billNo },
-            attributes: ['barcode', 'productId', 'batchNo','productName', 'billQty', 'sellingPrice', 'discount', 'amount'],
+            attributes: ['barcode', 'productId', 'batchNo', 'productName', 'billQty', 'sellingPrice', 'discount', 'amount'],
             raw: true,
         });
 

@@ -62,11 +62,11 @@ export const adjustProductQuantity = async (req, res) => {
 };
 
 
-export const handleBilling = async (req, res) => {
+export const handleBillingController = async (req, res) => {
   try {
-    const { billedProducts, branchId } = req.body;
-
-    await ProductBatchSumService.handleBilling(billedProducts, branchId);
+    const { billedProducts, branchName } = req.body;
+    console.log("branchName", branchName);
+    await ProductBatchSumService.handleBilling(billedProducts, branchName);
 
     res.status(200).json({ message: 'Billing processed successfully.' });
   } catch (error) {
@@ -75,7 +75,7 @@ export const handleBilling = async (req, res) => {
   }
 };
 
-export const handleBillCancellation = async (req, res) => {
+export const handleBillCancellationController = async (req, res) => {
   try {
     const { canceledProducts, branchId } = req.body;
 
@@ -126,15 +126,15 @@ export const getProductsByBarcodeController = async (req, res) => {
   const { barcode, branchName } = req.query;
 
   try {
-      const branch = await branches.findOne({ where: { branchName } });
-      if (!branch) {
-          return res.status(404).json({ message: 'Branch not found' });
-      }
+    const branch = await branches.findOne({ where: { branchName } });
+    if (!branch) {
+      return res.status(404).json({ message: 'Branch not found' });
+    }
 
-      const products = await ProductBatchSumService.getProductsByBarcode(barcode, branch.branchId);
-      return res.status(200).json(products);
+    const products = await ProductBatchSumService.getProductsByBarcode(barcode, branch.branchId);
+    return res.status(200).json(products);
   } catch (error) {
-      console.error('Error retrieving products data by barcode:', error);
-      return res.status(500).json({ message: 'Internal server error' });
+    console.error('Error retrieving products data by barcode:', error);
+    return res.status(500).json({ message: 'Internal server error' });
   }
 };

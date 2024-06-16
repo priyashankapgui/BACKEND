@@ -8,5 +8,6 @@ productBatchSumrouter.get('/product-batch-details', ProductBatchSumController.ge
 productBatchSumrouter.get("/adjust-stock", ProductBatchSumController.getProductBatchDetailsController);
 productBatchSumrouter.get('/products-by-branch', ProductBatchSumController.getAllProductsByBranchController);
 productBatchSumrouter.get('/products-by-barcode', ProductBatchSumController.getProductsByBarcodeController);
+productBatchSumrouter.put('/achala', ProductBatchSumController.handleBillingController);
 
 export default productBatchSumrouter;

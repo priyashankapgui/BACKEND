@@ -213,9 +213,10 @@ export const getAllProductBatchSumData = async () => {
 
 
 // Handling billing process
-export const handleBilling = async (billedProducts, branchId) => {
-  const updates = billedProducts.map(async (billedProduct) => {
-    const { productId, batchNo, quantitySold } = billedProduct;
+export const handleBilling = async (billedProducts, branchName) => {
+  const branchId = await mapBranchNameToId(branchName);
+  const updates = billedProducts.map(async (billedProducts) => {
+    const { productId, batchNo, billQty } = billedProducts;
 
     const productBatch = await productBatchSum.findOne({
       where: {
@@ -229,7 +230,7 @@ export const handleBilling = async (billedProducts, branchId) => {
       throw new Error(`No product batch found for productId: ${productId}, batchNo: ${batchNo}, branchId: ${branchId}`);
     }
 
-    const newTotalAvailableQty = productBatch.totalAvailableQty - quantitySold;
+    const newTotalAvailableQty = productBatch.totalAvailableQty - billQty;
 
     if (newTotalAvailableQty < 0) {
       throw new Error(`Insufficient stock for productId: ${productId}, batchNo: ${batchNo}, branchId: ${branchId}`);

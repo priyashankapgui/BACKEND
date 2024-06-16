@@ -35,10 +35,6 @@ const bill_Product = sequelize.define('bill_Product', {
         type: DataTypes.STRING,
         allowNull: true
     },
-    productName: {
-        type: DataTypes.STRING,
-        allowNull: false
-    },
     billQty: {
         type: DataTypes.FLOAT,
         allowNull: false

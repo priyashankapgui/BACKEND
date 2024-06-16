@@ -1,7 +1,7 @@
 import { Op } from 'sequelize';
 import bill from './bill.js';
 import branches from '../branch/branch.js';
-
+import { mapBranchNameToId } from '../branch/service.js';
 
 // Generate Bill Number
 const generateBillNumber = async (branchId) => {
@@ -37,8 +37,9 @@ const generateBillNumber = async (branchId) => {
 };
 
 // Create Bill
-export const createBill = async ({ branchId, branchName, billedBy, customerName, contactNo, paymentMethod, billTotalAmount,createdAt }) => {
+export const createBill = async ({ branchName, billedBy, customerName, contactNo, paymentMethod, billTotalAmount,createdAt }) => {
     try {
+        const branchId = await mapBranchNameToId(branchName);
         // Generate bill number
         const billNo = await generateBillNumber(branchId);
 
@@ -46,7 +47,6 @@ export const createBill = async ({ branchId, branchName, billedBy, customerName,
         const newBill = await bill.create({
             billNo,
             branchId,
-            branchName,
             billedBy,
             customerName,
             contactNo,

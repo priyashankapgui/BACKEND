@@ -2,6 +2,8 @@ import * as Service from './service.js';
 import * as BillProductService from '../bill_Product/service.js';
 import { SUCCESS, ERROR } from "../../helper.js";
 import { Codes } from "./constants.js";
+import { handleBilling } from '../productBatchSum/service.js';
+import * as ProductBatchSum from "../productBatchSum/service.js"
 
 const { SUC_CODES } = Codes;
 
@@ -46,10 +48,10 @@ export const getBillByNumberController = async (req, res) => {
 
 export const createBillController = async (req, res) => {
     try {
-        const { branchId, branchName, billedBy, customerName, contactNo, status, paymentMethod, billTotalAmount, products } = req.body;
+        const { branchName, billedBy, customerName, contactNo, status, paymentMethod, billTotalAmount, products } = req.body;
 
         // Create new bill
-        const newBill = await Service.createBill({ branchId, branchName, billedBy, customerName, contactNo, status, paymentMethod, billTotalAmount });
+        const newBill = await Service.createBill({  branchName, billedBy, customerName, contactNo, status, paymentMethod, billTotalAmount });
 
         // Prepare bill products data
         const billProducts = products.map(product => ({
@@ -57,7 +59,6 @@ export const createBillController = async (req, res) => {
             productId: product.productId,
             batchNo: product.batchNo,
             barcode: product.barcode,
-            productName: product.productName,
             billQty: product.billQty,
             sellingPrice: product.sellingPrice,
             discount: product.discount,
@@ -72,6 +73,7 @@ export const createBillController = async (req, res) => {
         } else {
             ERROR(res, { message: 'Validation error creating bill_Product entries' }, req.span, 400);
         }
+        const results = await ProductBatchSum.handleBilling(branchName,billProducts)
     } catch (error) {
         console.error('Error creating Bill and bill_Product entries:', error);
         ERROR(res, { message: 'Failed to create Bill and bill_Product entries' }, req.span, 500);
