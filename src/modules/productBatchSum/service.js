@@ -201,6 +201,134 @@ export const adjustProductGRNQuantity = async (productName, branchName, batchNo,
   }
 };
 
+
+// Function to update totalAvailableQty when stock transfer IN
+export const updateProductBatchSumQty = async (productId, batchNo, supplyingBranch, transferQty) => {
+  const [branchErr, branch] = await to(branches.findOne({ where: { branchName: supplyingBranch } }));
+    if (branchErr) TE(branchErr);
+    if (!branch) TE(new Error('Branch not found.'));
+    const branchId = branch.branchId;
+
+  try {
+    const productBatchSumEntry = await productBatchSum.findOne({
+      where: {
+        productId,
+        batchNo,
+        branchId,
+      },
+    });
+
+    if (productBatchSumEntry) {
+      productBatchSumEntry.totalAvailableQty -= transferQty;
+      await productBatchSumEntry.save();
+    } else {
+      throw new Error(`Product batch sum entry not found for productId: ${productId}, batchNo: ${batchNo}, branchId: ${branchId}`);
+    }
+  } catch (error) {
+    console.error('Error updating product batch sum:', error);
+    throw error;
+  }
+};
+
+
+
+
+// Function to update or create productBatchSum entry when saving stock transfer OUT
+export const updateOrAddProductBatchSum = async ( requestBranch, productDetails) => {
+  const updatedProductBatchSums = [];
+
+  try {
+    for (const product of productDetails) {
+      const { productId, batchNo, transferQty } = product;
+
+      const [branchErr, branch] = await to(branches.findOne({ where: { branchName: requestBranch } }));
+      if (branchErr) TE(branchErr);
+      if (!branch) TE(new Error('Requesting branch not found.'));
+      const branchId = branch.branchId;
+
+      let productBatchSumEntry = await productBatchSum.findOne({
+        where: {
+          productId,
+          batchNo,
+          branchId,
+        },
+      });
+
+      // Update existing productBatchSum entry or create new one
+      if (productBatchSumEntry) {
+        productBatchSumEntry.totalAvailableQty += transferQty;
+        await productBatchSumEntry.save();
+      } else {
+
+        const product = await products.findOne({
+          where: { productId: productId },
+          attributes: ['productName']
+        });
+  
+        if (!product) {
+          throw new Error(`Product with productId ${productId} not found`);
+        }
+
+        const productName = product.productName;
+
+        productBatchSumEntry = await productBatchSum.create({
+          productId,
+          batchNo,
+          branchId,
+          productName,
+          branchName: requestBranch,
+          totalAvailableQty: transferQty,
+        });
+      }
+
+      updatedProductBatchSums.push(productBatchSumEntry);
+    }
+
+    return updatedProductBatchSums;
+  } catch (error) {
+    console.error('Error updating or adding product batch sum:', error);
+    throw error;
+  }
+};
+
+
+
+//function to get batchNo
+export const getBatchNumbersByBranchAndProduct = async (branchName, productId) => {
+  try {
+
+    const branch = await branches.findOne({
+      where: { branchName: branchName },
+      attributes: ['branchId']
+    });
+
+    if (!branch) {
+      throw new Error(`BranchId not found`);
+    }
+
+    const branchId = branch.branchId;
+
+    const batchNumbers = await productBatchSum.findAll({
+      attributes: ['batchNo', 'totalAvailableQty' , 'sellingPrice'],
+      where: {
+        branchId,
+        productId,
+      },
+    });
+
+    return batchNumbers.map(record => ({
+      batchNo: record.batchNo,
+      totalAvailableQty: record.totalAvailableQty,
+      sellingPrice: record.sellingPrice,
+    }));
+  } catch (error) {
+    console.error('Error fetching batch numbers:', error);
+    throw error;
+  }
+};
+
+
+
 export const getAllProductBatchSumData = async () => {
   try {
     const allData = await productBatchSum.findAll();

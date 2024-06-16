@@ -39,6 +39,11 @@ import ShoppingCart from "./src/modules/cart_Customer/shoppingcart.js";
 import onlineBill from "./src/modules/online_Bill/onlineBill.js";
 import ProductBatchUpdateReason from "./src/modules/productBatchUpdateReason/productBatchUpdateReason.js";
 import productBatchUpdateReasonRouter from "./src/modules/productBatchUpdateReason/routes.js";
+import stockTransferRouter from "./src/modules/stockTransfer/routes.js";
+import TransferProductBatchRouter from "./src/modules/TransferProductBatch/routes.js";
+import TransferProduct from "./src/modules/TransferProduct/TransferProduct.js";
+import TransferProductBatch from "./src/modules/TransferProductBatch/TransferProductBatch.js";
+
 import Stripe from 'stripe';
 
 const app = express();
@@ -68,6 +73,8 @@ app.use('/', UserRoleRouter);
 app.use('/', PageAccessRouter)
 app.use('/', cartRoutes);
 app.use('/',productBatchUpdateReasonRouter);
+app.use('/',stockTransferRouter);
+app.use('/',TransferProductBatchRouter);
 
 
 app.use("/api", Productrouter);
@@ -84,6 +91,11 @@ app.use('/api', feedback);
 app.use('/api', productBatchSumrouter);
 app.use('/api', cartRoutes);
 app.use('/api',productBatchUpdateReasonRouter);
+app.use('/api',stockTransferRouter);
+app.use('/api',TransferProductBatchRouter);
+
+
+
 
 app.use('/Images', express.static('.src/Images'))
 
@@ -151,4 +163,4 @@ app.post('/create-checkout-session', async (req, res) => {
 });
 
 
-export { sequelize, categories, suppliers, grn, products, branches, feedback, ShoppingCart, productBatchSum, SuperAdmin, onlineBill , ProductBatchUpdateReason,bill};
+export { sequelize, categories, suppliers, grn, products, branches, feedback, ShoppingCart, productBatchSum, SuperAdmin, onlineBill , ProductBatchUpdateReason,bill, TransferProduct, TransferProductBatch};
