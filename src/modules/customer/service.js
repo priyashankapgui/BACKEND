@@ -18,10 +18,6 @@ export const registerCustomer = async (customer) => {
   if (!emailRegex.test(email)) {
     throw new Error("Invalid email format");
   }
-  // Validate password
-  if (!/^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,20}$/.test(password)) {
-    throw new Error("Invalid password format");
-  }
   // Validate phone number
   const phoneRegex = /^[0-9]{10}$/;
   if (!phoneRegex.test(phone)) {
