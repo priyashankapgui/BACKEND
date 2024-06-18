@@ -87,10 +87,6 @@ export const loginCustomerService = async (email, password) => {
   if(tempUser.failedLoginAttempts >= AUTH.MAX_FAILED_ATTEMPTS && tempUser.loginAttemptTime > new Date(new Date() - AUTH.FAILED_ATTEMPT_TIMEOUT)){
     const remainingTime = Math.round((tempUser.loginAttemptTime - new Date(new Date() - AUTH.FAILED_ATTEMPT_TIMEOUT)) / (60*1000));
     // Send password reset email if account is locked
-    if(tempUser.failedLoginAttempts >= AUTH.MAX_FAILED_ATTEMPTS) {
-      //console.log(tempUser.email);
-      await resetPasswordEmail(tempUser.email, "template_p2h8p9n"); 
-    }
     throw new Error( `This Account has been locked, please try again in ${remainingTime} minutes`);
   }
   tempUser.loginAttemptTime = new Date();
@@ -125,6 +121,9 @@ export const loginCustomerService = async (email, password) => {
     };
   } else {
     tempUser.failedLoginAttempts = (tempUser.failedLoginAttempts || 0) + 1;
+    if(tempUser.failedLoginAttempts >= AUTH.MAX_FAILED_ATTEMPTS) {
+      await resetPasswordEmail(tempUser.email, "template_securityw509"); 
+    }
     await tempUser.save();
     throw new Error("Invalid Credentials");
     
@@ -148,7 +147,7 @@ export const resetPasswordEmail = async (email, emaliTemplate) => {
         },
         ACCESS_TOKEN,
         {
-          expiresIn: "5m",
+          expiresIn: "15m",
         }
       );
       const resetLink = `http://localhost:3000/login/forgotpw/resetpw?token=${passwordResetToken}`;

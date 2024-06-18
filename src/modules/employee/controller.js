@@ -180,7 +180,7 @@ export const forgotPassword = async (req, res) => {
     return;
   }
   try {
-    const data = await forgotPasswordService(employeeId);
+    const data = await forgotPasswordService(employeeId, "template_resetpw509");
     res.status(200).json(data);
   } catch (error) {
     res.status(error.status || 500).json({ error: error.message });
