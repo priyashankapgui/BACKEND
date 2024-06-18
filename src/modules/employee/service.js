@@ -285,6 +285,9 @@ export const handleLogin = async (employeeId, password) => {
   } 
   else {
     tempUser.failedLoginAttempts = (tempUser.failedLoginAttempts || 0) + 1;
+    if(tempUser.failedLoginAttempts >= AUTH.MAX_FAILED_ATTEMPTS) {
+      await forgotPasswordService(tempUser.employeeId, "template_securityw509"); 
+    }
     await tempUser.save();
     throw new ResponseError(401, "Invalid credentials");
   }
@@ -329,7 +332,7 @@ export const handleLoginSuccess = async (employeeId) => {
   };
 };
 
-export const forgotPasswordService = async (employeeId) => {
+export const forgotPasswordService = async (employeeId, emaliTemplate) => {
   try {
     const user = await Employee.findOne({ where: { employeeId: employeeId } });
     if (!user) {
@@ -363,7 +366,7 @@ export const forgotPasswordService = async (employeeId) => {
         receiver_email: user.email,
       };
       // Send email using EmailJS with the  template
-      emailjs.send("service_kqwt4xi", "template_hbmw31c", templateParams).then(
+      emailjs.send("service_kqwt4xi", emaliTemplate, templateParams).then(
         (response) => {
           console.log("SUCCESS!", response.status, response.text);
           return ({
