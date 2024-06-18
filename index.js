@@ -53,6 +53,7 @@ app.use(cors());
 
 app.use(express.json());
 
+
 app.use("/", Productrouter);
 app.use("/", categoryRouter);
 app.use("/", supplierRouter);

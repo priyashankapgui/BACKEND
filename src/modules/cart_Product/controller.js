@@ -1,87 +1,41 @@
-import ShoppingCart from '../cart_Customer/shoppingcart.js';
-import CartProduct from '../cart_Product/cartProduct.js';
-import ProductBatchSum from '../productBatchSum/productBatchSum.js';
+import { addToCart, getCartItems, updateCartItem, deleteCartItem } from './service.js';
 
-export const getCartItems = async (req, res) => {
+export const addToCartController = async (req, res) => {
   try {
-    const cartItems = await CartProduct.findAll();
+    const { customerId, productId, productName, branchId, sellingPrice, quantity, discount } = req.body;
+    const cartProduct = await addToCart(customerId, productId, productName, branchId, sellingPrice, quantity, discount);
+    res.status(200).json(cartProduct);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+export const getCartItemsController = async (req, res) => {
+  try {
+    const { customerId } = req.params;
+    const cartItems = await getCartItems(customerId);
     res.status(200).json(cartItems);
   } catch (error) {
-    console.error('Error fetching cart items:', error);
-    res.status(500).json({ message: 'Internal server error' });
+    res.status(500).json({ error: error.message });
   }
 };
 
-export const addToCart = async (req, res) => {
-  const { productId, productName, branchId, sellingPrice, quantity, discount } = req.body;
-
+export const updateCartItemController = async (req, res) => {
   try {
-    // Find or create a shopping cart
-    const [cart, created] = await ShoppingCart.findOrCreate({ where: {} });
-
-    // Fetch the batch number with the longest expiry date for the given productId and branchId
-    const productBatch = await ProductBatchSum.findOne({
-      where: { productId, branchId },
-      order: [['expDate', 'DESC']]
-    });
-
-    if (!productBatch) {
-      return res.status(404).json({ message: 'Product batch not found in the selected branch' });
-    }
-
-    const { batchNo } = productBatch;
-
-    // Create a cart product entry
-    await CartProduct.create({
-      cartId: cart.cartId,
-      productId,
-      productName,
-      batchNo,
-      branchId,
-      sellingPrice,
-      quantity,
-      discount,
-    });
-
-    res.status(201).json({ message: 'Product added to cart successfully' });
+    const { customerId, productId, quantity } = req.body;
+    const cartProduct = await updateCartItem(customerId, productId, quantity);
+    res.status(200).json(cartProduct);
   } catch (error) {
-    console.error('Error adding to cart:', error);
-    res.status(500).json({ message: 'Internal server error' });
+    res.status(500).json({ error: error.message });
   }
 };
 
-export const updateCartItem = async (req, res) => {
-  const { productId } = req.params;
-  const { quantity } = req.body;
-
+export const deleteCartItemController = async (req, res) => {
   try {
-    const cartProduct = await CartProduct.findOne({ where: { productId } });
-    if (cartProduct) {
-      cartProduct.quantity = quantity;
-      await cartProduct.save();
-      res.status(200).json({ message: 'Cart item updated successfully' });
-    } else {
-      res.status(404).json({ message: 'Cart item not found' });
-    }
+    const { customerId, productId } = req.body;
+    const result = await deleteCartItem(customerId, productId);
+    res.status(200).json(result);
   } catch (error) {
-    console.error('Error updating cart item:', error);
-    res.status(500).json({ message: 'Internal server error' });
-  }
-};
-
-export const deleteCartItem = async (req, res) => {
-  const { productId } = req.params;
-
-  try {
-    const cartProduct = await CartProduct.findOne({ where: { productId } });
-    if (cartProduct) {
-      await cartProduct.destroy();
-      res.status(200).json({ message: 'Cart item deleted successfully' });
-    } else {
-      res.status(404).json({ message: 'Cart item not found' });
-    }
-  } catch (error) {
-    console.error('Error deleting cart item:', error);
-    res.status(500).json({ message: 'Internal server error' });
+    res.status(500).json({ error: error.message });
   }
 };
