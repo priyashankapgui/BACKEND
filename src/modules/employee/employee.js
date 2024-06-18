@@ -19,7 +19,7 @@ const Employee = sequelize.define('employee', {
     },
     email: {
         type: DataTypes.STRING,
-        allowNull: false,
+        allowNull: true,
         validate: {
             isEmail: true,
         },
@@ -30,14 +30,14 @@ const Employee = sequelize.define('employee', {
     },
     phone: {
         type: DataTypes.STRING,
-        allowNull: false,
+        allowNull: true,
         validate: {
             is: /^(?:7|0|(?:\+94))[0-9]{9,10}$/,
         },
     },
     address: {
         type: DataTypes.STRING,
-        allowNull: false,
+        allowNull: true,
     },
     userRoleId:{
         type: DataTypes.INTEGER,

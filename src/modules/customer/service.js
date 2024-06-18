@@ -2,7 +2,7 @@ import Customer from "../customer/customer.js";
 import bcrypt from "bcryptjs";
 const salt = bcrypt.genSaltSync(10);
 import jwt from "jsonwebtoken";
-import { SECRET } from "../../../config/config.js";
+import { AUTH, SECRET } from "../../../config/config.js";
 const { SECRET_KEY: ACCESS_TOKEN } = SECRET;
 import emailjs from "@emailjs/nodejs";
 
@@ -49,6 +49,7 @@ export const updateCustomerService = async (customerId, updatedCustomerData) => 
     const customerData = await customer.update(updatedCustomerData, {
       attributes: {exclude: ["customerId", "password"]},
     });
+    console.log(customerData);
     return customerData;
   } catch (error) {
     throw new Error("Error updating customer: " + error.message);
@@ -78,50 +79,76 @@ export const updatePasswordService = async (customerId, oldPassword, newPassword
 };
 
 export const loginCustomerService = async (email, password) => {
-  const user = await Customer.findOne({ where: { email: email } });
-  if (!user) {
-    throw new Error("Invalid Credentials");
+  const tempUser = await Customer.findOne({ where: { email: email } });
+  //console.log(tempUser.email);
+  if (!tempUser) {
+    throw new Error("Email not found");
   }
-  const storedPassword = await user.password;
+  if(tempUser.failedLoginAttempts >= AUTH.MAX_FAILED_ATTEMPTS && tempUser.loginAttemptTime > new Date(new Date() - AUTH.FAILED_ATTEMPT_TIMEOUT)){
+    const remainingTime = Math.round((tempUser.loginAttemptTime - new Date(new Date() - AUTH.FAILED_ATTEMPT_TIMEOUT)) / (60*1000));
+    // Send password reset email if account is locked
+    if(tempUser.failedLoginAttempts >= AUTH.MAX_FAILED_ATTEMPTS) {
+      //console.log(tempUser.email);
+      await forgotPasswordService(tempUser.email); 
+    }
+    throw new Error( `This Account has been locked, please try again in ${remainingTime} minutes`);
+  }
+  tempUser.loginAttemptTime = new Date();
+  const storedPassword = await tempUser.password;
   const passwordMatch = await bcrypt.compare(password, storedPassword);
   if (passwordMatch) {
     const accessToken = jwt.sign(
       {
-        customerId: user.customerId,
-        email: user.email,
+        customerId: tempUser.customerId,
+        email: tempUser.email,
       },
       ACCESS_TOKEN,
       {
         expiresIn: "8h",
       }
     );
+    // Reset failed login attempts
+    tempUser.failedLoginAttempts = 0;
+    await tempUser.save();
     // Return token and user information
     return {
       message: "Login successful",
       token: accessToken,
       user: {
-        customerId: user.customerId,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        email: user.email,
-        phone: user.phone,
-        address: user.address,
+        customerId: tempUser.customerId,
+        firstName:tempUser.firstName,
+        lastName: tempUser.lastName,
+        email: tempUser.email,
+        phone: tempUser.phone,
+        address: tempUser.address,
       },
     };
   } else {
+    tempUser.failedLoginAttempts = (tempUser.failedLoginAttempts || 0) + 1;
+    await tempUser.save();
     throw new Error("Invalid Credentials");
+    
   }
 };
 
-export const forgotPasswordCustomer = async (req, res) => {
-  const { email } = req.body;
+export const forgotPasswordService = async (email) => {
   if (!email) {
-    return res.status(400).json({ message: "Email is required" });
+    if (res) {
+      return res.status(400).json({ message: "Email is required" });
+    } else {
+      throw new Error("Email is required");
+    }
+    // return res.status(400).json({ message: "Email is required" });
   }
   try {
     const user = await Customer.findOne({ where: { email: email } });
     if (!user) {
-      return res.status(404).json({ message: "Email not found" });
+      if (res) {
+        return res.status(404).json({ message: "Email not found" });
+      } else {
+        throw new Error("Email not found");
+      }
+      // return res.status(404).json({ message: "Email not found" });
     } else {
       const passwordResetToken = jwt.sign(
         {
@@ -161,13 +188,24 @@ export const forgotPasswordCustomer = async (req, res) => {
         },
         (error) => {
           console.log("FAILED...", error);
-          return res.status(500).json({ message: "Failed to send email" });
+          if (res) {
+            return res.status(500).json({ message: "Failed to send email" });
+          } else {
+            throw new Error("Failed to send email");
+          }
+          //return res.status(500).json({ message: "Failed to send email" });
         }
       );
     }
   } catch (error) {
     console.error("Forgot password error:", error);
-    return res.status(500).json({ message: "Internal server error" });
+    if (res) {
+      return res.status(500).json({ message: "Internal server error" });
+    } else {
+      throw new Error("Internal server error");
+    }
+    // return res.status(500).json({ message: "Internal server error" });
+
   }
 };
 

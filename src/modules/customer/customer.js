@@ -39,6 +39,15 @@ const Customer = sequelize.define('customer', {
         type: DataTypes.STRING,
         allowNull: false,
     },
+    failedLoginAttempts:{
+        type: DataTypes.INTEGER,
+        defaultValue: 0,
+        allowNull:true,
+    },
+    loginAttemptTime :{
+        type: DataTypes.DATE,
+        allowNull:true, 
+    },
     },
     { 
         tableName: 'customer',

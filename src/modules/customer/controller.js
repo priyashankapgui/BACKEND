@@ -2,6 +2,7 @@ import {
     registerCustomer,
     getCustomerById,
     loginCustomerService,
+    forgotPasswordService,
     updateCustomerService,
     updatePasswordService,
     
@@ -37,6 +38,7 @@ export const getCustomer = async (req, res) => {
 export const updateCustomer = async (req , res) => {
     const customerId = req.params.customerId;
     const updatedCustomerData = req.body;
+    console.log(updatedCustomerData);
     try {
         const updatedCustomer = await updateCustomerService(
             customerId,
@@ -86,4 +88,18 @@ export const handleLoginCustomer = async (req, res) => {
       return res.status(500).json({ message: error.message });
     }
   };
+
+export const forgotPasswordCustomer = async (req, res) => {
+    const { email } = req.body;
+    if (!email) {
+      return res.status(400).json({ message: "Email is required" });
+    }
+    try {
+        const result = await forgotPasswordService(email);
+        return res.status(200).json(result);    
+    } catch (error) {
+      console.error("Forgot password error:", error);
+      return res.status(500).json({ message: "Internal server error" });
+    }
+  }
 
