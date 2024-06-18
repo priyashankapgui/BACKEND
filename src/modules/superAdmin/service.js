@@ -2,10 +2,12 @@ import SuperAdmin from "./superAdmin.js";
 import bcrypt from "bcryptjs";
 const salt = bcrypt.genSaltSync(10);
 import jwt from "jsonwebtoken";
-import { SECRET } from "../../../config/config.js";
+import { AUTH, SECRET } from "../../../config/config.js";
 const { SECRET_KEY: ACCESS_TOKEN } = SECRET;
 import emailjs from "@emailjs/nodejs";
 import UserRole from "../userRole/userRole.js";
+import { imageUploadwithCompression } from "../../blobService/utils.js";
+import sequelize from "../../../config/database.js";
 
 export const getAllSuperAdmins = async () => {
   try {
@@ -22,10 +24,26 @@ export const handleSuperAdminLogin = async (superAdminId, password) => {
     if (!superAdmin) {
       throw new Error("SuperAdmin not found");
     }
+
+    if (
+      superAdmin.failedLoginAttempts >= AUTH.MAX_FAILED_ATTEMPTS &&
+      superAdmin.loginAttemptTime > new Date(new Date() - AUTH.FAILED_ATTEMPT_TIMEOUT)
+    ) {
+      const remainingTime = Math.round(
+        (superAdmin.loginAttemptTime - new Date(new Date() - AUTH.FAILED_ATTEMPT_TIMEOUT)) / (60 * 1000)
+      );
+      throw new Error(`This Account is locked. Please try again in ${remainingTime} minutes`);
+    }
+    
+    superAdmin.loginAttemptTime = new Date();
+
     const isPasswordValid = bcrypt.compareSync(password, superAdmin.password);
     if (!isPasswordValid) {
+      superAdmin.failedLoginAttempts += 1;
+      await superAdmin.save();
       throw new Error("Invalid credentials");
     }
+    superAdmin.failedLoginAttempts = 0;
     const userRole = await UserRole.findByPk(superAdmin.userRoleId);
     const userRoleName = userRole.userRoleName;
     const token = jwt.sign(
@@ -38,7 +56,9 @@ export const handleSuperAdminLogin = async (superAdminId, password) => {
         expiresIn: "8h",
       }
     );
-    return { token: token, superAdmin: superAdmin, userRoleName: userRoleName};
+    superAdmin.currentAccessToken = token;
+    await superAdmin.save();
+    return { token: token, superAdmin: superAdmin, userRoleName: userRoleName };
   } catch (error) {
     throw new Error(error.message);
   }
@@ -54,7 +74,6 @@ export const handleSuperAdminForgotPassword = async (userID) => {
         {
           userId: user.superAdminId,
           email: user.email,
-
         },
         ACCESS_TOKEN,
         {
@@ -76,21 +95,21 @@ export const handleSuperAdminForgotPassword = async (userID) => {
         receiver_name: user.superAdminName,
         receiver_email: user.email,
       };
-    let data = {};
-    // Send email using EmailJS with the  template
-    try {
-      const response = await emailjs.send("service_kqwt4xi", "template_hbmw31c", templateParams);
-      console.log("SUCCESS!", response.status, response.text);
-      data = {
-        message: "Password reset link sent to email",
-        email: user.email,
-        resetLink: resetLink,
-      };
-    } catch (error) {
-      console.log("FAILED...", error);
-      data = { message: "Failed to send email" };
-    }
-    return data;
+      let data = {};
+      // Send email using EmailJS with the  template
+      try {
+        const response = await emailjs.send("service_kqwt4xi", "template_hbmw31c", templateParams);
+        console.log("SUCCESS!", response.status, response.text);
+        data = {
+          message: "Password reset link sent to email",
+          email: user.email,
+          resetLink: resetLink,
+        };
+      } catch (error) {
+        console.log("FAILED...", error);
+        data = { message: "Failed to send email" };
+      }
+      return data;
     }
   } catch (error) {
     console.error("Forgot password error:", error);
@@ -110,17 +129,25 @@ export const handleSuperAdminResetPassword = async (userId, newPassword) => {
   user.password = newPassword;
   await user.save();
   return;
-}
+};
 
-export const updateSuperAdminById = async (superAdminID, updatedSuperAdminData) => {
+export const updateSuperAdminById = async (req, superAdminID, updatedSuperAdminData) => {
+  const t = await sequelize.transaction();
   try {
     const superAdmin = await SuperAdmin.findByPk(superAdminID);
     if (!superAdmin) {
       throw new Error("SuperAdmin not found");
     }
-    const updatedSuperAdmin = await superAdmin.update(updatedSuperAdminData);
+    const updatedSuperAdmin = await superAdmin.update(updatedSuperAdminData, {
+      transaction: t,
+    });
+    if (req.file) {
+      await imageUploadwithCompression(req.file, "cms-data", superAdminID);
+    }
+    await t.commit();
     return updatedSuperAdmin;
   } catch (error) {
+    await t.rollback();
     throw new Error("Error updating superAdmin: " + error.message);
   }
 };

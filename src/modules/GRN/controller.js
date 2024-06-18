@@ -131,100 +131,60 @@ export const getGRNsByDateRangeController = async (req, res) => {
 
 
 
-
-//Function to get GRN by supplierId
-export const getGRNBySupplier = async (req, res) => {
-  const {supplierId} = req.params;
-  console.log("supplier",supplierId);
-  try {
-    const result = await GRNService.getGRNBySupplierId(supplierId);
-
-SUCCESS(res, SUC_CODES, result, req.span);
-} catch (error) {
-  console.log(error);
-
-  ERROR(res, error, res.span);
-}
-};
-
-
-
-//Function to get GRN by productId
-export const getGRNDetailsByProductIdController = async (req, res) => {
-  const { productId } = req.params;
-  console.log('productId from params:', productId);
-
-  try {
-    const result = await ProductGRNService.getGRNDetailsByProductId(productId);
-
-SUCCESS(res, SUC_CODES, result, req.span);
-} catch (error) {
-  console.log(error);
-
-  ERROR(res, error, res.span);
-}
-};
-
-
-
-
-//Function to get GRN by branchId
-export const getGRNByBranch = async (req, res) => {
-  const {branchName} = req.query;
-  console.log("branch",branchName);
-  try {
-    const result = await GRNService.getGRNByBranchId(branchName);
-SUCCESS(res, SUC_CODES, result, req.span);
-} catch (error) { 
-  console.log(error);
-
-  ERROR(res, error, res.span);
-}
-};
-
-
-
-//Function to get GRN data using branchName and supplierId
-export const getGRNsByBranchAndSupplierController = async (req, res) => {
-  try {
-    
-    const {branchName , supplierId } = req.query;
-
-    if (!branchName || !supplierId) {
-      return res.status(400).json({ message: ' branchName and supplierId are required' });
-    }
-
-    const result = await GRNService.getGRNsByBranchAndSupplier(branchName, supplierId);
-
-SUCCESS(res, SUC_CODES, result, req.span);
-} catch (error) {
-  console.log(error);
-
-  ERROR(res, error, res.span);
-}
-};
-
-
-// Function to get GRN data using branchName and productId
-export const getGRNsByBranchAndProductController = async (req, res) => {
+//Functon to get product related data
+export const getGRNsController = async (req, res) => {
   try {
     const { branchName, productId } = req.query;
 
-    if (!branchName || !productId) {
-      return res.status(400).json({ message: 'branchName and productId are required' });
+    let result;
+
+    if (productId && branchName === 'All') {
+      result = await ProductGRNService.getGRNDetailsByProductId(productId);
+    } else if (branchName && productId) {
+      result = await GRNService.getGRNsByBranchAndProduct(branchName, productId);
+    } else if (branchName) {
+      result = await GRNService.getGRNByBranchId(branchName);
+    } else if (productId) {
+      result = await ProductGRNService.getGRNDetailsByProductId(productId);
+    } else {
+      return res.status(400).json({ message: 'At least one of branchName or productId is required' });
     }
 
-    const result = await GRNService.getGRNsByBranchAndProduct(branchName, productId);
     SUCCESS(res, SUC_CODES, result, req.span);
   } catch (error) {
     console.log(error);
-  
-    ERROR(res, error, res.span);
+    ERROR(res, error, req.span);
   }
-  };
+};
 
+  
 
+//Functon to get supplier related data
+export const getGRNsSupplierController = async (req, res) => {
+  try {
+    const { branchName, supplierId } = req.query;
+    let result;
 
+    if (supplierId && branchName === 'All') {
+      result = await GRNService.getGRNBySupplierId(supplierId);
+    } else if (branchName && supplierId) {
+      result = await GRNService.getGRNsByBranchAndSupplier(branchName, supplierId);
+    } else if (branchName) {
+      result = await GRNService.getGRNByBranchId(branchName);
+    } else if (supplierId) {
+      result = await GRNService.getGRNBySupplierId(supplierId);
+    } else {
+      return res.status(400).json({ message: 'At least one of branchName or supplierId is required' });
+    }
+
+    SUCCESS(res, SUC_CODES, result, req.span);
+  } catch (error) {
+    console.log(error);
+    ERROR(res, error, req.span);
+  }
+};
+
+  
 
 
 // Controller function to calculate total amount by invoice number
