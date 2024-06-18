@@ -4,6 +4,7 @@ const { SECRET_KEY } = SECRET;
 import Permission from "../modules/permission/permission.js";
 import SuperAdmin from "../modules/superAdmin/superAdmin.js";
 import Employee from "../modules/employee/employee.js";
+import Customer from "../modules/customer/customer.js";
 
 export const authenticateToken = async(req, res, next) => {
   try{
@@ -63,5 +64,22 @@ export function authenticateTokenWithPermission(pageId){
       console.log();
       res.status(403).json({ error: error.message });
     }
+  }
+};
+
+export const authenticateCustomerToken = async (req, res, next) => {
+  try {
+    const authHeader = req.headers["authorization"];
+    const token = authHeader.split(" ")[1];
+    const decoded = jwt.verify(token, SECRET_KEY);
+    const customerId = decoded.customerId;
+    const userRow = await Customer.findByPk(customerId); // Corrected method name and argument
+    if (!userRow) {
+      res.status(401).json({ error: "Token Error" });
+    } else {
+      next();
+    }
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
 };

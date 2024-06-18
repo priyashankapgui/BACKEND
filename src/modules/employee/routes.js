@@ -9,8 +9,9 @@ import {
   updatePersonalInfo,
   loginEmployee,
   logoutEmployee,
+  forgotPassword,
 } from "../employee/controller.js";
-import { forgotPassword, imageUploadTest } from "../employee/service.js";
+import {  imageUploadTest } from "../employee/service.js";
 import { authenticateToken, authenticateTokenWithPermission } from "../../middleware/authenticationMiddleware.js";
 import { processForm,  processMultipleForm } from "../../blobService/utils.js";
 
