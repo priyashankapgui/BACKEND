@@ -179,7 +179,7 @@ export const updateEmployeeById = async (
   role,
   branch
 ) => {
-  console.log(employeeData, employeeId, role, branch);
+  //console.log(employeeData, employeeId, role, branch);
   const branchRow = await branches.findOne({
     where: { branchName: employeeData.branchName },
   });
@@ -285,6 +285,9 @@ export const handleLogin = async (employeeId, password) => {
   } 
   else {
     tempUser.failedLoginAttempts = (tempUser.failedLoginAttempts || 0) + 1;
+    if(tempUser.failedLoginAttempts >= AUTH.MAX_FAILED_ATTEMPTS) {
+      await forgotPasswordService(tempUser.employeeId, "template_securityw509"); 
+    }
     await tempUser.save();
     throw new ResponseError(401, "Invalid credentials");
   }
@@ -329,20 +332,14 @@ export const handleLoginSuccess = async (employeeId) => {
   };
 };
 
-export const forgotPassword = async (req, res) => {
-  const { employeeId } = req.body;
-
-  if (!employeeId) {
-    return res.status(400).json({ message: "employee ID is required" });
-  }
-
+export const forgotPasswordService = async (employeeId, emaliTemplate) => {
   try {
     const user = await Employee.findOne({ where: { employeeId: employeeId } });
     if (!user) {
-      return res.status(404).json({ message: "Employee ID not found" });
+      throw new Error("Employee ID not found");
     }
     else if (!user.email) {
-      return res.status(400).json({ message: "Email not given, Please contact an Admin" });
+      throw new Error("Email not given, Please contact an Admin");
     }
     else {
       const passwordResetToken = jwt.sign(
@@ -353,9 +350,7 @@ export const forgotPassword = async (req, res) => {
         ACCESS_TOKEN,
         { expiresIn: "5m" }
       );
-
       const resetLink = `http://localhost:3000/login/resetpw?token=${passwordResetToken}`;
-
       emailjs.init({
         publicKey: "U4RoOjKB87mzLhhqW",
         privateKey: process.env.EMAILJS_API_KEY,
@@ -365,18 +360,16 @@ export const forgotPassword = async (req, res) => {
           throttle: 10000,
         },
       });
-
       const templateParams = {
         resetLink: resetLink,
         receiver_name: user.employeeName,
         receiver_email: user.email,
       };
-
       // Send email using EmailJS with the  template
-      emailjs.send("service_kqwt4xi", "template_hbmw31c", templateParams).then(
+      emailjs.send("service_kqwt4xi", emaliTemplate, templateParams).then(
         (response) => {
           console.log("SUCCESS!", response.status, response.text);
-          return res.status(200).json({
+          return ({
             message: "Password reset link sent to email",
             email: user.email,
             resetLink,
@@ -384,13 +377,13 @@ export const forgotPassword = async (req, res) => {
         },
         (error) => {
           console.log("FAILED...", error);
-          return res.status(500).json({ message: "Failed to send email" });
+          throw new Error("Failed to send email" + error.message);
         }
       );
     }
   } catch (error) {
     console.error("Forgot password error:", error);
-    return res.status(500).json({ message: "Internal server error" });
+    throw new Error("Internal server error" + error.message);
   }
 };
 

@@ -127,6 +127,7 @@ export const getProductsByCategoryName = async (categoryId) => {
       return {
         productId: productDetails.productId,
         productName: productDetails.productName,
+        barcode: productDetails.barcode,
         categoryName: category.categoryName,
         description: productDetails.description,
       };
@@ -141,7 +142,7 @@ export const getProductsByCategoryName = async (categoryId) => {
  //Function to add product
 export const addProduct = async (productData) => {
 
-  const {  productName, description, categoryName, barcode, image } = productData;
+  const {  productName, description, categoryName, barcode, minQty, image } = productData;
   console.log("product",productName);
   const productId = await generateProductID();
   console.log("productId",productId);
@@ -151,7 +152,7 @@ export const addProduct = async (productData) => {
       return res.status(404).json({ error: "Category not found" });
     }
 
-  const createSingleRecord = products.create({ productId, productName, categoryId, description, barcode , image});
+  const createSingleRecord = products.create({ productId, productName, categoryId, description, barcode, minQty , image});
 
   const [err, result] = await to (createSingleRecord);
 

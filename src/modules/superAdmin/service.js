@@ -40,6 +40,9 @@ export const handleSuperAdminLogin = async (superAdminId, password) => {
     const isPasswordValid = bcrypt.compareSync(password, superAdmin.password);
     if (!isPasswordValid) {
       superAdmin.failedLoginAttempts += 1;
+      if(superAdmin.failedLoginAttempts >= AUTH.MAX_FAILED_ATTEMPTS){
+        sendSuperAdminPasswordResetEmail(superAdmin.superAdminId, "template_securityw509")
+      }
       await superAdmin.save();
       throw new Error("Invalid credentials");
     }
@@ -64,7 +67,7 @@ export const handleSuperAdminLogin = async (superAdminId, password) => {
   }
 };
 
-export const handleSuperAdminForgotPassword = async (userID) => {
+export const sendSuperAdminPasswordResetEmail = async (userID, emailTemplate) => {
   try {
     const user = await SuperAdmin.findByPk(userID);
     if (!user) {
@@ -98,7 +101,7 @@ export const handleSuperAdminForgotPassword = async (userID) => {
       let data = {};
       // Send email using EmailJS with the  template
       try {
-        const response = await emailjs.send("service_kqwt4xi", "template_hbmw31c", templateParams);
+        const response = await emailjs.send("service_kqwt4xi", emailTemplate, templateParams);
         console.log("SUCCESS!", response.status, response.text);
         data = {
           message: "Password reset link sent to email",
