@@ -2,7 +2,7 @@ import {
     registerCustomer,
     getCustomerById,
     loginCustomerService,
-    forgotPasswordService,
+    resetPasswordEmail,
     updateCustomerService,
     updatePasswordService,
     
@@ -95,11 +95,10 @@ export const forgotPasswordCustomer = async (req, res) => {
       return res.status(400).json({ message: "Email is required" });
     }
     try {
-        const result = await forgotPasswordService(email);
+        const result = await resetPasswordEmail(email, "template_p2h8p9n");
         return res.status(200).json(result);    
     } catch (error) {
-      console.error("Forgot password error:", error);
-      return res.status(500).json({ message: "Internal server error" });
+      return res.status(500).json({ message: error.message});
     }
   }
 

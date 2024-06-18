@@ -10,7 +10,7 @@ import{
     updateCustomer,
     updatePassword
 } from "../customer/controller.js";
-import { authenticateToken } from "../../middleware/authenticationMiddleware.js";
+import {authenticateCustomerToken } from "../../middleware/authenticationMiddleware.js";
 
 
 
@@ -18,9 +18,9 @@ import { authenticateToken } from "../../middleware/authenticationMiddleware.js"
 const CustomerRouter = express.Router();
 
 CustomerRouter.post("/api/customers/registercustomer", registerNewCustomer);
-CustomerRouter.get("/api/customers/:customerId", authenticateToken,getCustomer);
-CustomerRouter.put("/api/customers/:customerId",authenticateToken, updateCustomer);
-CustomerRouter.post("/api/customers/password/:customerId", authenticateToken,updatePassword)
+CustomerRouter.get("/api/customers/:customerId", authenticateCustomerToken,getCustomer);
+CustomerRouter.put("/api/customers/:customerId",authenticateCustomerToken, updateCustomer);
+CustomerRouter.post("/api/customers/password/:customerId", authenticateCustomerToken,updatePassword)
 CustomerRouter.post("/api/customers/login", handleLoginCustomer);
 CustomerRouter.post("/api/customers/login/forgotpw", forgotPasswordCustomer);
 CustomerRouter.post("/api/customers/login/forgotpw/resetpw", resetPasswordCustomer);

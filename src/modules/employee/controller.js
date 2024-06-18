@@ -8,7 +8,8 @@ import {
   handleEmployeeResetPassword,
   getEmployeesByBranch,
   updateEmployeePersonalInfo,
-  handleLogin
+  handleLogin,
+  forgotPasswordService
 } from "../employee/service.js";
 import { SECRET } from "../../../config/config.js";
 import jwt, { decode } from "jsonwebtoken";
@@ -172,6 +173,20 @@ export const loginEmployee = async (req, res) => {
   }
 }
 
+export const forgotPassword = async (req, res) => {
+  const { employeeId } = req.body;
+  if (!employeeId) {
+    res.status(400).json({ message: "employee ID is required" });
+    return;
+  }
+  try {
+    const data = await forgotPasswordService(employeeId);
+    res.status(200).json(data);
+  } catch (error) {
+    res.status(error.status || 500).json({ error: error.message });
+  }
+}
+
 export const resetEmployeePassword = async (req, res) => {
   const { resetToken, newPassword, confirmPassword } = req.body;
   if (!resetToken || !newPassword || !confirmPassword) {
@@ -186,8 +201,15 @@ export const resetEmployeePassword = async (req, res) => {
     res.status(400).json({ message: "Invalid password format" });
     return;
   }
-  const decoded = jwt.verify(resetToken, ACCESS_TOKEN);
-  console.log(decoded);
+  // const decoded = jwt.verify(resetToken, ACCESS_TOKEN);
+  // console.log(decoded);
+  let decoded;
+  try{
+    decoded = jwt.verify(resetToken, ACCESS_TOKEN);
+  }
+  catch(error){
+    return res.status(401).json({ message: "This link is invalid or has expired" });
+  }
   const userId = decoded.userId;
   try {
     if(userId.startsWith("SA")){

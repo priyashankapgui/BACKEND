@@ -89,7 +89,7 @@ export const loginCustomerService = async (email, password) => {
     // Send password reset email if account is locked
     if(tempUser.failedLoginAttempts >= AUTH.MAX_FAILED_ATTEMPTS) {
       //console.log(tempUser.email);
-      await forgotPasswordService(tempUser.email); 
+      await resetPasswordEmail(tempUser.email, "template_p2h8p9n"); 
     }
     throw new Error( `This Account has been locked, please try again in ${remainingTime} minutes`);
   }
@@ -131,27 +131,19 @@ export const loginCustomerService = async (email, password) => {
   }
 };
 
-export const forgotPasswordService = async (email) => {
+export const resetPasswordEmail = async (email, emaliTemplate) => {
   if (!email) {
-    if (res) {
-      return res.status(400).json({ message: "Email is required" });
-    } else {
       throw new Error("Email is required");
-    }
-    // return res.status(400).json({ message: "Email is required" });
   }
   try {
     const user = await Customer.findOne({ where: { email: email } });
     if (!user) {
-      if (res) {
-        return res.status(404).json({ message: "Email not found" });
-      } else {
         throw new Error("Email not found");
-      }
-      // return res.status(404).json({ message: "Email not found" });
-    } else {
+    }
+    else {
       const passwordResetToken = jwt.sign(
         {
+          customerId: user.customerId,
           email: user.email,
         },
         ACCESS_TOKEN,
@@ -177,10 +169,10 @@ export const forgotPasswordService = async (email) => {
       };
 
       // Send email using EmailJS with the  template
-      emailjs.send("service_kqwt4xi", "template_p2h8p9n", templateParams).then(
+      emailjs.send("service_kqwt4xi", emaliTemplate, templateParams).then(
         (response) => {
           console.log("SUCCESS!", response.status, response.text);
-          return res.status(200).json({
+          return ({
             message: "Password reset link sent to email",
             email: user.email,
             resetLink: resetLink,
@@ -188,25 +180,14 @@ export const forgotPasswordService = async (email) => {
         },
         (error) => {
           console.log("FAILED...", error);
-          if (res) {
-            return res.status(500).json({ message: "Failed to send email" });
-          } else {
             throw new Error("Failed to send email");
-          }
-          //return res.status(500).json({ message: "Failed to send email" });
         }
       );
     }
   } catch (error) {
     console.error("Forgot password error:", error);
-    if (res) {
-      return res.status(500).json({ message: "Internal server error" });
-    } else {
       throw new Error("Internal server error");
     }
-    // return res.status(500).json({ message: "Internal server error" });
-
-  }
 };
 
 export const resetPasswordCustomer = async (req, res) => {
@@ -215,31 +196,24 @@ export const resetPasswordCustomer = async (req, res) => {
   if (!resetToken || !newPassword || !confirmPassword) {
     return res.status(400).json({ message: "Missing required fields" });
   }
-
   try {
-    const decoded = jwt.verify(resetToken, ACCESS_TOKEN);
+    let decoded;
+    try{
+      decoded = jwt.verify(resetToken, ACCESS_TOKEN);
+    }
+    catch(error){
+      return res.status(401).json({ message: "This link is invalid or has expired" });
+    }
     const email = decoded.email;
-
     const user = await Customer.findOne({ where: { email: email } });
     if (!user) {
       return res.status(404).json({ message: "Invalid Request" });
     }
-
-    if (
-      newPassword.length < 8 ||
-      newPassword.length > 20 ||
-      !/^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,20}$/.test(newPassword)
-    ) {
-      return res.status(400).json({ message: "Invalid password format" });
-    }
-
     if (newPassword === user.password) {
       return res.status(400).json({ message: "New password cannot be the same as old password" });
     }
-
     user.password = newPassword;
     await user.save();
-
     return res.status(200).json({ message: "Password reset successfull" });
   } catch (error) {
     console.error("Password reset error:", error);

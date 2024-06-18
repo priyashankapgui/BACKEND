@@ -15,10 +15,10 @@ const {
   DATABASE_PORT
 } = process.env;
 
-// Check if all required environment variables are set
-if (!DATABASE_HOST || !DATABASE_USERNAME || !DATABASE_PASSWORD || !DATABASE_NAME || !DATABASE_SSL_CA || !DATABASE_PORT) {
-  throw new Error('One or more required environment variables are missing.');
-}
+// // Check if all required environment variables are set
+// if (!DATABASE_HOST || !DATABASE_USERNAME || !DATABASE_PASSWORD || !DATABASE_NAME || !DATABASE_SSL_CA || !DATABASE_PORT) {
+//   throw new Error('One or more required environment variables are missing.');
+// }
 
 // const certPath = path.resolve(DATABASE_SSL_CA);
 // if (!fs.existsSync(certPath)) {
