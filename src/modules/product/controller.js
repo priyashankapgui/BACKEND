@@ -77,7 +77,7 @@ try {
 
 //Function to create a product
 export const createProduct = async (req, res) => {
-  const { productName, description, categoryName, barcode } = req.body;
+  const { productName, description, categoryName, barcode, minQty } = req.body;
  
   try{
     if (!req.file) {
@@ -91,6 +91,7 @@ export const createProduct = async (req, res) => {
         categoryName,
         image,
         barcode,
+        minQty
     });
 
     SUCCESS(res, SUC_CODES, result, req.span);

@@ -1,4 +1,6 @@
 import { Op, fn, col } from 'sequelize';
+import Sequelize from 'sequelize';
+import sequelize from '../../../config/database.js';
 import { to, TE } from "../../helper.js";
 import productGRN from "../../modules/product_GRN/product_GRN.js";
 import grn from "../../modules/GRN/grn.js";
@@ -7,6 +9,7 @@ import products from '../product/product.js';
 import branches from '../branch/branch.js';
 import { mapBranchNameToId } from '../branch/service.js';
 import categories from '../category/category.js';
+
 
 // Add data to the productBatchSum table using hooks in productGRN table
 export const updateProductBatchSum = async (productId, batchNo, branchId) => {
@@ -155,6 +158,7 @@ export const getBatchDetailsByProductName = async (productId, branchName) => {
       expDate: productBatchSumData.expDate,
       availableQty: productBatchSumData.totalAvailableQty,
       sellingPrice: productBatchSumData.sellingPrice,
+      discount: productBatchSumData.discount,
     }));
 
     return batchDetails;
@@ -484,5 +488,217 @@ export const getProductsByBarcode = async (barcode, branchId) => {
   } catch (error) {
     console.error('Error retrieving products data by barcode:', error);
     throw new Error('Error retrieving products data by barcode');
+  }
+};
+
+
+
+//Function to update the discount
+export const updateProductBatchDiscount = async (
+  productId,
+  batchNo,
+  branchName,
+  discount
+) => {
+  try {
+    const branchId = await mapBranchNameToId(branchName);
+
+    const productBatchSumData = await productBatchSum.findOne({
+      where: {
+        productId,
+        batchNo,
+        branchId,
+      },
+    });
+
+    if (!productBatchSumData) {
+      throw new Error('Product batch not found');
+    }
+
+    productBatchSumData.discount = discount;
+    await productBatchSumData.save();
+
+    return productBatchSumData;
+  } catch (error) {
+    throw new Error(`Failed to update discount: ${error.message}`);
+  }
+};
+
+
+
+//Function to minQty
+export const getProductQuantitiesByBranch = async (branchName) => {
+  try {
+    const branchId = await mapBranchNameToId(branchName);
+
+    const productBatches = await productBatchSum.findAll({
+      where: { branchId },
+      attributes: ['productId', [sequelize.fn('SUM', sequelize.col('totalAvailableQty')), 'totalAvailableQty']],
+      group: ['productId'],
+    });
+
+    const results = [];
+
+    for (const productBatch of productBatches) {
+      const productId = productBatch.productId;
+      const totalAvailableQty = parseFloat(productBatch.getDataValue('totalAvailableQty'));
+
+      const product = await products.findOne({
+        where: { productId },
+        attributes: ['minQty', 'productName'],
+      });
+
+      if (product && totalAvailableQty < product.minQty) {
+        results.push({
+          branchName,
+          productId,
+          productName: product.productName,
+          minQty: product.minQty,
+          totalAvailableQty,
+        });
+      }
+    }
+
+    return results;
+  } catch (error) {
+    console.error('Error fetching product quantities by branch:', error);
+    throw new Error('Unable to fetch product quantities');
+  }
+};
+
+
+
+
+
+export const getProductQuantitiesByProductAndBranch = async (branchName, productId) => {
+  try {
+    const branchId = await mapBranchNameToId(branchName);
+
+    const productBatches = await productBatchSum.findAll({
+      where: { branchId , productId },
+      attributes: ['productId', [sequelize.fn('SUM', sequelize.col('totalAvailableQty')), 'totalAvailableQty']],
+      group: ['productId', 'branchId'],
+    });
+
+    const results = [];
+
+    for (const productBatch of productBatches) {
+      const productId = productBatch.productId;
+      const totalAvailableQty = parseFloat(productBatch.getDataValue('totalAvailableQty'));
+
+      const product = await products.findOne({
+        where: { productId },
+        attributes: ['minQty', 'productName'],
+      });
+
+      if (product && totalAvailableQty < product.minQty) {
+        results.push({
+          branchName,
+          productId,
+          productName: product.productName,
+          minQty: product.minQty,
+          totalAvailableQty,
+        });
+      }
+    }
+
+    return results;
+  } catch (error) {
+    console.error('Error fetching product quantities by branch:', error);
+    throw new Error('Unable to fetch product quantities');
+  }
+};
+
+
+
+
+//min qty without any parameter
+export const getAllProductQuantities = async () => {
+  try {
+    const productBatches = await productBatchSum.findAll({
+      attributes: [
+        'productId', 
+        'branchId',
+        'branchName',
+        [sequelize.fn('SUM', sequelize.col('totalAvailableQty')), 'totalAvailableQty']
+      ],
+      group: ['productId', 'branchId', 'branchName'],
+    });
+
+    const results = [];
+
+    for (const productBatch of productBatches) {
+      const productId = productBatch.productId;
+      const branchName = productBatch.branchName;
+      const totalAvailableQty = parseFloat(productBatch.getDataValue('totalAvailableQty'));
+
+      const product = await products.findOne({
+        where: { productId },
+        attributes: ['minQty', 'productName'],
+      });
+
+      if (product && totalAvailableQty < product.minQty) {
+        results.push({
+          branchName,
+          productId,
+          productName: product.productName,
+          minQty: product.minQty,
+          totalAvailableQty,
+        });
+      }
+    }
+
+    return results;
+  } catch (error) {
+    console.error('Error fetching product quantities:', error);
+    throw new Error('Unable to fetch product quantities');
+  }
+};
+
+
+
+
+
+
+
+export const getProductQuantitiesByProductId = async (productId) => {
+  try {
+    const productBatches = await productBatchSum.findAll({
+      where: { productId },
+      attributes: [
+        'productId', 
+        'branchId',
+        'branchName',
+        [sequelize.fn('SUM', sequelize.col('totalAvailableQty')), 'totalAvailableQty']
+      ],
+      group: ['productId', 'branchId', 'branchName'],
+    });
+
+    const results = [];
+
+    for (const productBatch of productBatches) {
+      const branchName = productBatch.branchName;
+      const totalAvailableQty = parseFloat(productBatch.getDataValue('totalAvailableQty'));
+
+      const product = await products.findOne({
+        where: { productId },
+        attributes: ['minQty', 'productName'],
+      });
+
+      if (product && totalAvailableQty < product.minQty) {
+        results.push({
+          branchName,
+          productId,
+          productName: product.productName,
+          minQty: product.minQty,
+          totalAvailableQty,
+        });
+      }
+    }
+
+    return results;
+  } catch (error) {
+    console.error('Error fetching product quantities by product ID:', error);
+    throw new Error('Unable to fetch product quantities');
   }
 };

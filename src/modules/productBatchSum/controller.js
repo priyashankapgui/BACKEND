@@ -138,3 +138,124 @@ export const getProductsByBarcodeController = async (req, res) => {
     return res.status(500).json({ message: 'Internal server error' });
   }
 };
+
+
+
+
+//Function to update the discount
+export const updateDiscount = async (req, res) => {
+  const updates = req.body.updates; // Assuming updates is an array of objects
+
+  try {
+    const results = await Promise.all(
+      updates.map(async ({ productId, batchNo, branchName, discount }) => {
+        if (typeof discount !== 'number') {
+          throw new Error('Discount must be a number');
+        }
+
+        const result = await ProductBatchSumService.updateProductBatchDiscount(
+          productId,
+          batchNo,
+          branchName,
+          discount
+        );
+        return result;
+      })
+    );
+
+    SUCCESS(res, SUC_CODES, results, req.span);
+  } catch (err) {
+    console.log(err);
+    ERROR(res, err, res.span);
+  }
+};
+
+
+
+//Function to minQty
+export const getProductQuantitiesByBranchController = async (req, res) => {
+  try {
+    const { branchName } = req.query;
+
+    if (!branchName) {
+      return res.status(400).json({ error: 'Branch name is required' });
+    }
+
+    const results = await ProductBatchSumService.getProductQuantitiesByBranch(branchName);
+
+    if (results.length === 0) {
+      return res.status(404).json({ message: 'No products found with quantities less than minQty' });
+    }
+    SUCCESS(res, SUC_CODES, results, req.span);
+  } catch (err) {
+    console.log(err);
+    ERROR(res, err, res.span);
+  }
+};
+
+
+
+
+//min stock without any parameter
+export const getAllProductQuantitiesController = async (req, res) => {
+  try {
+    const results = await ProductBatchSumService.getAllProductQuantities();
+
+    if (results.length === 0) {
+      return res.status(404).json({ message: 'No products found with quantities less than minQty' });
+    }
+    
+    SUCCESS(res, SUC_CODES, results, req.span);
+  } catch (err) {
+    console.error('Error in getAllProductQuantitiesController:', err);
+    ERROR(res, err, res.span);
+  }
+};
+
+
+
+
+
+
+
+
+
+
+export const getProductQuantities = async (req, res) => {
+  const { branchName, productId } = req.query;
+
+  try {
+    let results;
+
+    switch (true) {
+      case productId && branchName && branchName !== 'All':
+        console.log("case1",branchName);
+        console.log("case1",productId);
+        results = await ProductBatchSumService.getProductQuantitiesByProductAndBranch(branchName, productId);
+        break;
+
+      case branchName && branchName !== 'All':
+        console.log("case2",branchName);
+        console.log("case2",productId);
+        results = await ProductBatchSumService.getProductQuantitiesByBranch(branchName);
+        break;
+
+      case  productId && !branchName || branchName === 'All':
+        console.log("case3",branchName);
+        console.log("case3",productId);
+        results = await ProductBatchSumService.getProductQuantitiesByProductId(productId);
+        break;
+
+      default:
+        console.log("case4",branchName);
+        console.log("case4",productId);
+        results = await ProductBatchSumService.getAllProductQuantities();
+        break;
+    }
+
+    res.json({ data: results });
+  } catch (error) {
+    console.error('Error fetching product quantities:', error);
+    res.status(500).json({ message: 'Unable to fetch product quantities' });
+  }
+};
