@@ -3,6 +3,8 @@ import ProductBatchUpdateReason from '../productBatchUpdateReason/productBatchUp
 import branches from '../branch/branch.js';
 import { to, TE } from "../../helper.js";
 
+
+
 export const adjustStockDetailsService = async ({ branchName, productId, batchNo, newQty, newSellingPrice, reason, updatedBy }) => {
  
   let [branchErr, branch] = await to(branches.findOne({ where: { branchName } }));
@@ -72,6 +74,57 @@ export const adjustStockDetailsService = async ({ branchName, productId, batchNo
     updates 
   };
 };
+
+
+
+
+
+//Function to get updatesd  stock and price details
+export const getProductBatchDetails = async (productId, branchName) => {
+
+  let [branchErr, branch] = await to(branches.findOne({ where: { branchName } }));
+  if (branchErr) TE(branchErr);
+  if (!branch) TE('Branch not found');
+
+  const branchId = branch.branchId;
+
+  let [productBatchSumErr, productBatchSumRecords] = await to(ProductBatchSum.findAll({
+    where: {
+      productId,
+      branchId,
+    },
+    attributes: ['batchNo', 'expDate', 'sellingPrice', 'totalAvailableQty'],
+    raw: true,
+  }));
+  if (productBatchSumErr) TE(productBatchSumErr);
+  if (!productBatchSumRecords.length) TE('No records found for the given product and branch');
+
+  // Get the update reason for each batch
+  const results = await Promise.all(productBatchSumRecords.map(async (record) => {
+    let [updateReasonErr, updateReasonRecord] = await to(ProductBatchUpdateReason.findOne({
+      where: {
+        productId,
+        branchId,
+        batchNo: record.batchNo,
+      },
+      attributes: ['reason', 'updatedBy', 'updatedAt'],
+      order: [['updatedAt', 'DESC']],
+      raw: true,
+    }));
+    if (updateReasonErr) TE(updateReasonErr);
+
+    return {
+      ...record,
+      reason: updateReasonRecord ? updateReasonRecord.reason : 'N/A',
+      updatedBy: updateReasonRecord ? updateReasonRecord.updatedBy : 'N/A',
+      updatedAt: updateReasonRecord ? updateReasonRecord.updatedAt : 'N/A',
+    };
+  }));
+
+  return results;
+}; 
+
+
 
 // export const adjustStockDetails = async (updateRequests) => {
 //   try {
@@ -155,51 +208,3 @@ export const adjustStockDetailsService = async ({ branchName, productId, batchNo
 // };
 
 
-
-
-
-
-//Function to get updatesd  stock and price details
-export const getProductBatchDetails = async (productId, branchName) => {
-
-  let [branchErr, branch] = await to(branches.findOne({ where: { branchName } }));
-  if (branchErr) TE(branchErr);
-  if (!branch) TE('Branch not found');
-
-  const branchId = branch.branchId;
-
-  let [productBatchSumErr, productBatchSumRecords] = await to(ProductBatchSum.findAll({
-    where: {
-      productId,
-      branchId,
-    },
-    attributes: ['batchNo', 'expDate', 'sellingPrice', 'totalAvailableQty'],
-    raw: true,
-  }));
-  if (productBatchSumErr) TE(productBatchSumErr);
-  if (!productBatchSumRecords.length) TE('No records found for the given product and branch');
-
-  // Get the update reason for each batch
-  const results = await Promise.all(productBatchSumRecords.map(async (record) => {
-    let [updateReasonErr, updateReasonRecord] = await to(ProductBatchUpdateReason.findOne({
-      where: {
-        productId,
-        branchId,
-        batchNo: record.batchNo,
-      },
-      attributes: ['reason', 'updatedBy', 'updatedAt'],
-      order: [['updatedAt', 'DESC']],
-      raw: true,
-    }));
-    if (updateReasonErr) TE(updateReasonErr);
-
-    return {
-      ...record,
-      reason: updateReasonRecord ? updateReasonRecord.reason : 'N/A',
-      updatedBy: updateReasonRecord ? updateReasonRecord.updatedBy : 'N/A',
-      updatedAt: updateReasonRecord ? updateReasonRecord.updatedAt : 'N/A',
-    };
-  }));
-
-  return results;
-}; 

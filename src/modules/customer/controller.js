@@ -2,6 +2,9 @@ import {
     registerCustomer,
     getCustomerById,
     loginCustomerService,
+    resetPasswordEmail,
+    updateCustomerService,
+    updatePasswordService,
     
 } from "../customer/service.js";       
 
@@ -32,6 +35,44 @@ export const getCustomer = async (req, res) => {
     }
 }
 
+export const updateCustomer = async (req , res) => {
+    const customerId = req.params.customerId;
+    const updatedCustomerData = req.body;
+    console.log(updatedCustomerData);
+    try {
+        const updatedCustomer = await updateCustomerService(
+            customerId,
+            updatedCustomerData
+        );
+        if (!updatedCustomer) {
+            res.status(404).json({ message: "Couldn't Update the Customer" });
+            return;
+        }
+        res.status(200).json(updatedCustomer);
+    }catch(error){
+        res.status(500).json({ message: error.message });
+    }
+};
+
+export const updatePassword = async (req, res) => {
+    const customerId = req.params.customerId;
+    const { oldPassword, newPassword } = req.body;
+    try {
+      const updatedCustomer = await updatePasswordService(
+        customerId,
+        oldPassword,
+        newPassword
+      );
+      if (!updatedCustomer) {
+        res.status(404).json({ message: "Couldn't Update the Password" });
+        return;
+      }
+      res.status(200).json(updatedCustomer);
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  };
+
 export const handleLoginCustomer = async (req, res) => {
     const { email, password } = req.body;
     if (!email || !password) {
@@ -47,3 +88,17 @@ export const handleLoginCustomer = async (req, res) => {
       return res.status(500).json({ message: error.message });
     }
   };
+
+export const forgotPasswordCustomer = async (req, res) => {
+    const { email } = req.body;
+    if (!email) {
+      return res.status(400).json({ message: "Email is required" });
+    }
+    try {
+        const result = await resetPasswordEmail(email, "template_resetpw509");
+        return res.status(200).json(result);    
+    } catch (error) {
+      return res.status(500).json({ message: error.message});
+    }
+  }
+

@@ -3,7 +3,7 @@ import sequelize from "../../../config/database.js";
 import ShoppingCart from "../cart_Customer/shoppingcart.js";
 import products from "../product/product.js";
 
-const CartProduct = sequelize.define("CartProduct", {
+const cart_Product = sequelize.define("cart_Product", {
   cartId: {
     type: DataTypes.INTEGER,
     allowNull: false,
@@ -26,6 +26,14 @@ const CartProduct = sequelize.define("CartProduct", {
     type: DataTypes.STRING,
     allowNull: false,
   },
+  batchNo: {
+    type: DataTypes.STRING,
+    allowNull: true
+  },
+  branchId:{
+    type: DataTypes.STRING(50),  
+    allowNull: true,
+  },
   sellingPrice: {
     type: DataTypes.FLOAT,
     allowNull: false,
@@ -45,4 +53,4 @@ const CartProduct = sequelize.define("CartProduct", {
   tableName: "cart_Product",
 });
 
-export default CartProduct;
+export default cart_Product;

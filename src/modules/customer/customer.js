@@ -20,6 +20,9 @@ const Customer = sequelize.define('customer', {
     email: {
         type: DataTypes.STRING,
         allowNull: false,
+        validate: {
+            isEmail: true,
+        }
     },
     password: {
         type: DataTypes.STRING,
@@ -28,10 +31,22 @@ const Customer = sequelize.define('customer', {
     phone: {
         type: DataTypes.STRING,
         allowNull: false,
+        validate: {
+            is: /^(?:7|0|(?:\+94))[0-9]{9,10}$/,
+        },
     },
     address: {
         type: DataTypes.STRING,
         allowNull: false,
+    },
+    failedLoginAttempts:{
+        type: DataTypes.INTEGER,
+        defaultValue: 0,
+        allowNull:true,
+    },
+    loginAttemptTime :{
+        type: DataTypes.DATE,
+        allowNull:true, 
     },
     },
     { 

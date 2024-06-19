@@ -1,12 +1,12 @@
 import sequelize from "./config/database.js";
 import express from "express";
 import cors from "cors";
-import dotenv from "dotenv";
 import grn from "./src/modules/GRN/grn.js";
 import products from "./src/modules/product/product.js";
 import suppliers from "./src/modules/supplier/supplier.js";
 import categories from "./src/modules/category/category.js";
 import branches from "./src/modules/branch/branch.js";
+import bill from "./src/modules/bill/bill.js";
 import productBatchSum from "./src/modules/productBatchSum/productBatchSum.js";
 import Productrouter from "./src/modules/product/routes.js";
 import categoryRouter from "./src/modules/category/routes.js";
@@ -39,11 +39,12 @@ import ShoppingCart from "./src/modules/cart_Customer/shoppingcart.js";
 import onlineBill from "./src/modules/online_Bill/onlineBill.js";
 import ProductBatchUpdateReason from "./src/modules/productBatchUpdateReason/productBatchUpdateReason.js";
 import productBatchUpdateReasonRouter from "./src/modules/productBatchUpdateReason/routes.js";
-
+import stockTransferRouter from "./src/modules/stockTransfer/routes.js";
+import TransferProductBatchRouter from "./src/modules/TransferProductBatch/routes.js";
+import TransferProduct from "./src/modules/TransferProduct/TransferProduct.js";
+import TransferProductBatch from "./src/modules/TransferProductBatch/TransferProductBatch.js";
 
 import Stripe from 'stripe';
-
-dotenv.config();
 
 const app = express();
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
@@ -56,10 +57,7 @@ app.use("/", Productrouter);
 app.use("/", categoryRouter);
 app.use("/", supplierRouter);
 app.use("/", GRNRouter);
-//app.use('/', productSupplierRouter);
-//app.use('/', productGRNRouter);
 app.use('/', Branchrouter);
-//app.use('/', branchSupplierRouter);
 app.use('/', EmployeeRouter);
 app.use('/', CustomerRouter);
 app.use('/', listedProductsRouter);
@@ -75,16 +73,16 @@ app.use('/', UserRoleRouter);
 app.use('/', PageAccessRouter)
 app.use('/', cartRoutes);
 app.use('/',productBatchUpdateReasonRouter);
+app.use('/',stockTransferRouter);
+app.use('/',TransferProductBatchRouter);
 
 
 app.use("/api", Productrouter);
 app.use("/api", categoryRouter);
 app.use("/api", supplierRouter);
 app.use("/api", GRNRouter);
-//app.use('/api', productSupplierRouter);
 app.use('/api', EmployeeRouter);
 app.use('/api', CustomerRouter);
-//app.use('/api', productGRNRouter);
 app.use('/api', listedProductsRouter);
 app.use('/api', billRouter);
 app.use('/api', refundBillRouter);
@@ -93,6 +91,11 @@ app.use('/api', feedback);
 app.use('/api', productBatchSumrouter);
 app.use('/api', cartRoutes);
 app.use('/api',productBatchUpdateReasonRouter);
+app.use('/api',stockTransferRouter);
+app.use('/api',TransferProductBatchRouter);
+
+
+
 
 app.use('/Images', express.static('.src/Images'))
 
@@ -101,7 +104,7 @@ setupAssociations();
 
 
 
-sequelize.sync({alter:true})
+sequelize.sync()
   .then(() => {
     console.log("Database synchronized");
     app.listen(8080, () => {
@@ -160,4 +163,4 @@ app.post('/create-checkout-session', async (req, res) => {
 });
 
 
-export { sequelize, categories, suppliers, grn, products, branches, feedback, ShoppingCart, productBatchSum, SuperAdmin, onlineBill , ProductBatchUpdateReason};
+export { sequelize, categories, suppliers, grn, products, branches, feedback, ShoppingCart, productBatchSum, SuperAdmin, onlineBill , ProductBatchUpdateReason,bill, TransferProduct, TransferProductBatch};
