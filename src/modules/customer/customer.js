@@ -34,7 +34,7 @@ const Customer = sequelize.define('customer', {
         type: DataTypes.STRING,
         allowNull: false,
     },
-    cartId: {
+    shoppingcartCartId: {
         type: DataTypes.INTEGER,
         references: {
             model: ShoppingCart,

@@ -1,140 +1,95 @@
-import CartProduct from '../cart_Product/cartProduct.js';
-import ProductBatchSum from '../productBatchSum/productBatchSum.js';
-import { getCustomerById } from '../customer/service.js';
+// cartProductService.js
 
-export const addToCart = async (productId, productName, branchId, sellingPrice, quantity, discount) => {
+import cart_Product from './cartProduct.js';
+import Customer from '../customer/customer.js'; 
+
+// Service to get cart items for a customer
+async function getCartItems(customerId) {
   try {
-    // Get the user object from session storage
-    const userJson = sessionStorage.getItem('user');
-
-    if (!userJson) {
-      throw new Error('User not found in session storage');
-    }
-
-    // Parse the JSON string to get the user object
-    const user = JSON.parse(userJson);
-    const customerId = user.customerId;
-
-    if (!customerId) {
-      throw new Error('Customer ID not found in user object');
-    }
-
-    // Fetch the customer by ID
-    const customer = await getCustomerById(customerId);
-
+    // Fetch the cartId for the given customerId
+    const customer = await Customer.findByPk(customerId);
     if (!customer) {
       throw new Error('Customer not found');
     }
-
-    // Get the customer's cart ID
     const cartId = customer.cartId;
 
-    // Fetch the batch number with the longest expiry date for the given productId and branchId
-    const productBatch = await ProductBatchSum.findOne({
-      where: { productId, branchId },
-      order: [['expDate', 'DESC']]
+    // Fetch cart items using the cartId
+    const cartItems = await cart_Product.findAll({
+      where: { cartId },
     });
-
-    if (!productBatch) {
-      throw new Error('Product batch not found in the selected branch');
-    }
-
-    const { batchNo } = productBatch;
-
-    // Create a cart product entry
-    const cartProduct = await CartProduct.create({
-      cartId,
-      productId,
-      productName,
-      batchNo,
-      branchId,
-      sellingPrice,
-      quantity,
-      discount,
-    });
-
-    return cartProduct;
-  } catch (error) {
-    throw new Error('Error adding to cart: ' + error.message);
-  }
-};
-
-
-
-export const getCartItems = async (customerId) => {
-  try {
-    // Fetch the customer by ID
-    const customer = await getCustomerById(customerId);
-
-    if (!customer) {
-      throw new Error('Customer not found');
-    }
-
-    // Get the customer's cart ID
-    const cartId = customer.cartId;
-
-    // Fetch all cart items for the customer's cart
-    const cartItems = await CartProduct.findAll({ where: { cartId } });
-
     return cartItems;
   } catch (error) {
-    throw new Error('Error fetching cart items: ' + error.message);
+    throw new Error(`Failed to get cart items: ${error.message}`);
   }
-};
+}
 
-export const updateCartItem = async (customerId, productId, quantity) => {
+// Service to add an item to the cart
+async function addToCart(customerId, productId, productName, batchNo, branchId, sellingPrice, quantity, discount) {
   try {
-    // Fetch the customer by ID
-    const customer = await getCustomerById(customerId);
-
+    // Fetch the cartId for the given customerId
+    const customer = await Customer.findByPk(customerId);
     if (!customer) {
       throw new Error('Customer not found');
     }
-
-    // Get the customer's cart ID
     const cartId = customer.cartId;
 
-    // Find the cart product entry by cartId and productId
-    const cartProduct = await CartProduct.findOne({ where: { cartId, productId } });
+    // Check if the product is already in the cart
+    let cartItem = await cart_Product.findOne({
+      where: {
+        cartId,
+        productId,
+      },
+    });
 
-    if (!cartProduct) {
-      throw new Error('Cart item not found');
+    if (cartItem) {
+      // If the item already exists in the cart, update its quantity and other fields
+      const updatedCartItem = await cartItem.update({
+        quantity: cartItem.quantity + quantity,
+        sellingPrice,
+        discount,
+      });
+      return updatedCartItem;
+    } else {
+      // If the item does not exist in the cart, create a new entry
+      cartItem = await cart_Product.create({
+        cartId,
+        productId,
+        productName,
+        batchNo,
+        branchId,
+        sellingPrice,
+        quantity,
+        discount,
+      });
+      return cartItem;
     }
-
-    // Update the quantity
-    cartProduct.quantity = quantity;
-    await cartProduct.save();
-
-    return cartProduct;
   } catch (error) {
-    throw new Error('Error updating cart item: ' + error.message);
+    throw new Error(`Failed to add item to cart: ${error.message}`);
   }
-};
+}
 
-export const deleteCartItem = async (customerId, productId) => {
+async function updateCartItem(cartId, productId, updatedFields) {
   try {
-    // Fetch the customer by ID
-    const customer = await getCustomerById(customerId);
-
-    if (!customer) {
-      throw new Error('Customer not found');
-    }
-
-    // Get the customer's cart ID
-    const cartId = customer.cartId;
-
-    // Find the cart product entry by cartId and productId
-    const cartProduct = await CartProduct.findOne({ where: { cartId, productId } });
-
-    if (!cartProduct) {
+    const cartItem = await cart_Product.findOne({ where: { cartId, productId } });
+    if (!cartItem) {
       throw new Error('Cart item not found');
     }
-
-    // Delete the cart product entry
-    await cartProduct.destroy();
-
+    const updatedCartItem = await cartItem.update(updatedFields);
+    return updatedCartItem;
+  } catch (error) {
+    throw new Error(`Failed to update cart item: ${error.message}`);
+  }
+}
+async function deleteCartItem(cartId, productId) {
+  try {
+    const cartItem = await cart_Product.findOne({ where: { cartId, productId } });
+    if (!cartItem) {
+      throw new Error('Cart item not found');
+    }
+    await cartItem.destroy();
     return { message: 'Cart item deleted successfully' };
   } catch (error) {
-    throw new Error('Error deleting cart item: ' + error.message);
+    throw new Error(`Failed to delete cart item: ${error.message}`);
   }
-};
+}
+export { getCartItems, addToCart, updateCartItem, deleteCartItem };
