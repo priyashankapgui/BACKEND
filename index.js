@@ -37,6 +37,7 @@ import refundBillRouter from "./src/modules/refund_Bill/routes.js";
 import cartRoutes from "./src/modules/cart_Product/routes.js"
 import ShoppingCart from "./src/modules/cart_Customer/shoppingcart.js";
 import onlineBill from "./src/modules/online_Bill/onlineBill.js";
+import onlineBillRoutes from "./src/modules/online_Bill/routes.js"
 import ProductBatchUpdateReason from "./src/modules/productBatchUpdateReason/productBatchUpdateReason.js";
 import productBatchUpdateReasonRouter from "./src/modules/productBatchUpdateReason/routes.js";
 import stockTransferRouter from "./src/modules/stockTransfer/routes.js";
@@ -52,6 +53,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 app.use(cors());
 
 app.use(express.json());
+
 
 app.use("/", Productrouter);
 app.use("/", categoryRouter);
@@ -75,6 +77,7 @@ app.use('/', cartRoutes);
 app.use('/',productBatchUpdateReasonRouter);
 app.use('/',stockTransferRouter);
 app.use('/',TransferProductBatchRouter);
+app.use('/',onlineBillRoutes);
 
 
 app.use("/api", Productrouter);
@@ -145,6 +148,9 @@ app.post('/create-checkout-session', async (req, res) => {
           currency: 'lkr',
           product_data: {
             name: item.productName,
+            Subtotal:	item.Subtotal,
+            Discount:	item.Discount,
+            Total:	item.Total
           },
           unit_amount: item.sellingPrice * 100,  
         },

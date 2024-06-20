@@ -45,10 +45,12 @@ const setupProductGRNAssociations = (products, grn) => {
 //   productGRN.belongsTo(grn, { foreignKey: "GRN_NO" });
 // }
 
-const setupCartCustomerAssociations = (ShoppingCart,Customer) => {
-  ShoppingCart.hasOne(Customer);
-  Customer.belongsTo(ShoppingCart, {    foreignKey: 'customerId'  });
-}
+const setupCartCustomerAssociations = (ShoppingCart, Customer) => {
+  ShoppingCart.hasOne(Customer, { foreignKey: 'cartId' });
+  Customer.belongsTo(ShoppingCart, { foreignKey: 'cartId' });
+};
+
+
 
 const setupCartProductAssociations = (ShoppingCart, products) => {
   ShoppingCart.belongsToMany(products, { through: "cart_Product", foreignKey: 'cartId' });
