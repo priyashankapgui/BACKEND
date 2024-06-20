@@ -13,7 +13,13 @@ export const authenticateToken = async(req, res, next) => {
     if(!token){
       res.status(400).json({ error: "Token Missing" });
     }
-    const decoded = jwt.verify(token, SECRET_KEY);
+    let decoded;
+    try{
+      decoded = jwt.verify(token, SECRET_KEY);
+    }
+    catch(error){
+      res.status(401).json({ error: "Token Expired" });
+    }
     const userId = decoded.userID || decoded.employeeId;
     let userRow;
     if(userId.startsWith("SA")){
