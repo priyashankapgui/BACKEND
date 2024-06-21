@@ -18,7 +18,8 @@ export const authenticateToken = async(req, res, next) => {
       decoded = jwt.verify(token, SECRET_KEY);
     }
     catch(error){
-      res.status(401).json({ error: "Token Expired" });
+      res.status(401).json({ error: "Token Expired. Please Login Again" });
+      return;
     }
     const userId = decoded.userID || decoded.employeeId;
     let userRow;
@@ -45,7 +46,13 @@ export function authenticateTokenWithPermission(pageId){
     try{
       const authHeader = req.headers["authorization"];
       const token = authHeader.split(" ")[1];
-      const decoded = jwt.verify(token, SECRET_KEY);
+      let decoded;
+      try{
+        decoded = jwt.verify(token, SECRET_KEY);
+      }
+      catch(error){
+        res.status(401).json({ error: "Token Expired. Please Login Again" });
+      }
       const userId = decoded.userID || decoded.employeeId;
       let userRow;
       if(userId.startsWith("SA")){
@@ -67,7 +74,6 @@ export function authenticateTokenWithPermission(pageId){
       }
      }
     catch(error){
-      console.log();
       res.status(403).json({ error: error.message });
     }
   }

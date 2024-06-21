@@ -72,7 +72,7 @@ export const createUserRoleWithPermissions = async (req, res) => {
   const t = await sequelize.transaction();
   try {
     const { userRoleName, branch, checkedPages } = req.body;
-    console.log(checkedPages);
+    //console.log(checkedPages);
     const newUserRole = await createRole(userRoleName, branch, t);
     const permissions = await createPermissionsForUserRole(
       newUserRole.userRoleId,
@@ -83,7 +83,7 @@ export const createUserRoleWithPermissions = async (req, res) => {
     return res.status(201).json({ newUserRole, permissions });
   } catch (error) {
     t.rollback();
-    return res.status(400).json({ error: error.message });
+    return res.status(400).json({ error: error.errors[0]?.message ? error.errors[0].message : error.message});
   }
 };
 
