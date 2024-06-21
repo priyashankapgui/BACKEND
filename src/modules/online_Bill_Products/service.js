@@ -10,10 +10,15 @@ export const addProductsToBill = async (onlineBillNo) => {
   try {
     // Fetch customerId from OnlineBill table
     const onlineBill = await OnlineBill.findOne({ where: { onlineBillNo } });
-    if (!onlineBill) {
-      throw new Error('OnlineBill not found');
+    if (!onlineBillNo) {
+      return res.status(400).json({
+        httpCode: 400,
+        type: 'BAD_REQUEST',
+        code: 500,
+        message: '"onlineBillNo" is required',
+        success: false,
+      });
     }
-
     const customerId = onlineBill.customerId;
 
     // Fetch shoppingcartCartId from Customer table

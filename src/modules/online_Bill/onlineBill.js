@@ -8,6 +8,7 @@ const onlineBill = sequelize.define('onlineBill', {
     type: DataTypes.STRING,
     allowNull: false,
     primaryKey: true,
+    autoIncrement: true
   },
   branchId: {
     type: DataTypes.STRING,
