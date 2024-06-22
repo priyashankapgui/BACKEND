@@ -76,27 +76,30 @@ try {
 
 
 //Function to create a product
-export const createProduct = async (req, res) => {
-  const { productName, description, categoryName, barcode, minQty } = req.body;
+// export const createProduct = async (req, res) => {
+  
  
-  try{
-    if (!req.file) {
-      return res.status(400).json({ error: "No file uploaded" });
-    }
+//   try{
+  
+//    const result = await Service.addProduct(req);
 
-   const image = req.file.path;
-   const result = await Service.addProduct({
-        productName,
-        description,
-        categoryName,
-        image,
-        barcode,
-        minQty
+//     SUCCESS(res, SUC_CODES, result, req.span);
+//   } catch (error) {
+//     ERROR(res, error, res.span);
+//   }
+// };
+
+
+export const createProduct = async (req, res) => {
+  try {
+    console.log("data oh",req.body);
+    const newProduct = await Service.addProduct(req);
+    res.status(201).json({
+      message: "Product created successfully",
+      product: newProduct,
     });
-
-    SUCCESS(res, SUC_CODES, result, req.span);
   } catch (error) {
-    ERROR(res, error, res.span);
+    res.status(500).json({ error: error.message });
   }
 };
 

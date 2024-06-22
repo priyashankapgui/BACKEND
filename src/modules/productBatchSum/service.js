@@ -533,7 +533,7 @@ export const getProductQuantitiesByBranch = async (branchName) => {
 
     const productBatches = await productBatchSum.findAll({
       where: { branchId },
-      attributes: ['productId', [sequelize.fn('SUM', sequelize.col('totalAvailableQty')), 'totalAvailableQty']],
+      attributes: ['productId', [sequelize.fn('SUM', sequelize.col('totalAvailableQty')), 'totalAvailableQty' ],],
       group: ['productId'],
     });
 
@@ -555,6 +555,7 @@ export const getProductQuantitiesByBranch = async (branchName) => {
           productName: product.productName,
           minQty: product.minQty,
           totalAvailableQty,
+    
         });
       }
     }
