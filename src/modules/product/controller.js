@@ -1,232 +1,119 @@
 import express from "express";
-import products from "../product/product.js";
-import {
-  getAllProducts,
-  getProductById,
-  addProduct,
-  searchProductsByName,
-  searchProductsByCategoryName,
-  deleteProductById,
-  updateProductById,
-  getProductIdByProductNameService,
-  // getProductDetailsByProductName,
-  searchSuppliersByProductName,
-} from "../product/service.js";
-import { mapCategoryNameToId } from "../../modules/category/service.js";
-import multer from "multer";
 import path from "path";
+import multer from "multer";
+import * as ProductBatchSumService from "../productBatchSum/service.js";
+import * as Service from "../product/service.js"
+import { mapSupplierNameToId } from "../supplier/service.js";
+import { SUCCESS, ERROR } from "../../helper.js";
+import { Codes } from "../category/constants.js";
+
+const { SUC_CODES } = Codes;
+
+
+
+ 
 
 // Controller function to get all products
 export const getProducts = async (req, res) => {
-  try {
-    const products = await getAllProducts();
-    res.status(200).json(products);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
+try {
+  const result = await Service.getAllProducts(req.query);
+  SUCCESS(res, SUC_CODES, result, req.span);
+} catch (err) {
+  console.log(err);
+  ERROR(res, err, res.span);
+}
 };
 
-// Controller function to get a product by its ID
+
+//Function to get product using productId
 export const getProduct = async (req, res) => {
-  const productId = req.params.productId;
+
+try {
+  const result = await Service.getProductById(req.params.productId);
+
+  SUCCESS(res, SUC_CODES, result, req.span);
+} catch (error) {
+  console.log(error);
+
+  ERROR(res, error, res.span);
+}
+}; 
+
+
+
+//function to get product details using categoryName
+export const getProductsByCategory = async (req, res) => {
+   const { categoryId } = req.query;
+   console.log("cataaa1",categoryId);
+
   try {
-    const productbyId = await getProductById(productId);
-    if (!productbyId) {
-      res.status(404).json({ error: "Product not found" });
-      return;
-    }
-    res.status(200).json(productbyId);
-  } catch (error) {
-    console.error("Error fetching product:", error);
-    res.status(500).json({ error: "Internal server error" });
+    const results = await Service.getProductsByCategoryName(categoryId);
+    SUCCESS(res, 200, results, req.span); 
+  } catch (err) {
+    console.error("Error fetching products:", err);
+    ERROR(res, err, req.span);
   }
 };
 
-// Controller function to search products by name
-export const getStocksByProductName = async (req, res) => {
-  const { productName } = req.params;
-  
-  try {
-    if (!productName) {
-      res.status(400).json({ error: "Product name is required" });
-      return;
-    }
-  
-    const searchResults = await searchProductsByName(productName);
-    res.status(200).json(searchResults);
-  } catch (error) {
-    console.error("Error searching products:", error);
-    res.status(500).json({ error: "Internal server error" });
-  }
-};
 
-// Controller function to get products by category name
-export const getProductsByCategoryName = async (req, res) => {
-  const { categoryName } = req.params;
 
-  try {
-    if (!categoryName) {
-      res.status(400).json({ error: "Category name is required" });
-      return;
-    }
-  
-    const products = await searchProductsByCategoryName(categoryName);
-    res.status(200).json(products);
-  } catch (error) {
-    console.error("Error fetching products by category name:", error);
-    res.status(500).json({ error: "Internal server error" });
-  }
-};
+
 
 // Controller function to update a product
 export const updateProduct = async (req, res) => {
-  const productId = req.params.productId;
-  const updatedProductData = req.body;
-  try {
-    const updatedProduct = await updateProductById(
-      productId,
-      updatedProductData
-    );
-    res.status(200).json(updatedProduct);
-  } catch (error) {
-    console.error("Error updating product:", error);
-    res.status(500).json({ error: "Internal server error" });
-  }
+
+try {
+  const result = await Service.updateProductById(req.params.productId, req.body);
+
+  SUCCESS(res, SUC_CODES, result, req.span);
+} catch (error) {
+  console.log(error);
+
+  ERROR(res, error, res.span);
+}
 };
 
-// Controller function to create a new product
+
+
+//Function to create a product
 export const createProduct = async (req, res) => {
-  const { branchName, productName, description, categoryName } = req.body;
-  try {
-    // Check if a file is uploaded
+  const { productName, description, categoryName, barcode, minQty } = req.body;
+ 
+  try{
     if (!req.file) {
       return res.status(400).json({ error: "No file uploaded" });
     }
-  
-  
-  
-    const categoryId = await mapCategoryNameToId(categoryName);
-    if (!categoryId) {
-      return res.status(404).json({ error: "Category not found" });
-    }
 
    const image = req.file.path;
-
-    // upload(req, res, async (err) => {
-    //   if (err) {
-    //     return res.status(400).json({ error: err.message });
-    //   }
-  
-      // Access the uploaded file using req.file
-      
-      const newProduct = await addProduct({
-        branchName,
+   const result = await Service.addProduct({
         productName,
         description,
-        categoryId,
+        categoryName,
         image,
+        barcode,
+        minQty
     });
 
-    res.status(201).json(newProduct);
-  
-
+    SUCCESS(res, SUC_CODES, result, req.span);
   } catch (error) {
-    console.error("Error adding product:", error);
-    res.status(500).json({ error: "Internal server error" });
+    ERROR(res, error, res.span);
   }
 };
-
 
 
 // Controller function to delete a product
 export const deleteProduct = async (req, res) => {
-  const productId = req.params.productId;
   try {
-    await deleteProductById(productId);
-    res.status(200).json({ message: "Product deleted successfully" });
-  } catch (error) {
-    console.error("Error deleting product:", error);
-    res.status(500).json({ error: "Internal server error" });
-  }
-};
-
-//Controller function to get productId by productName
-export const getProductIdByProductNameController = async (req, res) => {
-  const { productName } = req.params;
-
-  try {
-    const productId = await getProductIdByProductNameService(productName);
-    if (!productId) {
-      res.status(404).json({ error: "Product not found" });
-      return;
-    }
-    res.status(200).json({ productId });
-  } catch (error) {
-    console.error("Error fetching productId by productName:", error);
-    res.status(500).json({ error: "Internal server error" });
-  }
-};
-
-// //Controller function to get productId and corresponding supplierName by productName
-// export const getProductDetailsByProductNameController = async (req, res) => {
-//   const { productName } = req.params;
-
-//   try {
-//     if (!productName) {
-//       res.status(400).json({ error: "Product name is required" });
-//       return;
-//     }
-
-//     // Call the service function to get product details
-//     const productDetails = await getProductDetailsByProductName(productName);
-
-//     if (!productDetails) {
-//       res.status(404).json({ error: "No product found for the given product name" });
-//       return;
-//     }
-
-//     // Return the product details
-//     res.status(200).json(productDetails);
-//   } catch (error) {
-//     console.error("Error fetching product details by product name:", error);
-//     res.status(500).json({ error: "Internal server error" });
-//   }
-// };
-
-export const getProductAndSuppliersDetailsByProductName = async (req, res) => {
-  const { productName } = req.params;
-
-  try {
-    if (!productName) {
-      return res.status(400).json({ error: "Product name is required" });
-    }
+    const result = await Service.deleteProductById(req.params.productId);
   
-    const product = await products.findOne({
-      where: { productName },
-    });
-
-    if (!product) {
-      return res.status(404).json({ error: "Product not found" });
-    }
-
-    const productId = product.productId;
-
-    // Retrieve the supplier details for the product
-    const suppliersDetails = await searchSuppliersByProductName(productId);
-    
-    // Construct the response object with product and supplier details
-    const response = {
-      productId: product.productId,
-      productName: product.productName,
-      suppliers: suppliersDetails
-    };
-
-    res.status(200).json(response);
+    SUCCESS(res, SUC_CODES, result, req.span);
   } catch (error) {
-    console.error("Error fetching product and suppliers details by product name:", error);
-    res.status(500).json({ error: "Internal server error" });
+    console.log(error);
+  
+    ERROR(res, error, res.span);
   }
-};
+  };
+  
 
 
 //upload image controller
@@ -254,3 +141,26 @@ export const getProductAndSuppliersDetailsByProductName = async (req, res) => {
     cb('Give proper file format to upload')
   }
 }).single('image')
+
+
+
+//Function to get active stock
+export const getTotalQuantityByBranchAndProduct = async (req, res) => {
+  try { 
+    const { branchName, productId } = req.query;
+    const result = await ProductBatchSumService.getProductTotalQuantity(branchName, productId);
+SUCCESS(res, SUC_CODES, result, req.span);
+} catch (error) {
+  console.log(error);
+
+  ERROR(res, error, res.span);
+}
+};
+
+
+
+
+
+
+
+

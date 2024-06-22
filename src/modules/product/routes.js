@@ -1,30 +1,19 @@
 import express from "express";
-import {
-  getProducts,
-  getProduct,
-  createProduct,
-  deleteProduct,
-  updateProduct,
-  getStocksByProductName,
-  getProductsByCategoryName,
-  getProductIdByProductNameController,
-  // getProductDetailsByProductNameController,
-  getProductAndSuppliersDetailsByProductName,
-  upload,
-  
-} from "../product/controller.js";
-import { getAllProducts } from "../product/service.js";
+import * as Controller from "../product/controller.js"; 
+import Validator from "../product/validator.js";
 
-const Productrouter = express.Router();
 
-Productrouter.post("/products", upload, createProduct);
-Productrouter.get("/products", getProducts);
-Productrouter.get("/products/:productId", getProduct);
-Productrouter.get("/products/productName/:productName", getStocksByProductName);
-Productrouter.get("/products/category/:categoryName", getProductsByCategoryName);
-Productrouter.delete("/products/:productId", deleteProduct);
-Productrouter.put("/products/:productId", updateProduct);
-Productrouter.get("/products/productId/:productName", getProductIdByProductNameController);
-// Productrouter.get("/products/details/:productName", getProductDetailsByProductNameController);
-Productrouter.get('/product/:productName', getProductAndSuppliersDetailsByProductName);
+const Productrouter = express.Router(); 
+
+Productrouter.post("/products", Controller.upload, Validator.validateProductCreate, Controller.createProduct);
+Productrouter.get("/products", Controller.getProducts);
+Productrouter.get("/products/:productId", Controller.getProduct);
+Productrouter.get("/products-category", Controller.getProductsByCategory);
+Productrouter.delete("/products/:productId", Controller.deleteProduct);
+Productrouter.put("/products/:productId", Validator.validateProductUpdate, Controller.updateProduct);
+Productrouter.get('/active-stock', Controller.getTotalQuantityByBranchAndProduct);
+
+
+
+ 
 export default Productrouter;

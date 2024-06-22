@@ -3,9 +3,9 @@ import * as GRNService from '../GRN/service.js';
 import * as GRNRoutes from '../GRN/routes.js';
 import grn from '../GRN/grn.js'; 
 
-  module.exports = {
+  export default  {
     Controller: GRNController,
-    Service: GRNService,
+    GRNService: GRNService,
     Routes: GRNRoutes,
     GRN: grn,
   };

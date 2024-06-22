@@ -1,40 +1,132 @@
 import Employee from "../employee/employee.js";
 import bcrypt from "bcryptjs";
-const salt = bcrypt.genSaltSync(10);
 import jwt from "jsonwebtoken";
-import { SECRET } from "../../../config/config.js";
-const { SECRET_KEY: ACCESS_TOKEN } = SECRET;
 import emailjs from "@emailjs/nodejs";
+import { AUTH, SECRET } from "../../../config/config.js";
+import branches from "../branch/branch.js";
+import UserRole from "../userRole/userRole.js";
+import sequelize from "../../../config/database.js";
+import { raw } from "mysql2";
+import { imageUploadMultiple, imageUploadwithCompression } from "../../blobService/utils.js";
+import ResponseError from "../../ResponseError.js";
 
+const salt = bcrypt.genSaltSync(10);
+const { SECRET_KEY: ACCESS_TOKEN } = SECRET;
+
+// export const generateEmployeeId = async () => {
+//   try {
+//     const latestEmployee = await Employee.findOne({
+//       order: [['employeeId', 'DESC']],
+//       attributes: ['employeeId'],
+//     });
+
+//     let newEmployeeId;
+
+//     if (latestEmployee && latestEmployee.employeeId) {
+//       const numericPart = parseInt(latestEmployee.employeeId.substring(1), 10);
+//       const incrementedNumericPart = numericPart + 1;
+//       newEmployeeId = `E${incrementedNumericPart.toString().padStart(5, '0')}`;
+//     } else {
+//       newEmployeeId = 'E00001';
+//     }
+
+//     return newEmployeeId;
+//   } catch (error) {
+//     console.error('Error generating new employee ID:', error);
+//     throw new Error('Could not generate new employee ID');
+//   }
+// }
 
 export const getAllEmployees = async () => {
   try {
-    const employees = await Employee.findAll();
+    const employees = await Employee.findAll( {
+      raw: true,
+      attributes: {
+        include: ["userRole.userRoleName", "userRole.branch.branchName"],
+        exclude: ["password"],
+      },
+      include: [
+        {
+          model: UserRole,
+          include: [{ model: branches, attributes: [] }],
+          attributes: [],
+        },
+      ],
+    });
     return employees;
   } catch (error) {
     throw new Error("Error retrieving employees");
   }
 };
 
+export const getEmployeesByBranch = async (branchName) => {
+  try {
+    const employees = await Employee.findAll( {
+      raw: true,
+      attributes: {
+        include: ["userRole.userRoleName", "userRole.branch.branchName"],
+        exclude: ["password"],
+        },
+        include: [
+          {
+            model: UserRole,
+            include: [{ 
+              model: branches, 
+              where: { branchName: branchName },
+              attributes: [],
+              required: true, 
+            }],
+            attributes: [],
+            required: true,
+        },
+      ],
+    });
+    return employees;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
+
 export const getEmployeeById = async (employeeId) => {
   try {
-    const employee = await Employee.findByPk(employeeId);
+    const employee = await Employee.findByPk(employeeId, {
+      raw: true,
+      attributes: {
+        include: ["userRole.userRoleName", "userRole.branch.branchName"],
+        exclude: ["password"],
+      },
+      include: [
+        {
+          model: UserRole,
+          include: [{ model: branches, attributes: [] }],
+          attributes: [],
+        },
+      ],
+    });
     return employee;
   } catch (error) {
     throw new Error("Error fetching employee: " + error.message);
   }
 };
 
-export const createEmployee = async (employee) => {
-  const { employeeId,role,email, password ,phone} = employee;
-
+export const createEmployee = async (req) => {
+  // const newEmployeeId = await generateEmployeeId();
+  console.log(req.body.employee);
+  const {
+    employeeId,
+    employeeName,
+    email,
+    password,
+    phone,
+    address,
+    userRoleName,
+  } = JSON.parse(req.body.employee);
   // Check if the employeeId already exists
-  const existingEmployee = await Employee.findOne({ where: { employeeId: employeeId } });
-  if (existingEmployee ) {
+  const existingEmployee = await Employee.findOne({
+    where: { employeeId: employeeId },
+  });
+  if (existingEmployee) {
     throw new Error("Employee ID already exists");
-  }
-  else if(employeeId.length != 4){
-    throw new Error("Employee ID must be a 4-digit number");
   }
 
   const existingEmail = await Employee.findOne({ where: { email: email } });
@@ -42,287 +134,279 @@ export const createEmployee = async (employee) => {
     throw new Error("Email already exists");
   }
 
-  // Validate employee role
-  const roleRegex = /^(cashier|admin|superadmin)$/;
-  if (!roleRegex.test(role)) {
-    throw new Error("Invalid role");
-  }
- 
-
-  // Validate email
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!emailRegex.test(email)) {
-    throw new Error("Invalid email format");
+  // Validate userRoleId
+  const userRoleID = await UserRole.findOne({
+    where: { userRoleName: userRoleName },
+  });
+  const userRoleId = userRoleID ? userRoleID.dataValues.userRoleId : null;
+  if (!userRoleID) {
+    throw new Error("User role does not exist");
   }
 
   // Validate password
-  if (!/^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,20}$/.test(password)) {
+  if (password.length < 8 || password.length > 64) {
     throw new Error("Invalid password format");
   }
 
+  
 
-  // Validate phone number
-  const phoneRegex = /^[0-9]{10}$/;
-  if (!phoneRegex.test(phone)) {
-    throw new Error("Invalid phone number");
-  }
-
-
+  const t = await sequelize.transaction();
   try {
-    const newEmployee = await Employee.create(employee);
+    const newEmployee = await Employee.create({
+      employeeId,
+      employeeName,
+      email: email !== "" ? email : undefined,
+      password,
+      userRoleId,
+      phone: phone !== "" ? phone : undefined,
+      address: address !== "" ? address : undefined,
+    }, { transaction: t });
+    if (req.file){
+      await imageUploadwithCompression(req.file, "cms-data", employeeId);
+    }
+    await t.commit();
     return newEmployee;
   } catch (error) {
+    await t.rollback();
     throw new Error("Error creating employee: " + error.message);
   }
 };
 
-export const updateEmployeeById = async (employeeId, employeeData) => {
+export const updateEmployeeById = async (
+  req,
+  employeeId,
+  employeeData,
+  role,
+  branch
+) => {
+  //console.log(employeeData, employeeId, role, branch);
+  const branchRow = await branches.findOne({
+    where: { branchName: employeeData.branchName },
+  });
+  const userRole = await UserRole.findOne({
+    where: { userRoleName: employeeData.userRoleName },
+  });
+  if (!userRole) {
+    throw new Error("User role does not exist");
+  }
+  if (userRole.userRoleId === 1){
+    throw new Error("Cannot assign super admin role to employee");
+  }
+  employeeData.userRoleId = userRole.userRoleId;
+  const employee = await Employee.findByPk(employeeId);
+  console.log(employee);
+  if (!employee) {
+    throw new Error("Employee not found");
+  }
   try {
-    const employee = await Employee.findByPk(employeeId);
-    if (!employee) {
-      return null;
+    if (role == 1 || branch === branchRow.branchName) {
+      console.log(employeeData);
+      const t = await sequelize.transaction();
+      const updatedEmployee = await employee.update(employeeData, {transaction: t});
+      if (req.file) {
+        await imageUploadwithCompression(req.file, "cms-data", employeeId);
+      }
+      await t.commit();
+      return updatedEmployee;
+    } else {
+      throw new Error("Unauthorized");
     }
-    const updatedEmployee = await employee.update(employeeData);
-    return updatedEmployee;
   } catch (error) {
+    await t.rollback();
     throw new Error("Error updating employee: " + error.message);
   }
 };
 
-export const deleteEmployeeById = async (employeeId) => {
+export const updateEmployeePersonalInfo = async (req, employeeId, employeeData) => {
+  const employee = await Employee.findByPk(employeeId);
+  if (!employee) {
+    throw new Error("Employee not found");
+  }
+  const t = await sequelize.transaction();
   try {
-    const employee = await Employee.findByPk(employeeId);
-    if (!employee) {
-      return null;
+    const updatedEmployee = await employee.update(employeeData, {
+      fields: ["employeeName", "email", "phone", "address", "password"],
+      transaction: t,
+    });
+    if(req.file){
+      await imageUploadwithCompression(req.file, "cms-data", employeeId);
     }
+    await t.commit();
+    return updatedEmployee;
+  } catch (error) {
+    await t.rollback();
+    throw new Error("Error updating employee: " + error.message);
+  }
+};
+
+export const deleteEmployeeById = async (employeeId, role, branch) => {
+  const employee = await Employee.findByPk(employeeId, {
+    attributes: {
+      exclude: ["password"],
+      },
+    include: [
+      {
+        model: UserRole,
+        include: [{ 
+          model: branches, 
+        }],
+    },
+  ],
+  });
+  if (!employee) {
+    return null;
+  }
+  if (role == 1 || employee.userRole.branch.branchName === branch) {
     await employee.destroy();
     return employee;
-  } catch (error) {
-    throw new Error("Error deleting employee: " + error.message);
+  } else {
+    throw new Error("Unauthorized");
   }
 };
 
-// Function to handle login
-export const handleLogin = async (req, res) => {
-  const { employeeId, password } = req.body;
-
-  if (!employeeId || !password) {
-    return res
-      .status(400)
-      .json({ message: "Username and password are required" });
+export const handleLogin = async (employeeId, password) => {
+  const tempUser = await Employee.findByPk(employeeId);
+  if (!tempUser) {
+    throw new ResponseError(404, "Employee not found")
   }
+  if (tempUser.failedLoginAttempts >= AUTH.MAX_FAILED_ATTEMPTS && tempUser.loginAttemptTime > new Date(new Date() - AUTH.FAILED_ATTEMPT_TIMEOUT)) {
+    const remainingTime = Math.round((tempUser.loginAttemptTime - new Date(new Date() - AUTH.FAILED_ATTEMPT_TIMEOUT)) / (60*1000));
+    throw new ResponseError(401, `This Account has been locked, please try again in ${remainingTime} minutes`);
+  }
+  tempUser.loginAttemptTime = new Date();
+  const storedPassword = tempUser.password;
+  const passwordMatch = await bcrypt.compare(password, storedPassword);
+  if (passwordMatch) {
+    const data = await handleLoginSuccess(employeeId);
+    tempUser.currentAccessToken = data.token;
+    tempUser.failedLoginAttempts = 0;
+    await tempUser.save();
+    return data;
+  } 
+  else {
+    tempUser.failedLoginAttempts = (tempUser.failedLoginAttempts || 0) + 1;
+    if(tempUser.failedLoginAttempts >= AUTH.MAX_FAILED_ATTEMPTS) {
+      await forgotPasswordService(tempUser.employeeId, "template_securityw509"); 
+    }
+    await tempUser.save();
+    throw new ResponseError(401, "Invalid credentials");
+  }
+};
 
+export const handleLoginSuccess = async (employeeId) => {
+  const user = await Employee.findByPk(employeeId, {
+    raw: true,
+    attributes: {
+      include: ["userRole.userRoleName", "userRole.branch.branchName"],
+    },
+    include: [
+      {
+        model: UserRole,
+        include: [{ model: branches, attributes: [] }],
+        attributes: [],
+      },
+    ],
+  });
+  const accessToken = jwt.sign(
+    {
+      employeeId: user.employeeId,
+      role: user.userRoleName,
+      userRoleId: user.userRoleId,
+      branchName: user.branchName,
+    },
+    ACCESS_TOKEN,
+    { expiresIn: "8h" }
+  );
+  return {
+    message: "Login successful",
+    token: accessToken,
+    user: {
+      userID: user.employeeId,
+      branchName: user.branchName,
+      userName: user.employeeName,
+      email: user.email,
+      role: user.userRoleName,
+      phone: user.phone,
+      address: user.address,
+    },
+  };
+};
+
+export const forgotPasswordService = async (employeeId, emaliTemplate) => {
   try {
-    // Find the user in the database based on the provided empID
     const user = await Employee.findOne({ where: { employeeId: employeeId } });
-
     if (!user) {
-      return res.status(404).json({ message: "Invalid Credentials" });
+      throw new Error("Employee ID not found");
     }
-
-    const storedPassword = await user.password;
-    const passwordMatch = await bcrypt.compare(password, storedPassword);
-    console.log(passwordMatch);
-    if (passwordMatch) {
-      const accessToken = jwt.sign(
-        {
-          employeeId: user.employeeId,
-          role: user.role,
-        },
-        ACCESS_TOKEN,
-        {
-          expiresIn: "8h",
-        }
-      );
-
-      //console.log(passwordMatch);
-
-      // Send token and user information in response
-      return res.status(200).json({
-        message: "Login successful",
-        token: accessToken,
-        user: {
-          employeeId: user.employeeId,
-          employeeName: user.employeeName,
-          email: user.email,
-          role: user.role,
-          phone: user.phone,
-          address: user.address,
-        },
-      });
-    } else if (!passwordMatch) {
-      return res.status(401).json({ message: "Invalid Credentials" });
+    else if (!user.email) {
+      throw new Error("Email not given, Please contact an Admin");
     }
-  } catch (error) {
-    console.error("Login error:", error);
-    return res.status(500).json({ message: "Internal server error" });
-  }
-};
-
-export const forgotPassword = async (req, res) => {
-  const { email } = req.body;
-
-  if (!email) {
-    return res.status(400).json({ message: "Email is required" });
-  }
-  try {
-    const user = await Employee.findOne({ where: { email: email } });
-    if (!user) {
-      return res.status(404).json({ message: "Email not found" });
-    } else {
+    else {
       const passwordResetToken = jwt.sign(
         {
+          userId: user.employeeId,
           email: user.email,
         },
         ACCESS_TOKEN,
-        {
-          expiresIn: "5m",
-        }
+        { expiresIn: "5m" }
       );
-
       const resetLink = `http://localhost:3000/login/resetpw?token=${passwordResetToken}`;
-
       emailjs.init({
         publicKey: "U4RoOjKB87mzLhhqW",
         privateKey: process.env.EMAILJS_API_KEY,
         blockHeadless: true,
-
         limitRate: {
           id: "app",
           throttle: 10000,
         },
       });
-
-      
       const templateParams = {
         resetLink: resetLink,
+        receiver_name: user.employeeName,
+        receiver_email: user.email,
       };
-
       // Send email using EmailJS with the  template
-      emailjs.send("service_kqwt4xi", "template_hbmw31c", templateParams).then(
+      emailjs.send("service_kqwt4xi", emaliTemplate, templateParams).then(
         (response) => {
           console.log("SUCCESS!", response.status, response.text);
-          return res.status(200).json({
+          return ({
             message: "Password reset link sent to email",
             email: user.email,
-            resetLink: resetLink,
+            resetLink,
           });
         },
         (error) => {
           console.log("FAILED...", error);
-          return res.status(500).json({ message: "Failed to send email" });
+          throw new Error("Failed to send email" + error.message);
         }
       );
     }
   } catch (error) {
     console.error("Forgot password error:", error);
-    return res.status(500).json({ message: "Internal server error" });
+    throw new Error("Internal server error" + error.message);
   }
 };
 
-export const passwordReset = async (req, res) => {
-  const { resetToken, newPassword, confirmPassword } = req.body;
-
-  if (!resetToken || !newPassword || !confirmPassword) {
-    return res.status(400).json({ message: "Missing required fields" });
+export const handleEmployeeResetPassword = async (userId, newPassword) => {
+  const user = await Employee.findByPk(userId);
+  if (!user) {
+    throw new TypeError("Employee ID not found");
   }
-
-  try {
-    const decoded = jwt.verify(resetToken, ACCESS_TOKEN);
-    const email = decoded.email;
-
-    const user = await Employee.findOne({ where: { email: email } });
-    if (!user) {
-      return res.status(404).json({ message: "Invalid Request" });
-    }
-
-    if (newPassword.length < 8 || newPassword.length > 20 || !/^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,20}$/.test(newPassword)) {
-      return res
-        .status(400)
-        .json({ message: "Invalid password format" });
-    }
-
-    if (newPassword === user.password) {
-      return res
-        .status(400)
-        .json({ message: "New password cannot be the same as old password" });
-    }
-
-    
-    user.password = newPassword;
-    await user.save();
-
-    return res.status(200).json({ message: "Password reset successful" });
-  } catch (error) {
-    console.error("Password reset error:", error);
-    return res.status(500).json({ message: "Internal server error" });
+  const passwordMatch = await bcrypt.compare(newPassword, user.password);
+  if (passwordMatch) {
+    throw new TypeError("New password cannot be the same as the old password");
   }
+  user.password = newPassword;
+  await user.save();
+  return;
 };
 
-
-
-export const verify = async (req, res) => {
-  res.status(200).json({
-    status: "success",
-    message: "User Verified",
-});
-}
-
-
-//function to verify admin
-export const verifyAdmin = async(req,res)=> {
-  const authHeader = req.headers['authorization'];
-    const token = authHeader.split(' ')[1];
-
-
-
+export const imageUploadTest = async (req, res) => {
   try {
-
-    const decoded = jwt.verify(token,ACCESS_TOKEN);
-    console.log(decoded);
-    const {employeeId,role} = decoded;
-
-    // Check if the employeeid and role matches the one associated with the user's account
-    const user = await Employee.findOne({ employeeId});
-    if (!user) {
-      return res.status(404).json({ message: 'User not found' });
-    }
-
-    else if (role != 'admin' && role != 'superadmin') {
-      return res.status(403).json({ message: 'Unauthorized' });
-    }
-    else{
-      return res.status(200).json({ message: 'User Verified' });
-    }
-    
+    const response = await imageUploadMultiple(req.files, "carosel", "webImage");
+    res.status(200).json({ message: response.message, fileNames: response.fileNames });
   } catch (error) {
-  return res.status(500).json({ error: error.message });
-  }
-}
-
-// Function to verify super admin
-export const verifySuperAdmin = async (req, res) => {
-  const authHeader = req.headers["authorization"];
-  const token = authHeader.split(" ")[1];
-
-
-  try {
-    const decoded = jwt.verify(token, ACCESS_TOKEN);
-
-    const { employeeId, role } = decoded;
-
-    // Check if the employeeid and role matches the one associated with the user's account
-    const user = await Employee.findOne({ employeeId });
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    } else if (role != "superadmin") {
-      return res.status(403).json({ message: "Unauthorized" });
-    } else {
-      return res.status(200).json({ message: "User Verified" });
-    }
-  } catch (error) {
-   
-    return res.status(500).json({ error: error.message });
+    res.status(500).json({ error: error.message });
   }
 }
 

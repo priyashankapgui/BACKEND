@@ -5,33 +5,33 @@ import {
   createNewEmployee,
   updateEmployee,
   deleteEmployee,
+  resetEmployeePassword,
+  updatePersonalInfo,
+  loginEmployee,
+  logoutEmployee,
+  forgotPassword,
 } from "../employee/controller.js";
-import { handleLogin, forgotPassword,passwordReset,verify,verifyAdmin , verifySuperAdmin} from "../employee/service.js";
-import { authenticateToken } from "../../middleware/authenticationMiddleware.js";
+import {  imageUploadTest } from "../employee/service.js";
+import { authenticateToken, authenticateTokenWithPermission } from "../../middleware/authenticationMiddleware.js";
+import { processForm,  processMultipleForm } from "../../blobService/utils.js";
 
 
 const EmployeeRouter = express.Router();
 
-EmployeeRouter.get("/employees", authenticateToken,getEmployees);
-EmployeeRouter.post("/employees",authenticateToken, createNewEmployee);
-EmployeeRouter.get("/employees/:employeeId",authenticateToken, getEmployee);
-EmployeeRouter.put("/employees/:employeeId", authenticateToken, updateEmployee);
-EmployeeRouter.delete("/employees/:employeeId",authenticateToken, deleteEmployee);
-EmployeeRouter.post("/api/login", handleLogin);
+EmployeeRouter.get("/employees", authenticateTokenWithPermission('accounts'), getEmployees);
+EmployeeRouter.post("/employees",authenticateTokenWithPermission('accounts'), processForm(), createNewEmployee);
+EmployeeRouter.get("/employees/:employeeId",authenticateTokenWithPermission('accounts'), getEmployee);
+EmployeeRouter.put("/employees/:employeeId",authenticateTokenWithPermission('accounts'), processForm(), updateEmployee);
+EmployeeRouter.post("/employees/selfUpdate", processForm(), updatePersonalInfo)
+EmployeeRouter.delete("/employees/:employeeId",authenticateTokenWithPermission('accounts'), deleteEmployee);
+EmployeeRouter.post("/api/login", loginEmployee);
 EmployeeRouter.post("/api/login/fp", forgotPassword);
-EmployeeRouter.post("/api/login/resetpw", passwordReset);
-
-// EmployeeRouter.get("/api/employees/verify", authenticateToken, (req, res) => {
-//     res.status(200).json({
-//         status: "success",
-//         message: "User Verified",
-//     });
-// });
-
-EmployeeRouter.get("/api/employees/verify", authenticateToken,verify);
+EmployeeRouter.post("/api/login/resetpw", resetEmployeePassword);
+EmployeeRouter.post("/api/logout", authenticateToken, logoutEmployee);
+EmployeeRouter.post("/imageupload", processMultipleForm(), imageUploadTest);
 
 
-EmployeeRouter.get("/api/employees/verifyAdmin", authenticateToken,verifyAdmin);
-EmployeeRouter.get("/api/employees/verifySuperAdmin", authenticateToken,verifySuperAdmin);
+
+
     
 export default EmployeeRouter;

@@ -1,7 +1,15 @@
 // main.js
 import express from "express";
-import { getAllFeedback , addFeedback } from "./service.js";
+import { getAllfeedback, addFeedback,  updateFeedbackAction } from "./service.js";
 
+export const getfeedback = async (req, res) => {
+  try {
+    const feedbackData = await getAllfeedback();
+    res.status(200).json(feedbackData);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
 
 export const createfeedback = async (req, res) => {
   try {
@@ -10,6 +18,7 @@ export const createfeedback = async (req, res) => {
       !req.body.feedbackType ||
       !req.body.message ||
       !req.body.phone ||
+      !req.body.branch||
       !req.body.email
     ) {
       return res.status(400).json({ error: "Incomplet request body" });
@@ -22,13 +31,12 @@ export const createfeedback = async (req, res) => {
   }
 };
 
-
-export const getFeedback = async (req, res) => {
+export const updateFeedback = async (req, res) => {
   try {
-    const feedbackData = await getAllFeedback();
-    res.status(200).json(feedbackData);
+      const { id } = req.params;
+      const updatedFeedback = await updateFeedbackAction(id, req.body);
+      res.status(200).json(updatedFeedback);
   } catch (error) {
-    console.error('Error retrieving feedback:', error);
-    res.status(500).json({ error: 'Internal server error' });
+      res.status(500).json({ error: error.message });
   }
 };
