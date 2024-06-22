@@ -44,7 +44,7 @@ const products = sequelize.define(
       type: DataTypes.STRING,
       allowNull: true, 
     },
-    minQty: {
+    qty: {
       type: DataTypes.FLOAT,
       allowNull: true, 
     },

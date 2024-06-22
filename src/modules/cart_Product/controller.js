@@ -1,87 +1,49 @@
-import ShoppingCart from '../cart_Customer/shoppingcart.js';
-import CartProduct from '../cart_Product/cartProduct.js';
-import ProductBatchSum from '../productBatchSum/productBatchSum.js';
+// cartProductController.js
 
-export const getCartItems = async (req, res) => {
+import * as cartProductServ from './service.js';
+
+// Controller to get cart items for a customer
+async function getCartItems(req, res, next) {
+  const { customerId } = req.body;
   try {
-    const cartItems = await CartProduct.findAll();
-    res.status(200).json(cartItems);
+    const cartItems = await cartProductServ.getCartItems(customerId);
+    res.json(cartItems);
   } catch (error) {
-    console.error('Error fetching cart items:', error);
-    res.status(500).json({ message: 'Internal server error' });
+    next(error);
   }
-};
+}
 
-export const addToCart = async (req, res) => {
-  const { productId, productName,branchId, sellingPrice, quantity, discount } = req.body;
-
+// Controller to add an item to the cart
+async function addToCart(req, res, next) {
+  const { customerId, productId, productName, batchNo, branchId, sellingPrice, quantity, discount } = req.body;
   try {
-    // Find or create a shopping cart
-    const [cart, created] = await ShoppingCart.findOrCreate({ where: {} });
-
-    // Fetch the batch number with the longest expiry date for the given productId
-    const productBatch = await ProductBatchSum.findOne({
-      where: { productId },
-      order: [['expDate', 'DESC']]
-    });
-
-    if (!productBatch) {
-      return res.status(404).json({ message: 'Product batch not found' });
-    }
-
-    const { batchNo } = productBatch;
-
-    // Create a cart product entry
-    await CartProduct.create({
-      cartId: cart.cartId,
-      productId,
-      productName,
-      batchNo,
-      branchId,
-      sellingPrice,
-      quantity,
-      discount,
-    });
-
-    res.status(201).json({ message: 'Product added to cart successfully' });
+    const addedCartItem = await cartProductServ.addToCart(customerId, productId, productName, batchNo, branchId, sellingPrice, quantity, discount);
+    res.json(addedCartItem);
   } catch (error) {
-    console.error('Error adding to cart:', error);
-    res.status(500).json({ message: 'Internal server error' });
+    next(error);
   }
-};
+}
 
-export const updateCartItem = async (req, res) => {
-  const { productId } = req.params;
-  const { quantity } = req.body;
-
+async function updateCartItem(req, res, next) {
+  const { cartId, productId } = req.params;  // Extract cartId and productId from request params
+  const updatedFields = req.body;  // Extract updated fields from request body
   try {
-    const cartProduct = await CartProduct.findOne({ where: { productId } });
-    if (cartProduct) {
-      cartProduct.quantity = quantity;
-      await cartProduct.save();
-      res.status(200).json({ message: 'Cart item updated successfully' });
-    } else {
-      res.status(404).json({ message: 'Cart item not found' });
-    }
+    const updatedCartItem = await cartProductServ.updateCartItem(cartId, productId, updatedFields);  // Pass both cartId and productId
+    res.json(updatedCartItem);
   } catch (error) {
-    console.error('Error updating cart item:', error);
-    res.status(500).json({ message: 'Internal server error' });
+    next(error);
   }
-};
+}
 
-export const deleteCartItem = async (req, res) => {
-  const { productId } = req.params;
-
+async function deleteCartItem(req, res, next) {
+  const { cartId, productId } = req.params;  // Extract cartId and productId from request params
   try {
-    const cartProduct = await CartProduct.findOne({ where: { productId } });
-    if (cartProduct) {
-      await cartProduct.destroy();
-      res.status(200).json({ message: 'Cart item deleted successfully' });
-    } else {
-      res.status(404).json({ message: 'Cart item not found' });
-    }
+    const result = await cartProductServ.deleteCartItem(cartId, productId);  // Pass both cartId and productId
+    res.json(result);
   } catch (error) {
-    console.error('Error deleting cart item:', error);
-    res.status(500).json({ message: 'Internal server error' });
+    next(error);
   }
-};
+}
+
+
+export { getCartItems, addToCart, updateCartItem, deleteCartItem };

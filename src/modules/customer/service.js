@@ -117,6 +117,7 @@ export const loginCustomerService = async (email, password) => {
         email: tempUser.email,
         phone: tempUser.phone,
         address: tempUser.address,
+        cartId: tempUser.cartId,
       },
     };
   } else {
