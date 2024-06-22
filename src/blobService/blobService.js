@@ -1,17 +1,18 @@
-import { BlobServiceClient } from "@azure/storage-blob";
+import { BlobServiceClient, StorageSharedKeyCredential } from "@azure/storage-blob";
 
-const account = "flexflowstorage01";
-const sas = "sv=2022-11-02&ss=bfqt&srt=sco&sp=rwdlacupiytfx&se=2024-06-21T23:19:31Z&st=2024-06-21T15:19:31Z&spr=https&sig=Dez5eg4iyqx%2FTgTAmneB%2FtgyHXmTyrFCo708nWOcsqk%3D";
+const account = process.env.AZURE_STORAGE_ACCOUNT;
+const accountKey = process.env.AZURE_STORAGE_ACCOUNT_KEY;
 
-const blobServiceClient = new BlobServiceClient(`https://${account}.blob.core.windows.net/?${sas}`);
+const sharedKeyCredential = new StorageSharedKeyCredential(account, accountKey);
+const blobServiceClient = new BlobServiceClient(`https://${account}.blob.core.windows.net`, sharedKeyCredential);
 
 export const uploadToBlob = async (containerName, fileName, file) => {
     const containerClient = blobServiceClient.getContainerClient(containerName);
     // Create the container if it does not exist
-    const createContainerResponse = await containerClient.createIfNotExists();
+    const createContainerResponse = await containerClient.createIfNotExists({access: "blob"});
     //creates blob with given name
     const blockBlobClient = containerClient.getBlockBlobClient(
-      `${fileName}.png`
+      `${fileName}`
     );
     await blockBlobClient.uploadFile(file);
 };
