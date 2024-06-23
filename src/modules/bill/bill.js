@@ -32,6 +32,10 @@ const bill = sequelize.define('bill', {
         type: DataTypes.FLOAT,
         allowNull: false
     },
+    receivedAmount: {
+        type: DataTypes.FLOAT,
+        allowNull: false
+    },
     status: {
         type: DataTypes.STRING,
         allowNull: false,

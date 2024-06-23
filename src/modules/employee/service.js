@@ -403,7 +403,7 @@ export const handleEmployeeResetPassword = async (userId, newPassword) => {
 
 export const imageUploadTest = async (req, res) => {
   try {
-    const response = await imageUploadMultiple(req.files, "cms-product", "product");
+    const response = await imageUploadMultiple(req.files, "carosel", "webImage");
     res.status(200).json({ message: response.message, fileNames: response.fileNames });
   } catch (error) {
     res.status(500).json({ error: error.message });

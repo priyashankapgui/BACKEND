@@ -172,6 +172,7 @@ export const imageUploadMultiple = async (
   const __filename = fileURLToPath(import.meta.url);
   const __dirname = dirname(__filename);
   const fileNames = [];
+  console.log(files);
   try {
     for (let i = 0; i < files.length; i++) {
       let finalPath = files[i].path;
@@ -192,18 +193,18 @@ export const imageUploadMultiple = async (
       await uploadToBlob(containerName, `${commonFileName}(${i}).${imageFormat}`, finalPath);
       fileNames.push(`${commonFileName}(${i})`);
 
-      fs.unlink(files[i].path, (err) => {
-        if (err) {
-          console.error(`Error deleting file ${targetPath}: `, err);
-        }
-      });
-      if (shouldCompress) {
-        fs.unlink(finalPath, (err) => {
-          if (err) {
-            console.error(`Error deleting file ${targetPath}: `, err);
-          }
-        });
-      }
+      // fs.unlink(files[i].path, (err) => {
+      //   if (err) {
+      //     console.error(`Error deleting file ${targetPath}: `, err);
+      //   }
+      // });
+      // if (shouldCompress) {
+      //   fs.unlink(finalPath, (err) => {
+      //     if (err) {
+      //       console.error(`Error deleting file ${targetPath}: `, err);
+      //     }
+      //   });
+      // }
     }
     console.log("Images uploaded successfully");
     return { message: "Images uploaded successfully", fileNames: fileNames};
