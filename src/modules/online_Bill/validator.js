@@ -5,8 +5,8 @@ const createOnlineBillSchema = Joi.object({
     onlineBillNo: Joi.string().required(),
     branchId: Joi.string().required(),
     customerId: Joi.number().integer().required(),
-    acceptedBy: Joi.string().required(),
-    status: Joi.string().required()
+    acceptedBy: Joi.string().optional(),
+    status: Joi.string().optional()
 });
 
 const updateOnlineBillSchema = Joi.object({

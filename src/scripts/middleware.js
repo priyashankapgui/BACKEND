@@ -3,7 +3,7 @@ import app from "../router.js";
 
 import branches from "../modules/branch/branch.js";
 import bill from "../modules/bill/bill.js";
-import ShoppingCart from "../modules/Cart_Customer/shoppingcart.js";
+import ShoppingCart from "../modules/cart_Customer/shoppingcart.js";
 //import bill_Product from "../modules/bill_Product/bill_Product.js";
 import cart_Product from "../modules/cart_Product/cartProduct.js";
 import categories from "../modules/category/category.js";
