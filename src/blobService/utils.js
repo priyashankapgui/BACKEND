@@ -70,7 +70,7 @@ export const processMultipleForm = () => {
 
 /**
  * Uploads an image to Azure Blob Storage without compression.
- * @param {MulterFile} file - The file object to upload.
+ * @param {MulterFile} file - The file object to upload with extension.
  * @param {string} containerName - The name of the container in Azure Blob Storage.
  * @param {string} fileName - The name of the file to be uploaded.
  * @returns {Promise<Object>} A promise that resolves to an object with a success message.
@@ -127,7 +127,7 @@ export const imageUploadwithCompression = async (
       .toFormat(imageFormat) // Compress the image to 70% quality
       .toFile(targetPath);
 
-    await uploadToBlob(containerName, fileName, targetPath);
+    await uploadToBlob(containerName, `${fileName}.${imageFormat}`, targetPath);
 
     fs.unlink(tempPath, (err) => {
       if (err) {
@@ -172,6 +172,7 @@ export const imageUploadMultiple = async (
   const __filename = fileURLToPath(import.meta.url);
   const __dirname = dirname(__filename);
   const fileNames = [];
+  console.log(files);
   try {
     for (let i = 0; i < files.length; i++) {
       let finalPath = files[i].path;
@@ -189,21 +190,21 @@ export const imageUploadMultiple = async (
         finalPath = targetPath;
       }
 
-      await uploadToBlob(containerName, `${commonFileName}(${i})`, finalPath);
+      await uploadToBlob(containerName, `${commonFileName}(${i}).${imageFormat}`, finalPath);
       fileNames.push(`${commonFileName}(${i})`);
 
-      fs.unlink(files[i].path, (err) => {
-        if (err) {
-          console.error(`Error deleting file ${targetPath}: `, err);
-        }
-      });
-      if (shouldCompress) {
-        fs.unlink(finalPath, (err) => {
-          if (err) {
-            console.error(`Error deleting file ${targetPath}: `, err);
-          }
-        });
-      }
+      // fs.unlink(files[i].path, (err) => {
+      //   if (err) {
+      //     console.error(`Error deleting file ${targetPath}: `, err);
+      //   }
+      // });
+      // if (shouldCompress) {
+      //   fs.unlink(finalPath, (err) => {
+      //     if (err) {
+      //       console.error(`Error deleting file ${targetPath}: `, err);
+      //     }
+      //   });
+      // }
     }
     console.log("Images uploaded successfully");
     return { message: "Images uploaded successfully", fileNames: fileNames};
