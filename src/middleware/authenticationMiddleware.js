@@ -52,6 +52,7 @@ export function authenticateTokenWithPermission(pageId){
       }
       catch(error){
         res.status(401).json({ error: "Token Expired. Please Login Again" });
+        return;
       }
       const userId = decoded.userID || decoded.employeeId;
       let userRow;
@@ -83,7 +84,14 @@ export const authenticateCustomerToken = async (req, res, next) => {
   try {
     const authHeader = req.headers["authorization"];
     const token = authHeader.split(" ")[1];
-    const decoded = jwt.verify(token, SECRET_KEY);
+    let decoded;
+    try{
+      decoded = jwt.verify(token, SECRET_KEY);
+    }
+    catch(error){
+      res.status(401).json({ error: "Token Expired. Please Login Again" });
+      return;
+    }
     const customerId = decoded.customerId;
     const userRow = await Customer.findByPk(customerId); // Corrected method name and argument
     if (!userRow) {
