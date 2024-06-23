@@ -95,7 +95,7 @@ export const forgotPasswordCustomer = async (req, res) => {
       return res.status(400).json({ message: "Email is required" });
     }
     try {
-        const result = await resetPasswordEmail(email, "template_p2h8p9n");
+        const result = await resetPasswordEmail(email, "template_resetpw509");
         return res.status(200).json(result);    
     } catch (error) {
       return res.status(500).json({ message: error.message});

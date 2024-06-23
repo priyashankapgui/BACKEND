@@ -1,6 +1,7 @@
 import { DataTypes } from 'sequelize';
 import sequelize from '../../../config/database.js';
 import bcrypt from 'bcryptjs';
+import ShoppingCart from '../cart_Customer/shoppingcart.js';
 
 const Customer = sequelize.define('customer', {
     customerId: {
@@ -20,9 +21,6 @@ const Customer = sequelize.define('customer', {
     email: {
         type: DataTypes.STRING,
         allowNull: false,
-        validate: {
-            isEmail: true,
-        }
     },
     password: {
         type: DataTypes.STRING,
@@ -31,34 +29,32 @@ const Customer = sequelize.define('customer', {
     phone: {
         type: DataTypes.STRING,
         allowNull: false,
-        validate: {
-            is: /^(?:7|0|(?:\+94))[0-9]{9,10}$/,
-        },
     },
     address: {
         type: DataTypes.STRING,
         allowNull: false,
     },
-    failedLoginAttempts:{
+    shoppingcartCartId: {
         type: DataTypes.INTEGER,
-        defaultValue: 0,
-        allowNull:true,
-    },
-    loginAttemptTime :{
-        type: DataTypes.DATE,
-        allowNull:true, 
-    },
-    },
-    { 
-        tableName: 'customer',
-        hooks: {
-            async beforeSave(customer) {
-                if (customer.changed('password')) {
-                    const saltRounds = bcrypt.genSaltSync(10); 
-                    customer.password = await bcrypt.hash(customer.password, saltRounds);
-                }
-            },
+        references: {
+            model: ShoppingCart,
+            key: 'cartId'
         },
-    });
+    },
+}, {
+    tableName: 'customer',
+    hooks: {
+        async beforeSave(customer) {
+            if (customer.changed('password')) {
+                const saltRounds = bcrypt.genSaltSync(10); 
+                customer.password = await bcrypt.hash(customer.password, saltRounds);
+            }
+        },
+        async beforeCreate(customer) {
+            const cart = await ShoppingCart.create({});
+            customer.cartId = cart.cartId;
+        }
+    },
+});
 
 export default Customer;

@@ -4,7 +4,7 @@ const ACCESS_TOKEN = SECRET.SECRET_KEY;
 import {
     getAllSuperAdmins,
     handleSuperAdminLogin,
-    handleSuperAdminForgotPassword,
+    sendSuperAdminPasswordResetEmail,
     handleSuperAdminResetPassword,
     updateSuperAdminById,
 }from "../superAdmin/service.js";
@@ -46,7 +46,7 @@ export const superAdminLogin = async (req, res) => {
 export const superAdminForgotPassword = async (req, res) => {
     const { userID } = req.body;
     try {
-        const data = await handleSuperAdminForgotPassword(userID);
+        const data = await sendSuperAdminPasswordResetEmail(userID, "template_resetpw509");
         console.log(data);
         res.status(200).json(data);
     } catch (error) {
