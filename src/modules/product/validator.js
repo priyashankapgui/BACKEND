@@ -6,6 +6,8 @@ const createproductSchema = Joi.object({
   description: Joi.string().allow(null, ''),
   categoryName: Joi.string().required(),
   barcode: Joi.string().allow(null, ''),
+  minQty: Joi.number().allow(null, ''),
+  
   
 });
 
@@ -24,9 +26,7 @@ const updateproductSchema = Joi.object({
 const validateProductCreate = async (req, res, next) => {
   try {
     await createproductSchema.validateAsync(req.body);
-    if (!req.file) {
-      return res.status(400).json({ error: 'No file uploaded' });
-    }
+   
     next();
   } catch (error) {
     VALIDATION_ERROR(res, error);
