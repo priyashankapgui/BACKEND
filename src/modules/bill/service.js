@@ -37,7 +37,7 @@ const generateBillNumber = async (branchId) => {
 };
 
 // Create Bill
-export const createBill = async ({ branchName, billedBy, customerName, contactNo, paymentMethod, billTotalAmount,createdAt }) => {
+export const createBill = async ({ branchName, billedBy, customerName, contactNo, paymentMethod, billTotalAmount, receivedAmount, createdAt }) => {
     try {
         const branchId = await mapBranchNameToId(branchName);
         // Generate bill number
@@ -52,6 +52,7 @@ export const createBill = async ({ branchName, billedBy, customerName, contactNo
             contactNo,
             paymentMethod,
             billTotalAmount,
+            receivedAmount,
             status: 'Completed',
             createdAt,
         });
@@ -65,19 +66,28 @@ export const createBill = async ({ branchName, billedBy, customerName, contactNo
 // Function to get all bills
 export const getAllBills = async () => {
     try {
-        const bills = await bill.findAll();
+        // Use a join to include branch names
+        const bills = await bill.findAll({
+            include: [{
+                model: branches,
+                attributes: ['branchName', 'address', 'contactNumber', 'email'],
+            }],
+        });
+
         if (!bills) {
             throw new Error("No bills found");
         }
+
         return bills.map(billProduct => ({
             billNo: billProduct.billNo,
             branchId: billProduct.branchId,
-            branchName: billProduct.branchName,
+            branchName: billProduct.branch.branchName,
             billedBy: billProduct.billedBy,
             customerName: billProduct.customerName,
             contactNo: billProduct.contactNo,
             paymentMethod: billProduct.paymentMethod,
             billTotalAmount: billProduct.billTotalAmount,
+            receivedAmount: billProduct.receivedAmount,
             status: billProduct.status,
             createdAt: billProduct.createdAt,
         }));

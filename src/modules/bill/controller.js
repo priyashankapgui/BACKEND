@@ -17,8 +17,27 @@ export const getAllBillsController = async (req, res) => {
     }
 };
 
+// export const getBillDetailsController = async (req, res) => {
+//     const { billNo } = req.query;
+//     console.log("bill", billNo);
+
+//     try {
+//         const result = await BillProductService.getBillProductsByBillNumber(billNo);
+//         console.log("hanee", result);
+//         SUCCESS(res, SUC_CODES, result, req.span);
+//     } catch (error) {
+//         console.error('Error fetching bill details:', error);
+//         ERROR(res, error, req.span);
+//     }
+// };
+
 export const getBillDetailsController = async (req, res) => {
     const { billNo } = req.query;
+
+    if (!billNo) {
+        return ERROR(res, { message: 'billNo parameter is missing' }, req.span, 400);
+    }
+
     console.log("bill", billNo);
 
     try {
@@ -27,9 +46,10 @@ export const getBillDetailsController = async (req, res) => {
         SUCCESS(res, SUC_CODES, result, req.span);
     } catch (error) {
         console.error('Error fetching bill details:', error);
-        ERROR(res, error, req.span);
+        ERROR(res, { message: 'Failed to fetch bill details', error: error.message }, req.span, 500);
     }
 };
+
 
 export const getBillByNumberController = async (req, res) => {
     try {
@@ -48,10 +68,10 @@ export const getBillByNumberController = async (req, res) => {
 
 export const createBillController = async (req, res) => {
     try {
-        const { branchName, billedBy, customerName, contactNo, status, paymentMethod, billTotalAmount, products } = req.body;
+        const { branchName, billedBy, customerName, contactNo, status, paymentMethod, billTotalAmount, receivedAmount, products } = req.body;
 
         // Create new bill
-        const newBill = await Service.createBill({  branchName, billedBy, customerName, contactNo, status, paymentMethod, billTotalAmount });
+        const newBill = await Service.createBill({ branchName, billedBy, customerName, contactNo, status, paymentMethod, billTotalAmount, receivedAmount });
 
         // Prepare bill products data
         const billProducts = products.map(product => ({
@@ -73,7 +93,7 @@ export const createBillController = async (req, res) => {
         } else {
             ERROR(res, { message: 'Validation error creating bill_Product entries' }, req.span, 400);
         }
-        const results = await ProductBatchSum.handleBilling(branchName,billProducts)
+        const results = await ProductBatchSum.handleBilling(branchName, billProducts)
     } catch (error) {
         console.error('Error creating Bill and bill_Product entries:', error);
         ERROR(res, { message: 'Failed to create Bill and bill_Product entries' }, req.span, 500);
