@@ -7,8 +7,7 @@ const onlineBill = sequelize.define('onlineBill', {
   onlineBillNo: {
     type: DataTypes.STRING,
     allowNull: false,
-    primaryKey: true,
-    autoIncrement: true
+    primaryKey: true
   },
   branchId: {
     type: DataTypes.STRING,
@@ -42,7 +41,7 @@ const onlineBill = sequelize.define('onlineBill', {
   },
   hopeToPickup: {
     type: DataTypes.DATE,
-    allowNull: false,
+    allowNull: true,
   }
 }, {
   tableName: 'OnlineBill'
