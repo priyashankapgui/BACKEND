@@ -178,64 +178,93 @@ export const getProductsByCategoryName = async (categoryId) => {
 // };
 
 
-export const addProduct = async (req) => {
-  console.log("data oh", req.body);
+// export const addProduct = async (req) => {
+//   console.log("data oh", req.body);
 
-  try {
-    const productData = req.body; // No need to parse
-    console.log("data ha", productData);
+//   try {
+//     const productData = req.body; // No need to parse
+//     console.log("data ha", productData);
 
-    const {
-      productName,
-      description,
-      categoryName,
-      barcode,
-      minQty,
-    } = productData;
+//     const {
+//       productName,
+//       description,
+//       categoryName,
+//       barcode,
+//       minQty,
+//     } = productData;
 
-    const productId = await generateProductID();
-    console.log("productId",productId);
-    // Check if the productId already exists
-    const existingProduct = await products.findOne({
-      where: { productId: productId },
-    });
-    if (existingProduct) {
-      throw new Error("Product ID already exists");
-    }
+//     const productId = await generateProductID();
+//     console.log("productId",productId);
+//     // Check if the productId already exists
+//     const existingProduct = await products.findOne({
+//       where: { productId: productId },
+//     });
+//     if (existingProduct) {
+//       throw new Error("Product ID already exists");
+//     }
 
-    // Validate category and get categoryId
-    const category = await categories.findOne({
-      where: { categoryName: categoryName },
-    });
-    if (!category) {
-      throw new Error("Category does not exist");
-    }
-    const categoryId = category.categoryId; 
+//     // Validate category and get categoryId
+//     const category = await categories.findOne({
+//       where: { categoryName: categoryName },
+//     });
+//     if (!category) {
+//       throw new Error("Category does not exist");
+//     }
+//     const categoryId = category.categoryId; 
 
-    // Create the new product
-    const newProduct = await products.create({
-      productId,
-      productName,
-      description,
-      categoryId,
-      barcode,
-      minQty,
-    });
+//     // Create the new product
+//     const newProduct = await products.create({
+//       productId,
+//       productName,
+//       description,
+//       categoryId,
+//       barcode,
+//       minQty,
+//     });
 
     
-    if (req.files) {
-      console.log("Uploading image:", req.files);
-      await imageUploadMultiple(req.files, "cms-product", productId); 
-      console.log("Image uploaded successfully");
-    } else {
-      console.log("No image file to upload");
+//     if (req.files) {
+//       console.log("Uploading image:", req.files);
+//       await imageUploadMultiple(req.files, "cms-product", productId); 
+//       console.log("Image uploaded successfully");
+//     } else {
+//       console.log("No image file to upload");
+//     }
+
+//     return newProduct;
+//   } catch (error) {
+//     throw new Error("Error creating product: " + error.message);
+//   }
+// };
+
+
+
+
+ //Function to add product
+ export const addProduct = async (productData) => {
+
+  const {  productName, description, categoryName, barcode, image , minQty } = productData;
+  console.log("product",productName);
+  const productId = await generateProductID();
+  console.log("productId",productId);
+
+  const categoryId = await mapCategoryNameToId(categoryName);
+    if (!categoryId) {
+      return res.status(404).json({ error: "Category not found" });
     }
 
-    return newProduct;
-  } catch (error) {
-    throw new Error("Error creating product: " + error.message);
-  }
+  const createSingleRecord = products.create({ productId, productName, categoryId, description, barcode , image, minQty});
+
+  const [err, result] = await to (createSingleRecord);
+
+  if (err) TE(err.errors[0] ? err.errors[0].message : err);
+
+if (!result) TE("Result not found");
+
+return result;
+
 };
+
 
 
 
@@ -273,11 +302,4 @@ export const deleteProductById = async (productId) => {
 
 
 
-export const imageUploadTest = async (req, res) => {
-  try {
-    const response = await imageUploadMultiple(req.files, "cms-product", "product");
-    res.status(200).json({ message: response.message, fileNames: response.fileNames });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-}
+
