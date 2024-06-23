@@ -223,6 +223,9 @@ export const updateProductBatchSumQty = async (productId, batchNo, supplyingBran
     });
 
     if (productBatchSumEntry) {
+      if (productBatchSumEntry.totalAvailableQty < transferQty) {
+        throw new Error(`Insufficient quantity available for transfer. Available: ${productBatchSumEntry.totalAvailableQty}, Requested: ${transferQty}`);
+      }
       productBatchSumEntry.totalAvailableQty -= transferQty;
       await productBatchSumEntry.save();
     } else {

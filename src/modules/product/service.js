@@ -223,9 +223,9 @@ export const addProduct = async (req) => {
     });
 
     
-    if (req.file) {
-      console.log("Uploading image:", req.file);
-      await imageUploadwithCompression(req.file, "cms-product", productId); 
+    if (req.files) {
+      console.log("Uploading image:", req.files);
+      await imageUploadMultiple(req.files, "cms-product", productId); 
       console.log("Image uploaded successfully");
     } else {
       console.log("No image file to upload");
