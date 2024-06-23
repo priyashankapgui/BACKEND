@@ -8,7 +8,8 @@ import{
     handleLoginCustomer,
     forgotPasswordCustomer,
     updateCustomer,
-    updatePassword
+    updatePassword,
+    verifyToken,
 } from "../customer/controller.js";
 import {authenticateCustomerToken } from "../../middleware/authenticationMiddleware.js";
 
@@ -24,6 +25,7 @@ CustomerRouter.post("/api/customers/password/:customerId", authenticateCustomerT
 CustomerRouter.post("/api/customers/login", handleLoginCustomer);
 CustomerRouter.post("/api/customers/login/forgotpw", forgotPasswordCustomer);
 CustomerRouter.post("/api/customers/login/forgotpw/resetpw", resetPasswordCustomer);
+CustomerRouter.get("/api/customer/verify", authenticateCustomerToken, verifyToken);
 
 
 

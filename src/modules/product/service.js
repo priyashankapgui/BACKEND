@@ -3,6 +3,7 @@ import { to, TE } from "../../helper.js";
 import products from "../product/product.js";
 import categories from "../category/category.js";
 import { mapCategoryNameToId } from "../../modules/category/service.js";
+import { imageUploadMultiple, imageUploadwithCompression } from "../../blobService/utils.js";
 
 
 
@@ -140,9 +141,109 @@ export const getProductsByCategoryName = async (categoryId) => {
 
 
  //Function to add product
-export const addProduct = async (productData) => {
+// export const addProduct = async (req, res) => {
+//   // console.log("data",req.body.product);
+//   const {
+   
+//     productName,
+//     description,
+//     categoryName,
+//     barcode,
+//     minQty,
+    
+//   } = req.body
+//   // const {  productName, description, categoryName, barcode, minQty } = req;
+//   console.log("product",productName);
+//   const productId = await generateProductID();
+//   console.log("productId",productId);
 
-  const {  productName, description, categoryName, barcode, minQty, image } = productData;
+//   const categoryId = await mapCategoryNameToId(categoryName);
+//     if (!categoryId) {
+//       return res.status(404).json({ error: "Category not found" });
+//     }
+
+//   const createSingleRecord = products.create({ productId, productName, categoryId, description, barcode, minQty });
+//   if (req.file){
+//     await imageUploadwithCompression(req.file, "cms-product", productId);
+//   }
+
+//   const [err, result] = await to (createSingleRecord);
+
+//   if (err) TE(err.errors[0] ? err.errors[0].message : err);
+
+// if (!result) TE("Result not found");
+
+// return result;
+
+// };
+
+
+// export const addProduct = async (req) => {
+//   console.log("data oh", req.body);
+
+//   try {
+//     const productData = req.body; // No need to parse
+//     console.log("data ha", productData);
+
+//     const {
+//       productName,
+//       description,
+//       categoryName,
+//       barcode,
+//       minQty,
+//     } = productData;
+
+//     const productId = await generateProductID();
+//     console.log("productId",productId);
+//     // Check if the productId already exists
+//     const existingProduct = await products.findOne({
+//       where: { productId: productId },
+//     });
+//     if (existingProduct) {
+//       throw new Error("Product ID already exists");
+//     }
+
+//     // Validate category and get categoryId
+//     const category = await categories.findOne({
+//       where: { categoryName: categoryName },
+//     });
+//     if (!category) {
+//       throw new Error("Category does not exist");
+//     }
+//     const categoryId = category.categoryId; 
+
+//     // Create the new product
+//     const newProduct = await products.create({
+//       productId,
+//       productName,
+//       description,
+//       categoryId,
+//       barcode,
+//       minQty,
+//     });
+
+    
+//     if (req.files) {
+//       console.log("Uploading image:", req.files);
+//       await imageUploadMultiple(req.files, "cms-product", productId); 
+//       console.log("Image uploaded successfully");
+//     } else {
+//       console.log("No image file to upload");
+//     }
+
+//     return newProduct;
+//   } catch (error) {
+//     throw new Error("Error creating product: " + error.message);
+//   }
+// };
+
+
+
+
+ //Function to add product
+ export const addProduct = async (productData) => {
+
+  const {  productName, description, categoryName, barcode, image , minQty } = productData;
   console.log("product",productName);
   const productId = await generateProductID();
   console.log("productId",productId);
@@ -152,7 +253,7 @@ export const addProduct = async (productData) => {
       return res.status(404).json({ error: "Category not found" });
     }
 
-  const createSingleRecord = products.create({ productId, productName, categoryId, description, barcode, minQty , image});
+  const createSingleRecord = products.create({ productId, productName, categoryId, description, barcode , image, minQty});
 
   const [err, result] = await to (createSingleRecord);
 
@@ -163,6 +264,8 @@ if (!result) TE("Result not found");
 return result;
 
 };
+
+
 
 
 
@@ -196,6 +299,7 @@ export const deleteProductById = async (productId) => {
 
   return { message: 'Product successfully deleted' };
 };
+
 
 
 

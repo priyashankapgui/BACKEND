@@ -214,7 +214,7 @@ export const cancelStockTransfer = async (STN_NO, submittedBy) => {
     try {
         const transferData = await stockTransfer.findOne({
             where: { STN_NO },
-            attributes: ['STN_NO', 'requestBranch', 'supplyingBranch', 'submittedBy', 'requestedBy', 'submittedAt', 'status'],
+            attributes: ['STN_NO', 'requestBranch', 'supplyingBranch', 'submittedBy', 'requestedBy', 'submittedAt', 'status', 'createdAt'],
         });
 
         if (!transferData) {
