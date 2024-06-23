@@ -102,3 +102,6 @@ export const forgotPasswordCustomer = async (req, res) => {
     }
   }
 
+export const verifyToken = async (req, res) => {
+    res.status(200).json({ message: "Valid Token" });
+}

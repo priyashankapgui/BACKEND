@@ -8,6 +8,7 @@ const createBillSchema = Joi.object({
     contactNo: Joi.string().allow('').optional(),
     paymentMethod: Joi.string().required(),
     billTotalAmount: Joi.number().required(),
+    receivedAmount: Joi.number().required(),
     status: Joi.string().valid('Completed', 'Canceled'),
     products: Joi.array().items(Joi.object({
         productId: Joi.string().required(),
