@@ -1,6 +1,6 @@
 import feedback from './src/modules/feedback/feedback.js';
 import feedbackRouter from './src/modules/feedback/routes.js';
-import { getfeedback } from '../feedback/controller.js';
+import { getFeedback } from '../feedback/controller.js';
 import { get_feedback} from '../feedback/service.js';
 
 
