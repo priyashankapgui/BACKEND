@@ -185,7 +185,7 @@ export const imageUploadMultiple = async (
         await sharp(files[i].path)
           .resize(resizeWidth)
           .png({ quality: quality, force: true })
-          .toFormat(imageFormat) // Compress the image to 70% quality
+          .toFormat(imageFormat) 
           .toFile(targetPath);
         finalPath = targetPath;
       }
@@ -193,18 +193,18 @@ export const imageUploadMultiple = async (
       await uploadToBlob(containerName, `${commonFileName}(${i}).${imageFormat}`, finalPath);
       fileNames.push(`${commonFileName}(${i})`);
 
-      // fs.unlink(files[i].path, (err) => {
-      //   if (err) {
-      //     console.error(`Error deleting file ${targetPath}: `, err);
-      //   }
-      // });
-      // if (shouldCompress) {
-      //   fs.unlink(finalPath, (err) => {
-      //     if (err) {
-      //       console.error(`Error deleting file ${targetPath}: `, err);
-      //     }
-      //   });
-      // }
+      fs.unlink(files[i].path, (err) => {
+        if (err) {
+          console.error(`Error deleting file ${targetPath}: `, err);
+        }
+      });
+      if (shouldCompress) {
+        fs.unlink(finalPath, (err) => {
+          if (err) {
+            console.error(`Error deleting file ${targetPath}: `, err);
+          }
+        });
+      }
     }
     console.log("Images uploaded successfully");
     return { message: "Images uploaded successfully", fileNames: fileNames};
