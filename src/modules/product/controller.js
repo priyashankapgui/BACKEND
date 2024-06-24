@@ -6,6 +6,8 @@ import * as Service from "../product/service.js"
 import { mapSupplierNameToId } from "../supplier/service.js";
 import { SUCCESS, ERROR } from "../../helper.js";
 import { Codes } from "../category/constants.js";
+import cloudinary from "../../blobService/cloudinary.js";
+import products from "./product.js";
 
 const { SUC_CODES } = Codes;
 
@@ -76,20 +78,53 @@ try {
 
 
 //Function to create a product
+// export const createProduct = async (req, res) => {
+  
+ 
+//   try{
+  
+//    const result = await Service.addProduct(req);
+
+//     SUCCESS(res, SUC_CODES, result, req.span);
+//   } catch (error) {
+//     ERROR(res, error, res.span);
+//   }
+// };
+
+
+// export const createProduct = async (req, res) => {
+//   try {
+//     console.log("data oh",req.body);
+//     const newProduct = await Service.addProduct(req);
+//     res.status(201).json({
+//       message: "Product created successfully",
+//       product: newProduct,
+//     });
+//   } catch (error) {
+//     res.status(500).json({ error: error.message });
+//   }
+// };
+
 export const createProduct = async (req, res) => {
+  console.log("data awa",req.body);
   const { productName, description, categoryName, barcode, minQty } = req.body;
+  const image = req.file;
  
   try{
-    if (!req.file) {
-      return res.status(400).json({ error: "No file uploaded" });
-    }
+   const results = await cloudinary.uploader.upload(image.buffer, {
+    folder: "/products",
+   })
+   console.log("data cloud",results);
 
-   const image = req.file.path;
+   
    const result = await Service.addProduct({
         productName,
         description,
         categoryName,
-        image,
+        image: {
+          public_id: results.public_id,
+          url: results.secure_url
+        },
         barcode,
         minQty
     });
@@ -99,6 +134,7 @@ export const createProduct = async (req, res) => {
     ERROR(res, error, res.span);
   }
 };
+
 
 
 // Controller function to delete a product
@@ -116,31 +152,31 @@ export const deleteProduct = async (req, res) => {
   
 
 
-//upload image controller
+// //upload image controller
 
- const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, 'src\\Image')
-  },
-  filename: (req, file, cb) => {
-    cb(null, Date.now() + path.extname(file.originalname))
-  }
-})
+//  const storage = multer.diskStorage({
+//   destination: (req, file, cb) => {
+//     cb(null, 'src\\Image')
+//   },
+//   filename: (req, file, cb) => {
+//     cb(null, Date.now() + path.extname(file.originalname))
+//   }
+// })
 
- export const upload = multer({
-  storage: storage,
-  limits: { fileSize: '1000000'},
-  fileFilter: (req, file, cb) => {
-    const fileTypes = /jpeg|jpg|png|gif/
-    const mimeType = fileTypes.test(file.mimetype)
-    const extname = fileTypes.test(path.extname(file.originalname))
+//  export const upload = multer({
+//   storage: storage,
+//   limits: { fileSize: '1000000'},
+//   fileFilter: (req, file, cb) => {
+//     const fileTypes = /jpeg|jpg|png|gif/
+//     const mimeType = fileTypes.test(file.mimetype)
+//     const extname = fileTypes.test(path.extname(file.originalname))
 
-    if(mimeType && extname) {
-      return cb(null, true)
-    }
-    cb('Give proper file format to upload')
-  }
-}).single('image')
+//     if(mimeType && extname) {
+//       return cb(null, true)
+//     }
+//     cb('Give proper file format to upload')
+//   }
+// }).single('image')
 
 
 

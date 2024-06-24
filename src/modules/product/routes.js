@@ -1,11 +1,15 @@
 import express from "express";
 import * as Controller from "../product/controller.js"; 
 import Validator from "../product/validator.js";
+import * as Service from "../product/service.js";
+
 
 
 const Productrouter = express.Router(); 
 
-Productrouter.post("/products", Controller.upload, Validator.validateProductCreate, Controller.createProduct);
+// Productrouter.post("/products" ,  processMultipleForm(), Controller.createProduct);
+Productrouter.post("/products",  Controller.createProduct);
+
 Productrouter.get("/products", Controller.getProducts);
 Productrouter.get("/products/:productId", Controller.getProduct);
 Productrouter.get("/products-category", Controller.getProductsByCategory);

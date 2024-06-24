@@ -223,6 +223,9 @@ export const updateProductBatchSumQty = async (productId, batchNo, supplyingBran
     });
 
     if (productBatchSumEntry) {
+      if (productBatchSumEntry.totalAvailableQty < transferQty) {
+        throw new Error(`Insufficient quantity available for transfer. Available: ${productBatchSumEntry.totalAvailableQty}, Requested: ${transferQty}`);
+      }
       productBatchSumEntry.totalAvailableQty -= transferQty;
       await productBatchSumEntry.save();
     } else {
@@ -533,7 +536,7 @@ export const getProductQuantitiesByBranch = async (branchName) => {
 
     const productBatches = await productBatchSum.findAll({
       where: { branchId },
-      attributes: ['productId', [sequelize.fn('SUM', sequelize.col('totalAvailableQty')), 'totalAvailableQty']],
+      attributes: ['productId', [sequelize.fn('SUM', sequelize.col('totalAvailableQty')), 'totalAvailableQty' ],],
       group: ['productId'],
     });
 
@@ -555,6 +558,7 @@ export const getProductQuantitiesByBranch = async (branchName) => {
           productName: product.productName,
           minQty: product.minQty,
           totalAvailableQty,
+    
         });
       }
     }

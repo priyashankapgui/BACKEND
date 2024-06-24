@@ -35,6 +35,11 @@ const stockTransfer = sequelize.define(
       type: DataTypes.STRING,
       allowNull: false,
     },
+    createdAt: {
+      type: 'TIMESTAMP',
+      defaultValue: DataTypes.NOW,
+      allowNull: false
+    },
   },
   {
     tableName: "stockTransfer",
