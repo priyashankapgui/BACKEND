@@ -146,23 +146,22 @@ app.post('/create-checkout-session', async (req, res) => {
   try {
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
-      line_items: items.map(item => {
-        const discountAmount = (item.sellingPrice * (item.discount / 100));
-        const discountedPrice = item.sellingPrice - discountAmount;
-        return {
-          price_data: {
-            currency: 'lkr',
-            product_data: {
-              name: item.product.productName,
-            },
-            unit_amount: Math.round(discountedPrice * 100),  // Convert to cents
+      line_items: items.map(item => ({
+        price_data: {
+          currency: 'lkr',
+          product_data: {
+            name: item.productName,
+            Subtotal:	item.Subtotal,
+            Discount:	item.Discount,
+            Total:	item.Total
           },
-          quantity: item.quantity,
-        };
-      }),
+          unit_amount: item.sellingPrice * 100,  
+        },
+        quantity: item.quantity,
+      })),
       mode: 'payment',
-      success_url: 'http://localhost:3000/success',
-      cancel_url: 'http://localhost:3000/cancel',
+      success_url: 'http://localhost:3001/success',
+      cancel_url: 'http://localhost:3001/cancel',
     });
 
     res.json({ sessionId: session.id });
@@ -171,7 +170,6 @@ app.post('/create-checkout-session', async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
-
 
 
 export { sequelize, categories, suppliers, grn, products, branches, feedback, ShoppingCart, productBatchSum, SuperAdmin, onlineBill , ProductBatchUpdateReason,bill, TransferProduct, TransferProductBatch};
