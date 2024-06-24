@@ -1,20 +1,18 @@
-// cartProductController.js
-
 import * as cartProductServ from './service.js';
 
-// Controller to get cart items for a customer
-async function getCartItems(req, res, next) {
-  const { customerId } = req.body;
+export const getCartItemsByCartId = async (req, res) => {
+  const { cartId } = req.params; // Assuming cartId is passed as a route parameter
+
   try {
-    const cartItems = await cartProductServ.getCartItems(customerId);
-    res.json(cartItems);
+    const cartItems = await cartProductServ.getCartItems(cartId);
+    res.status(200).json(cartItems);
   } catch (error) {
-    next(error);
+    res.status(500).json({ error: error.message });
   }
-}
+};
 
 // Controller to add an item to the cart
-async function addToCart(req, res, next) {
+export const addToCart = async (req, res, next) => {
   const { customerId, productId, productName, batchNo, branchId, sellingPrice, quantity, discount } = req.body;
   try {
     const addedCartItem = await cartProductServ.addToCart(customerId, productId, productName, batchNo, branchId, sellingPrice, quantity, discount);
@@ -24,7 +22,7 @@ async function addToCart(req, res, next) {
   }
 }
 
-async function updateCartItem(req, res, next) {
+export const updateCartItem = async (req, res, next) => {
   const { cartId, productId } = req.params;  // Extract cartId and productId from request params
   const updatedFields = req.body;  // Extract updated fields from request body
   try {
@@ -35,7 +33,7 @@ async function updateCartItem(req, res, next) {
   }
 }
 
-async function deleteCartItem(req, res, next) {
+export const deleteCartItem = async (req, res, next) => {
   const { cartId, productId } = req.params;  // Extract cartId and productId from request params
   try {
     const result = await cartProductServ.deleteCartItem(cartId, productId);  // Pass both cartId and productId
@@ -44,6 +42,3 @@ async function deleteCartItem(req, res, next) {
     next(error);
   }
 }
-
-
-export { getCartItems, addToCart, updateCartItem, deleteCartItem };

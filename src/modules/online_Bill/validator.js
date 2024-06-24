@@ -2,11 +2,12 @@ import Joi from 'joi';
 import { VALIDATION_ERROR } from '../../helper.js';
 
 const createOnlineBillSchema = Joi.object({
-    onlineBillNo: Joi.string().required(),
+    onlineBillNo: Joi.string().optional(),
     branchId: Joi.string().required(),
     customerId: Joi.number().integer().required(),
     acceptedBy: Joi.string().optional(),
-    status: Joi.string().optional()
+    status: Joi.string().optional(),
+    hopeToPickup: Joi.date().optional()
 });
 
 const updateOnlineBillSchema = Joi.object({
@@ -14,7 +15,8 @@ const updateOnlineBillSchema = Joi.object({
     branchId: Joi.string().optional(),
     customerId: Joi.number().integer().optional(),
     acceptedBy: Joi.string().optional(),
-    status: Joi.string().optional()
+    status: Joi.string().optional(),
+    hopeToPickup: Joi.date().optional()
 });
 
 const create = async (req, res, next) => {
