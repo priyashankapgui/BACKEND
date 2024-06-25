@@ -204,7 +204,7 @@ export const getAllProductQuantitiesController = async (req, res) => {
     if (results.length === 0) {
       return res.status(404).json({ message: 'No products found with quantities less than minQty' });
     }
-    
+
     SUCCESS(res, SUC_CODES, results, req.span);
   } catch (err) {
     console.error('Error in getAllProductQuantitiesController:', err);
@@ -229,26 +229,26 @@ export const getProductQuantities = async (req, res) => {
 
     switch (true) {
       case productId && branchName && branchName !== 'All':
-        console.log("case1",branchName);
-        console.log("case1",productId);
+        console.log("case1", branchName);
+        console.log("case1", productId);
         results = await ProductBatchSumService.getProductQuantitiesByProductAndBranch(branchName, productId);
         break;
 
       case branchName && branchName !== 'All':
-        console.log("case2",branchName);
-        console.log("case2",productId);
+        console.log("case2", branchName);
+        console.log("case2", productId);
         results = await ProductBatchSumService.getProductQuantitiesByBranch(branchName);
         break;
 
-      case  productId && !branchName || branchName === 'All':
-        console.log("case3",branchName);
-        console.log("case3",productId);
+      case productId && !branchName || branchName === 'All':
+        console.log("case3", branchName);
+        console.log("case3", productId);
         results = await ProductBatchSumService.getProductQuantitiesByProductId(productId);
         break;
 
       default:
-        console.log("case4",branchName);
-        console.log("case4",productId);
+        console.log("case4", branchName);
+        console.log("case4", productId);
         results = await ProductBatchSumService.getAllProductQuantities();
         break;
     }
@@ -257,5 +257,27 @@ export const getProductQuantities = async (req, res) => {
   } catch (error) {
     console.error('Error fetching product quantities:', error);
     res.status(500).json({ message: 'Unable to fetch product quantities' });
+  }
+};
+
+export const getAllProductBatchSumDataByBranchController = async (req, res) => {
+  const { branchName } = req.query;
+
+  console.log(`Received request for branch: ${branchName}`);
+
+  try {
+    const data = await ProductBatchSumService.getAllProductBatchSumDataByBranch(branchName);
+    return res.status(200).json({
+      success: true,
+      message: `Product batch sum data retrieved successfully for branch: ${branchName}`,
+      data,
+    });
+  } catch (error) {
+    console.error('Error retrieving product batch sum data by branch:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Error retrieving product batch sum data by branch',
+      error: error.message,
+    });
   }
 };
