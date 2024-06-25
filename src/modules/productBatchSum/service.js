@@ -706,3 +706,53 @@ export const getProductQuantitiesByProductId = async (productId) => {
     throw new Error('Unable to fetch product quantities');
   }
 };
+
+
+
+
+export const getProductDetailsByBranchName = async (branchName) => {
+  try {
+    const branch = await branches.findOne({
+      where: { branchName },
+    });
+
+    if (!branch) {
+      throw new Error('Branch not found');
+    }
+
+    console.log("branchId", branch.branchId);
+
+    const productsData = await productBatchSum.findAll({
+      where: { branchId: branch.branchId },
+      attributes: ['productId', 'productName', 'branchName', 'discount', 'sellingPrice', 'totalAvailableQty'],
+    });
+
+    const results = [];
+
+    for (const productData of productsData) {
+      const { productId, branchName, discount, sellingPrice , totalAvailableQty } = productData.dataValues;
+
+      const product = await products.findOne({
+        where: { productId },
+        attributes: ['productName', 'description', 'image'],
+      });
+
+      if (product) {
+        results.push({
+          branchName,
+          productId,
+          productName: product.productName,
+          description: product.description,
+          image: product.image,
+          discount,
+          sellingPrice,
+          totalAvailableQty
+        });
+      }
+    }
+
+    return results;
+  } catch (error) {
+    throw error;
+  }
+};

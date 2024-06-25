@@ -259,3 +259,25 @@ export const getProductQuantities = async (req, res) => {
     res.status(500).json({ message: 'Unable to fetch product quantities' });
   }
 };
+
+
+
+
+
+export const getProductDetailsByBranchNameController = async (req, res) => {
+  const { branchName } = req.body;
+  console.log("branchName",branchName);
+
+  try {
+    const products = await ProductBatchSumService.getProductDetailsByBranchName(branchName);
+
+    if (!products.length) {
+      return res.status(404).json({ message: 'No products found for the given branch name' });
+    }
+
+    res.status(200).json(products);
+  } catch (error) {
+    console.error('Error fetching product details:', error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+};

@@ -12,5 +12,8 @@ productBatchSumrouter.put('/achala', ProductBatchSumController.handleBillingCont
 productBatchSumrouter.put('/product-batch-sum-discount', ProductBatchSumController.updateDiscount);
 productBatchSumrouter.get('/product-quantities-by-branch', ProductBatchSumController.getProductQuantitiesByBranchController);
 productBatchSumrouter.get('/product-quantities', ProductBatchSumController.getProductQuantities);
+productBatchSumrouter.get('/product-branch', ProductBatchSumController.getProductDetailsByBranchNameController);
+
+
 
 export default productBatchSumrouter;

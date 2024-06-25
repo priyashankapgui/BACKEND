@@ -59,32 +59,64 @@ return result;
 
 
 
-// Function to add a new category
- const addCategory = async (data) => {
+// // Function to add a new category
+//  const addCategory = async (data) => {
   
-    const categoryId = await generateCategoryId();
-    const createSingleRecord = categories.create({ categoryId, ...data });
-    const [err, result] = await to (createSingleRecord);
+//     const categoryId = await generateCategoryId();
+//     const createSingleRecord = categories.create({ categoryId, ...data });
+//     const [err, result] = await to (createSingleRecord);
 
-  if (err) TE(err.errors[0] ? err.errors[0].message : err);
-  if (!result) TE("Result not found");
-  return result;
+//   if (err) TE(err.errors[0] ? err.errors[0].message : err);
+//   if (!result) TE("Result not found");
+//   return result;
+// };
+
+const addCategory = async ({  categoryName, image }) => {
+  try {
+    const categoryId = await generateCategoryId();
+    const category = await categories.create({
+      categoryId,
+      categoryName,
+      image,
+    });
+    return category;
+  } catch (error) {
+    throw new Error(error.message);
+  }
 };
 
 
-//Function to update category
-const updateCategoryById = async (categoryId, updatedCategoryData) => {
-  const updateRecord = categories.update(updatedCategoryData, {
-    where: { categoryId: categoryId },
-    returning: true, // Ensure it returns the updated record
-    plain: true
-  });
 
-  const [err, result] = await to(updateRecord);
+//Function to update category
+// const updateCategoryById = async (categoryId, updatedCategoryData) => {
+//   const updateRecord = categories.update(updatedCategoryData, {
+//     where: { categoryId: categoryId },
+//     returning: true, 
+//     plain: true
+//   });
+
+//   const [err, result] = await to(updateRecord);
+//   if (err) TE(err);
+//   if (!result) TE("Result not found");
+  
+//   // Fetch the updated record to return
+//   const updatedRecord = await categories.findByPk(categoryId);
+//   if (!updatedRecord) TE("Updated result not found");
+
+//   return updatedRecord;
+// };
+
+
+const updateCategoryById = async (categoryId, updatedCategoryData) => {
+  const [err, result] = await to(categories.update(updatedCategoryData, {
+    where: { categoryId: categoryId },
+    returning: true,
+    plain: true
+  }));
+
   if (err) TE(err);
   if (!result) TE("Result not found");
-  
-  // Fetch the updated record to return
+
   const updatedRecord = await categories.findByPk(categoryId);
   if (!updatedRecord) TE("Updated result not found");
 

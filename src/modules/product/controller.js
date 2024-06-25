@@ -3,11 +3,10 @@ import path from "path";
 import multer from "multer";
 import * as ProductBatchSumService from "../productBatchSum/service.js";
 import * as Service from "../product/service.js"
-import { mapSupplierNameToId } from "../supplier/service.js";
 import { SUCCESS, ERROR } from "../../helper.js";
 import { Codes } from "../category/constants.js";
 import cloudinary from "../../blobService/cloudinary.js";
-import products from "./product.js";
+
 
 const { SUC_CODES } = Codes;
 
@@ -61,79 +60,75 @@ export const getProductsByCategory = async (req, res) => {
 
 
 
-// Controller function to update a product
+// // Controller function to update a product
 export const updateProduct = async (req, res) => {
+  try {
+    const { productId } = req.params;
+    const updatedProductData = { ...req.body };
+    console.log("productId",productId);
+    console.log("products",updatedProductData);
+    
+    if (req.file) {
+      console.log("file",req.file);
+      const uploadRes = await new Promise((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
+          { resource_type: "image", folder: "products" },
+          (error, result) => {
+            if (error) reject(error);
+            else resolve(result);
+          }
+        );
+        req.file.stream.pipe(stream);
+      });
 
-try {
-  const result = await Service.updateProductById(req.params.productId, req.body);
+      updatedProductData.image = uploadRes.secure_url;
+    }else if (req.body.image) {
+      // Handle base64 encoded image upload
+      const uploadRes = await cloudinary.uploader.upload(req.body.image, {
+        upload_preset: "flexflow"
+      });
+      updatedProductData.image = uploadRes.secure_url;
+    }
 
-  SUCCESS(res, SUC_CODES, result, req.span);
-} catch (error) {
-  console.log(error);
-
-  ERROR(res, error, res.span);
-}
-};
-
-
-
-//Function to create a product
-// export const createProduct = async (req, res) => {
-  
- 
-//   try{
-  
-//    const result = await Service.addProduct(req);
-
-//     SUCCESS(res, SUC_CODES, result, req.span);
-//   } catch (error) {
-//     ERROR(res, error, res.span);
-//   }
-// };
-
-
-// export const createProduct = async (req, res) => {
-//   try {
-//     console.log("data oh",req.body);
-//     const newProduct = await Service.addProduct(req);
-//     res.status(201).json({
-//       message: "Product created successfully",
-//       product: newProduct,
-//     });
-//   } catch (error) {
-//     res.status(500).json({ error: error.message });
-//   }
-// };
-
-export const createProduct = async (req, res) => {
-  console.log("data awa",req.body);
-  const { productName, description, categoryName, barcode, minQty } = req.body;
-  const image = req.file;
- 
-  try{
-   const results = await cloudinary.uploader.upload(image.buffer, {
-    folder: "/products",
-   })
-   console.log("data cloud",results);
-
-   
-   const result = await Service.addProduct({
-        productName,
-        description,
-        categoryName,
-        image: {
-          public_id: results.public_id,
-          url: results.secure_url
-        },
-        barcode,
-        minQty
-    });
-
-    SUCCESS(res, SUC_CODES, result, req.span);
+    const result = await Service.updateProductById(productId, updatedProductData);
+    SUCCESS(res, 200, result, req.span);
   } catch (error) {
+    console.log(error);
     ERROR(res, error, res.span);
   }
 };
+
+
+//function to create product
+export const createProduct = async (req, res) => {
+  const { productName, description, categoryName, barcode, minQty, image } = req.body;
+
+  try {
+    let imageUrl = null;
+    if (image) {
+      const uploadRes = await cloudinary.uploader.upload(image, {
+        upload_preset: "flexflow"
+      });
+      imageUrl = uploadRes.secure_url;
+    }
+
+    const result = await Service.addProduct({
+      productName,
+      description,
+      categoryName,
+      image: imageUrl,
+      barcode,
+      minQty
+    });
+
+    res.status(200).send(result);
+  } catch (error) {
+    res.status(500).send(error);
+  }
+};
+
+
+
 
 
 
@@ -151,32 +146,6 @@ export const deleteProduct = async (req, res) => {
   };
   
 
-
-// //upload image controller
-
-//  const storage = multer.diskStorage({
-//   destination: (req, file, cb) => {
-//     cb(null, 'src\\Image')
-//   },
-//   filename: (req, file, cb) => {
-//     cb(null, Date.now() + path.extname(file.originalname))
-//   }
-// })
-
-//  export const upload = multer({
-//   storage: storage,
-//   limits: { fileSize: '1000000'},
-//   fileFilter: (req, file, cb) => {
-//     const fileTypes = /jpeg|jpg|png|gif/
-//     const mimeType = fileTypes.test(file.mimetype)
-//     const extname = fileTypes.test(path.extname(file.originalname))
-
-//     if(mimeType && extname) {
-//       return cb(null, true)
-//     }
-//     cb('Give proper file format to upload')
-//   }
-// }).single('image')
 
 
 
