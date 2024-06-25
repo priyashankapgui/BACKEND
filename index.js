@@ -44,7 +44,7 @@ import stockTransferRouter from "./src/modules/stockTransfer/routes.js";
 import TransferProductBatchRouter from "./src/modules/TransferProductBatch/routes.js";
 import TransferProduct from "./src/modules/TransferProduct/TransferProduct.js";
 import TransferProductBatch from "./src/modules/TransferProductBatch/TransferProductBatch.js";
-import bodyParser from "body-parser";
+import webImagesrouter from "./src/modules/web_Images/routes.js";
 
 import Stripe from 'stripe';
 
@@ -54,9 +54,6 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 app.use(cors());
 
 app.use(express.json());
-
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
 
 
 app.use("/", Productrouter);
@@ -82,6 +79,7 @@ app.use('/',productBatchUpdateReasonRouter);
 app.use('/',stockTransferRouter);
 app.use('/',TransferProductBatchRouter);
 app.use('/',onlineBillRoutes);
+app.use('/',webImagesrouter);
 
 
 app.use("/api", Productrouter);
@@ -100,6 +98,7 @@ app.use('/api', cartRoutes);
 app.use('/api',productBatchUpdateReasonRouter);
 app.use('/api',stockTransferRouter);
 app.use('/api',TransferProductBatchRouter);
+app.use('/api',webImagesrouter);
 
 
 

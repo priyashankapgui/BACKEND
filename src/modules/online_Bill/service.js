@@ -38,7 +38,7 @@ const generateOnlineBillNo = async (branchId) => {
     return onlineBillNo;
 };
 
-const createOnlineBill = async (branchId, customerId, acceptedBy, status,hopeToPickup) => {
+const createOnlineBill = async (branchId, customerId, acceptedBy, status, hopeToPickup) => {
     try {
         const onlineBillNo = await generateOnlineBillNo(branchId);
 

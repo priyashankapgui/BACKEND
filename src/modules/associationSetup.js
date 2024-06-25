@@ -14,6 +14,7 @@ import online_Bill_Products from "./online_Bill_Products/online_Bill_Products.js
 import stockTransfer from "./stockTransfer/stockTransfer.js";
 import TransferProduct from "./TransferProduct/TransferProduct.js";
 import TransferProductBatch from "./TransferProductBatch/TransferProductBatch.js";
+import cart_Product from "./cart_Product/cartProduct.js";
 
 
 
@@ -50,14 +51,17 @@ const setupCartCustomerAssociations = (ShoppingCart, Customer) => {
   Customer.belongsTo(ShoppingCart, { foreignKey: 'cartId' });
 };
 
-
-
 const setupCartProductAssociations = (ShoppingCart, products) => {
   ShoppingCart.belongsToMany(products, { through: "cart_Product", foreignKey: 'cartId' });
   products.belongsToMany(ShoppingCart, { through: "cart_Product", foreignKey: 'productId' });
 }
 
-const setupBranchOnlineBillAssociation = (productBatchSum,onlineBill) =>{
+const customerCartProductAssociation = (Customer, cart_Product) => {
+  Customer.hasMany(cart_Product, { foreignKey: 'customerId' });
+  cart_Product.belongsTo(Customer, { foreignKey: 'customerId' });
+}
+
+const setupBranchOnlineBillAssociation = (branches,onlineBill) =>{
   branches.hasMany(onlineBill,{foreignKey:"branchId",as:"OnlineBill"});
   onlineBill.belongsTo(branches,{foreignKey:"branchId"});
 }
@@ -160,7 +164,8 @@ export const setupAssociations = () => {
   setupCustomerOnlineBillAssociation(Customer,onlineBill);
   setupOnlineBillProductBatchAssociation(onlineBill, productBatchSum, online_Bill_Products);
   setupProductStockTransferAssociations(products, stockTransfer);
-  setupStockTransferProductBatchAssociations(TransferProduct, TransferProductBatch)
+  setupStockTransferProductBatchAssociations(TransferProduct, TransferProductBatch);
+  customerCartProductAssociation(Customer, cart_Product);
   //setupProductGRNandGRNssociations(productGRN, grn)
 
 };

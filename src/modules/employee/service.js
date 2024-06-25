@@ -111,7 +111,7 @@ export const getEmployeeById = async (employeeId) => {
 
 export const createEmployee = async (req) => {
   // const newEmployeeId = await generateEmployeeId();
-  console.log(req.body.employee);
+  //console.log(req.body.employee);
   const {
     employeeId,
     employeeName,
@@ -128,12 +128,10 @@ export const createEmployee = async (req) => {
   if (existingEmployee) {
     throw new Error("Employee ID already exists");
   }
-
   const existingEmail = await Employee.findOne({ where: { email: email } });
   if (existingEmail) {
     throw new Error("Email already exists");
   }
-
   // Validate userRoleId
   const userRoleID = await UserRole.findOne({
     where: { userRoleName: userRoleName },
@@ -142,13 +140,10 @@ export const createEmployee = async (req) => {
   if (!userRoleID) {
     throw new Error("User role does not exist");
   }
-
-  // Validate password
-  if (password.length < 8 || password.length > 64) {
-    throw new Error("Invalid password format");
-  }
-
-  
+  // // Validate password
+  // if (password.length < 8 || password.length > 64) {
+  //   throw new Error("Invalid password format");
+  // }
 
   const t = await sequelize.transaction();
   try {
@@ -403,7 +398,7 @@ export const handleEmployeeResetPassword = async (userId, newPassword) => {
 
 export const imageUploadTest = async (req, res) => {
   try {
-    const response = await imageUploadMultiple(req.files, "carosel", "webImage");
+    const response = await imageUploadMultiple(req.files, "cms-product", "product");
     res.status(200).json({ message: response.message, fileNames: response.fileNames });
   } catch (error) {
     res.status(500).json({ error: error.message });
