@@ -160,6 +160,7 @@ export const deleteEmployee = async (req, res) => {
 
 export const loginEmployee = async (req, res) => {
   const { employeeId, password } = req.body;
+  console.log(employeeId, password);
   if (!employeeId || !password) {
     res.status(400).json({ message: "Missing required fields" });
     return;
@@ -197,10 +198,10 @@ export const resetEmployeePassword = async (req, res) => {
     res.status(400).json({ message: "Passwords do not match" });
     return;
   }
-  if(newPassword.length < 8 || newPassword.length > 64){
-    res.status(400).json({ message: "Invalid password format" });
-    return;
-  }
+  // if(newPassword.length < 8 || newPassword.length > 64){
+  //   res.status(400).json({ message: "Invalid password format" });
+  //   return;
+  // }
   // const decoded = jwt.verify(resetToken, ACCESS_TOKEN);
   // console.log(decoded);
   let decoded;
