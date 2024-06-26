@@ -49,7 +49,7 @@ export const getUserRolePermissionsByToken = async (req, res) => {
         const decoded = jwt.verify(token, ACCESS_TOKEN);
         const userRoleId = decoded.userRoleId;
         const permissions = await getPermissionsWithPageAccess(userRoleId);
-        console.log(permissions);
+        //console.log(permissions);
         res.status(200).json(permissions);
     } catch (error) {
         res.status(500).json({ error: error.message });

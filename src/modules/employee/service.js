@@ -110,8 +110,6 @@ export const getEmployeeById = async (employeeId) => {
 };
 
 export const createEmployee = async (req) => {
-  // const newEmployeeId = await generateEmployeeId();
-  //console.log(req.body.employee);
   const {
     employeeId,
     employeeName,
@@ -328,13 +326,12 @@ export const handleLoginSuccess = async (employeeId) => {
 };
 
 export const forgotPasswordService = async (employeeId, emaliTemplate) => {
-  try {
     const user = await Employee.findOne({ where: { employeeId: employeeId } });
     if (!user) {
-      throw new Error("Employee ID not found");
+      throw new ResponseError(400, "Employee ID not found");
     }
     else if (!user.email) {
-      throw new Error("Email not given, Please contact an Admin");
+      throw new ResponseError(400, "Email not given, Please contact an Admin");
     }
     else {
       const passwordResetToken = jwt.sign(
@@ -343,7 +340,7 @@ export const forgotPasswordService = async (employeeId, emaliTemplate) => {
           email: user.email,
         },
         ACCESS_TOKEN,
-        { expiresIn: "5m" }
+        { expiresIn: "10m" }
       );
       const resetLink = `http://localhost:3000/login/resetpw?token=${passwordResetToken}`;
       emailjs.init({
@@ -372,14 +369,10 @@ export const forgotPasswordService = async (employeeId, emaliTemplate) => {
         },
         (error) => {
           console.log("FAILED...", error);
-          throw new Error("Failed to send email" + error.message);
+          throw new Error("Failed to send email " + error.message);
         }
       );
     }
-  } catch (error) {
-    console.error("Forgot password error:", error);
-    throw new Error("Internal server error" + error.message);
-  }
 };
 
 export const handleEmployeeResetPassword = async (userId, newPassword) => {
