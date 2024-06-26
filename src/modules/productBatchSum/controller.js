@@ -269,15 +269,39 @@ export const getAllProductBatchSumDataByBranchController = async (req, res) => {
     const data = await ProductBatchSumService.getAllProductBatchSumDataByBranch(branchName);
     return res.status(200).json({
       success: true,
-      message: `Product batch sum data retrieved successfully for branch: ${branchName}`,
+      message: `Stock summery Product batch sum data retrieved successfully for branch: ${branchName}`,
       data,
     });
   } catch (error) {
-    console.error('Error retrieving product batch sum data by branch:', error);
+    console.error('Error retrieving Stock summery product batch sum data by branch:', error);
     return res.status(500).json({
       success: false,
-      message: 'Error retrieving product batch sum data by branch',
+      message: 'Error retrieving Stock summery product batch sum data by branch',
       error: error.message,
     });
   }
 };
+
+
+
+export const getUpcomingExpProductBatchSumDataByBranchController = async (req, res) => {
+  const { branchName } = req.query;
+
+  console.log(`Received request for branch: ${branchName}`);
+
+  try {
+    const data = await ProductBatchSumService.getUpcomingExpProductBatchSumDataByBranch(branchName);
+    return res.status(200).json({
+      success: true,
+      message: `Upcoming exp Product batch sum data retrieved successfully for branch: ${branchName}`,
+      data,
+    });
+  } catch (error) {
+    console.error('Error retrieving Upcoming exp product batch sum data by branch:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Error retrieving Upcoming exp product batch sum data by branch',
+      error: error.message,
+    });
+  }
+}
