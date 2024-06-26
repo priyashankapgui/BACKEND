@@ -15,14 +15,12 @@ import sequelize from "../../../config/database.js";
     let newCategoryId;
 
     if (latestCategory && latestCategory.categoryId) {
-      // Extract the numeric part of the latest category ID and increment it
       const numericPart = parseInt(latestCategory.categoryId.substring(3), 10);
       const incrementedNumericPart = numericPart + 1;
 
       // Format the new category ID with leading zeros
       newCategoryId = `CAT${incrementedNumericPart.toString().padStart(5, '0')}`;
     } else {
-      // If there are no existing categories, start with CAT00001
       newCategoryId = 'CAT00001';
     }
 
@@ -51,46 +49,52 @@ import sequelize from "../../../config/database.js";
  const getCategoryById = async (categoryId) => {
  
 const getRecord = categories.findByPk(categoryId);
-const [err, result] = await to(getRecord);
+const [err, category] = await to(getRecord);
 if (err) TE(err);
-if (!result) TE("Result not found");
+if (!category) TE("Result not found");
+
+const result = {
+  categoryName: category.categoryName,
+  image: category.image
+}
 return result;
 };
 
 
 
-// Function to add a new category
- const addCategory = async (data) => {
-  
+// // Function to add a new category
+const addCategory = async ({  categoryName, image }) => {
+  try {
     const categoryId = await generateCategoryId();
-    const createSingleRecord = categories.create({ categoryId, ...data });
-    const [err, result] = await to (createSingleRecord);
-
-  if (err) TE(err.errors[0] ? err.errors[0].message : err);
-  if (!result) TE("Result not found");
-  return result;
+    const category = await categories.create({
+      categoryId,
+      categoryName,
+      image,
+    });
+    return category;
+  } catch (error) {
+    throw new Error(error.message);
+  }
 };
+
 
 
 //Function to update category
 const updateCategoryById = async (categoryId, updatedCategoryData) => {
-  const updateRecord = categories.update(updatedCategoryData, {
-    where: { categoryId: categoryId },
-    returning: true, // Ensure it returns the updated record
-    plain: true
-  });
+  const [err, result] = await to(categories.update(updatedCategoryData, {
+      where: { categoryId: categoryId },
+      returning: true,
+      plain: true
+  }));
 
-  const [err, result] = await to(updateRecord);
   if (err) TE(err);
   if (!result) TE("Result not found");
-  
-  // Fetch the updated record to return
+
   const updatedRecord = await categories.findByPk(categoryId);
   if (!updatedRecord) TE("Updated result not found");
 
   return updatedRecord;
 };
-
 
 
 
@@ -144,29 +148,6 @@ export  {
 
 
 
+ 
 
 
-
-// Function to update a category by its ID
-//  const updateCategoryById = async (categoryId, updatedCategoryData) => {
-  
-//     const category = await categories.findByPk(categoryId);
-//     if (!category) {
-//       return null;
-//     }
-//     const updatedData = await categories.update(updatedCategoryData, {
-//       where: { categoryId: categoryId } // Adding the where clause
-//     });
-// // const updateRecord = categories.update(
-// //   { where: { categoryId: categoryId } },
-// //   updatedCategoryData
-// // );
-
-// const [err, result] = await to(updatedData);
-
-// if (err) TE(err.errors[0] ? err.errors[0].message : err);
-
-// if (!result) TE("Result not found");
-
-// return updatedData;
-// };

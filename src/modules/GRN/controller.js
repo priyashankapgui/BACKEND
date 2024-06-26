@@ -61,7 +61,7 @@ export const createGRNAndProduct = async (req, res) => {
 // Controller function to get all GRNs
 export const getGRNs = async (req, res) => {
 try {
-  const result = await GRNService.getAllGRNs(req.query);
+  const result = await ProductGRNService.getAllGRNDetails(req.query);
   SUCCESS(res, SUC_CODES, result, req.span);
 } catch (err) {
   console.log(err);

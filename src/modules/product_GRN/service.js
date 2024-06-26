@@ -237,3 +237,101 @@ export const getGRNDetailsByNo = async (GRN_NO) => {
     throw new Error('Failed to fetch GRN details');
   }
 };
+
+
+
+
+
+
+export const getAllGRNDetails = async () => {
+  console.log("Fetching all GRN details...");
+  try {
+    // Fetch all GRNs
+    const allGRNs = await grn.findAll({
+      raw: true,
+    });
+    if (!allGRNs || allGRNs.length === 0) {
+      throw new Error("No GRNs found");
+    }
+    console.log("Found", allGRNs.length, "GRNs");
+
+    // Fetch all suppliers
+    const supplierIds = allGRNs.map(grn => grn.supplierId);
+    const suppliersData = await suppliers.findAll({
+      where: { supplierId: supplierIds },
+      raw: true,
+    });
+    if (!suppliersData || suppliersData.length === 0) {
+      throw new Error("No suppliers found for GRNs");
+    }
+    console.log("Found suppliers for all GRNs");
+
+    // Fetch all branches
+    const branchIds = allGRNs.map(grn => grn.branchId);
+    const branchesData = await branches.findAll({
+      where: { branchId: branchIds },
+      raw: true,
+    });
+    if (!branchesData || branchesData.length === 0) {
+      throw new Error("No branches found for GRNs");
+    }
+    console.log("Found branches for all GRNs");
+
+    // Fetch all productGRNs for all GRNs
+    const grnNumbers = allGRNs.map(grn => grn.GRN_NO);
+    const productGRNs = await productGRN.findAll({
+      where: { GRN_NO: grnNumbers },
+      attributes: ['GRN_NO', 'batchNo', 'productId', 'totalQty', 'sellingPrice', 'purchasePrice', 'freeQty', 'expDate', 'amount', 'comment'],
+      raw: true,
+    });
+    console.log("Found productGRNs for all GRNs");
+
+    // Fetch all products for productGRNs and format the result
+    const productGRNsWithDetails = await Promise.all(productGRNs.map(async (productGRN) => {
+      const productData = await products.findOne({
+        where: { productId: productGRN.productId },
+        raw: true,
+      });
+      if (!productData) {
+        throw new Error("Product not found for productId: " + productGRN.productId);
+      }
+
+      return {
+        GRN_NO: productGRN.GRN_NO,
+        productId: productGRN.productId,
+        productName: productData.productName,
+        batchNo: productGRN.batchNo,
+        totalQty: productGRN.totalQty,
+        sellingPrice: productGRN.sellingPrice,
+        purchasePrice: productGRN.purchasePrice,
+        freeQty: productGRN.freeQty,
+        expDate: productGRN.expDate,
+        amount: productGRN.amount,
+        comment: productGRN.comment,
+      };
+    }));
+
+    // Format the final result for all GRNs
+    const results = allGRNs.map(grnItem => {
+      const supplier = suppliersData.find(s => s.supplierId === grnItem.supplierId);
+      const branch = branchesData.find(b => b.branchId === grnItem.branchId);
+      const filteredProductGRNs = productGRNsWithDetails.filter(productGRN => productGRN.GRN_NO === grnItem.GRN_NO);
+
+      return {
+        GRN_NO: grnItem.GRN_NO,
+        createdAt: grnItem.createdAt,
+        branchName: branch ? branch.branchName : 'Unknown Branch',
+        supplierName: supplier ? supplier.supplierName : 'Unknown Supplier',
+        invoiceNo: grnItem.invoiceNo,
+        productGRNs: filteredProductGRNs,
+      };
+    });
+
+    console.log("Final results:", results);
+    return results;
+  } catch (error) {
+    console.error('Error fetching all GRN details:', error);
+    throw new Error('Failed to fetch all GRN details');
+  }
+};
+
