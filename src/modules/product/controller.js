@@ -1,6 +1,3 @@
-import express from "express";
-import path from "path";
-import multer from "multer";
 import * as ProductBatchSumService from "../productBatchSum/service.js";
 import * as Service from "../product/service.js"
 import { SUCCESS, ERROR } from "../../helper.js";
@@ -11,8 +8,6 @@ import cloudinary from "../../blobService/cloudinary.js";
 const { SUC_CODES } = Codes;
 
 
-
- 
 
 // Controller function to get all products
 export const getProducts = async (req, res) => {
@@ -28,25 +23,20 @@ try {
 
 //Function to get product using productId
 export const getProduct = async (req, res) => {
-
 try {
   const result = await Service.getProductById(req.params.productId);
-
   SUCCESS(res, SUC_CODES, result, req.span);
 } catch (error) {
   console.log(error);
-
   ERROR(res, error, res.span);
 }
 }; 
-
 
 
 //function to get product details using categoryName
 export const getProductsByCategory = async (req, res) => {
    const { categoryId } = req.query;
    console.log("cataaa1",categoryId);
-
   try {
     const results = await Service.getProductsByCategoryName(categoryId);
     SUCCESS(res, 200, results, req.span); 
@@ -111,7 +101,6 @@ export const createProduct = async (req, res) => {
       });
       imageUrl = uploadRes.secure_url;
     }
-
     const result = await Service.addProduct({
       productName,
       description,

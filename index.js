@@ -45,6 +45,7 @@ import TransferProductBatchRouter from "./src/modules/TransferProductBatch/route
 import TransferProduct from "./src/modules/TransferProduct/TransferProduct.js";
 import TransferProductBatch from "./src/modules/TransferProductBatch/TransferProductBatch.js";
 import webImagesrouter from "./src/modules/web_Images/routes.js";
+import bodyParser from "body-parser";
 
 import Stripe from 'stripe';
 

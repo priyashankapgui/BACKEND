@@ -39,8 +39,6 @@ export const createCategory = async (req, res) => {
   const { categoryName, image } = req.body;
 
   try {
-  
-
     let imageUrl = null;
     if (image) {
       const uploadRes = await cloudinary.uploader.upload(image, {
@@ -50,7 +48,6 @@ export const createCategory = async (req, res) => {
       });
       imageUrl = uploadRes.secure_url;
     }
-
     const result = await Service.addCategory({
       categoryName,
       image: imageUrl,
@@ -65,41 +62,44 @@ export const createCategory = async (req, res) => {
 
 
 // // Controller function to update a category
+// 
 export const updateCategory = async (req, res) => {
   try {
-    const { categoryId } = req.params;
-    const updatedCategoryData = { ...req.body };
+      const { categoryId } = req.params;
+      const updatedCategoryData = { ...req.body };
+      console.log("categoryId",categoryId);
+    console.log("category",updatedCategoryData);
+    
 
-    if (req.file) {
-      const uploadRes = await new Promise((resolve, reject) => {
-        const stream = cloudinary.uploader.upload_stream(
-          { resource_type: "image", folder: "categories" },
-          (error, result) => {
-            if (error) reject(error);
-            else resolve(result);
-          }
-        );
-        req.file.stream.pipe(stream);
-      });
+      if (req.file) {
+        console.log("file",req.file);
+          const uploadRes = await new Promise((resolve, reject) => {
+              const stream = cloudinary.uploader.upload_stream(
+                  { resource_type: "image", folder: "category" },
+                  (error, result) => {
+                      if (error) reject(error);
+                      else resolve(result);
+                  }
+              );
+              req.file.stream.pipe(stream);
+          });
 
-      updatedCategoryData.image = uploadRes.secure_url;
-    } else if (req.body.image) {
-      // Handle base64 encoded image upload
-      const uploadRes = await cloudinary.uploader.upload(req.body.image, {
-        
-        folder: "category"
-      });
-      updatedCategoryData.image = uploadRes.secure_url;
-    }
+          updatedCategoryData.image = uploadRes.secure_url;
+      } else if (req.body.image) {
+          // Handle base64 encoded image upload
+          const uploadRes = await cloudinary.uploader.upload(req.body.image, {
+              folder: "category"
+          });
+          updatedCategoryData.image = uploadRes.secure_url;
+      }
 
-    const result = await Service.updateCategoryById(categoryId, updatedCategoryData);
-    SUCCESS(res, 200, result, req.span);
+      const result = await Service.updateCategoryById(categoryId, updatedCategoryData);
+      SUCCESS(res, 200, result, req.span);
   } catch (error) {
-    console.error(error);
-    ERROR(res, error, res.span);
+      console.error(error);
+      ERROR(res, error, res.span);
   }
 };
-
 
 
 
