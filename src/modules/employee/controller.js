@@ -109,7 +109,7 @@ export const updatePersonalInfo = async (req, res) => {
     const decoded = jwt.verify(token, ACCESS_TOKEN);
     const employeeId = decoded.employeeId || decoded.userID;
     const updatedEmployeeData = JSON.parse(req.body.data);;
-    console.log(updatedEmployeeData, employeeId);
+    console.log("ghiuhiuhiu: ",updatedEmployeeData, employeeId);
     let updatedEmployee;
     if(employeeId.startsWith("SA")){
       updatedEmployeeData.superAdminName = updatedEmployeeData.employeeName;
@@ -162,7 +162,7 @@ export const loginEmployee = async (req, res) => {
   const { employeeId, password } = req.body;
   console.log(employeeId, password);
   if (!employeeId || !password) {
-    res.status(400).json({ message: "Missing required fields" });
+    res.status(400).json({ error: "Missing required fields" });
     return;
   }
   try {
@@ -177,7 +177,7 @@ export const loginEmployee = async (req, res) => {
 export const forgotPassword = async (req, res) => {
   const { employeeId } = req.body;
   if (!employeeId) {
-    res.status(400).json({ message: "employee ID is required" });
+    res.status(400).json({error: "employee ID is required" });
     return;
   }
   try {
@@ -190,7 +190,7 @@ export const forgotPassword = async (req, res) => {
 
 export const resetEmployeePassword = async (req, res) => {
   const { resetToken, newPassword, confirmPassword } = req.body;
-  if (!resetToken || !newPassword || !confirmPassword) {
+  if ( !newPassword || !confirmPassword) {
     res.status(400).json({ message: "Missing required fields" });
     return;
   }
@@ -209,7 +209,7 @@ export const resetEmployeePassword = async (req, res) => {
     decoded = jwt.verify(resetToken, ACCESS_TOKEN);
   }
   catch(error){
-    return res.status(401).json({ message: "This link is invalid or has expired" });
+    return res.status(401).json({message: "This link is invalid or has expired" });
   }
   const userId = decoded.userId;
   try {
