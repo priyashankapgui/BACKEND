@@ -348,6 +348,7 @@ export const getAllProductBatchSumData = async () => {
 
 // Handling billing process with detailed logging
 export const handleBilling = async (billedProducts, branchName) => {
+  console.log(billedProducts);
   try {
     const branchId = await mapBranchNameToId(branchName);
     if (!branchId) {
@@ -368,14 +369,14 @@ export const handleBilling = async (billedProducts, branchName) => {
       });
 
       if (!productBatch) {
-        throw new Error(`No product batch found for productId: ${productId}, batchNo: ${batchNo}, branchId: ${branchId}`);
+        throw new Error(`No product batch found for productId: ${productId}, batchNo: ${batchNo},branchId: ${branchId}`);
       }
 
       console.log(`Found productBatch: ${JSON.stringify(productBatch.dataValues)}`);
 
       const newTotalAvailableQty = productBatch.totalAvailableQty - billQty;
       if (newTotalAvailableQty < 0) {
-        throw new Error(`Insufficient quantity for productId: ${productId}, batchNo: ${batchNo}, branchId: ${branchId}. Available: ${productBatch.totalAvailableQty}, Requested: ${billQty}`);
+        throw new Error(`Insufficient quantity for productId: ${productId}, batchNo: ${batchNo}, branchId: ${branchId}, Available: ${productBatch.totalAvailableQty}, Requested: ${billQty}`);
       }
 
       await productBatchSum.update(
@@ -399,6 +400,8 @@ export const handleBilling = async (billedProducts, branchName) => {
     throw new Error(`Error handling billing: ${error.message}`);
   }
 };
+
+
 
 // Handling refunds process
 export const handleRefund = async (refundedProducts, branchId) => {
@@ -754,7 +757,51 @@ export const getAllProductBatchSumDataByBranch = async (branchName) => {
       discount: record.discount,
     }));
   } catch (error) {
-    console.error('Error retrieving product batch sum data by branch:', error);
-    throw new Error('Error retrieving product batch sum data by branch');
+    console.error('Error retrieving Stock summery product batch sum data by branch:', error);
+    throw new Error('Error retrieving  Stock summery product batch sum data by branch');
+  }
+};
+
+
+export const getUpcomingExpProductBatchSumDataByBranch = async (branchName) => {
+  try {
+    const branchId = await mapBranchNameToId(branchName);
+
+    if (!branchId) {
+      throw new Error(`Branch not found for branchName: ${branchName}`);
+    }
+
+    const currentDate = new Date();
+    const sixMonthsLater = new Date();
+    sixMonthsLater.setMonth(currentDate.getMonth() + 6);
+
+    const productBatchSumData = await productBatchSum.findAll({
+      where: {
+        branchId: branchId,
+        expDate: {
+          [Op.between]: [currentDate, sixMonthsLater]
+        }
+      }
+    });
+
+    if (!productBatchSumData || productBatchSumData.length === 0) {
+      return [];
+    }
+
+    return productBatchSumData.map(record => ({
+      productId: record.productId,
+      batchNo: record.batchNo,
+      barcode: record.barcode,
+      branchId: record.branchId,
+      branchName: record.branchName,
+      expDate: record.expDate,
+      sellingPrice: record.sellingPrice,
+      totalAvailableQty: record.totalAvailableQty,
+      productName: record.productName,
+      discount: record.discount,
+    }));
+  } catch (error) {
+    console.error('Error retrieving Upcoming exp product batch sum data by branch:', error);
+    throw new Error('Error retrieving Upcoming exp product batch sum data by branch');
   }
 };
