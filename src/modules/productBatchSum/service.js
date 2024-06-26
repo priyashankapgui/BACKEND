@@ -209,9 +209,9 @@ export const adjustProductGRNQuantity = async (productName, branchName, batchNo,
 // Function to update totalAvailableQty when stock transfer IN
 export const updateProductBatchSumQty = async (productId, batchNo, supplyingBranch, transferQty) => {
   const [branchErr, branch] = await to(branches.findOne({ where: { branchName: supplyingBranch } }));
-    if (branchErr) TE(branchErr);
-    if (!branch) TE(new Error('Branch not found.'));
-    const branchId = branch.branchId;
+  if (branchErr) TE(branchErr);
+  if (!branch) TE(new Error('Branch not found.'));
+  const branchId = branch.branchId;
 
   try {
     const productBatchSumEntry = await productBatchSum.findOne({
@@ -241,7 +241,7 @@ export const updateProductBatchSumQty = async (productId, batchNo, supplyingBran
 
 
 // Function to update or create productBatchSum entry when saving stock transfer OUT
-export const updateOrAddProductBatchSum = async ( requestBranch, productDetails) => {
+export const updateOrAddProductBatchSum = async (requestBranch, productDetails) => {
   const updatedProductBatchSums = [];
 
   try {
@@ -271,7 +271,7 @@ export const updateOrAddProductBatchSum = async ( requestBranch, productDetails)
           where: { productId: productId },
           attributes: ['productName']
         });
-  
+
         if (!product) {
           throw new Error(`Product with productId ${productId} not found`);
         }
@@ -316,7 +316,7 @@ export const getBatchNumbersByBranchAndProduct = async (branchName, productId) =
     const branchId = branch.branchId;
 
     const batchNumbers = await productBatchSum.findAll({
-      attributes: ['batchNo', 'totalAvailableQty' , 'sellingPrice'],
+      attributes: ['batchNo', 'totalAvailableQty', 'sellingPrice'],
       where: {
         branchId,
         productId,
@@ -346,45 +346,62 @@ export const getAllProductBatchSumData = async () => {
 };
 
 
-
-// Handling billing process
+// Handling billing process with detailed logging
 export const handleBilling = async (billedProducts, branchName) => {
-  const branchId = await mapBranchNameToId(branchName);
-  const updates = billedProducts.map(async (billedProducts) => {
-    const { productId, batchNo, billQty } = billedProducts;
-
-    const productBatch = await productBatchSum.findOne({
-      where: {
-        productId: productId,
-        batchNo: batchNo,
-        branchId: branchId,
-      },
-    });
-
-    if (!productBatch) {
-      throw new Error(`No product batch found for productId: ${productId}, batchNo: ${batchNo}, branchId: ${branchId}`);
+  console.log(billedProducts);
+  try {
+    const branchId = await mapBranchNameToId(branchName);
+    if (!branchId) {
+      throw new Error(`Branch not found for branchName: ${branchName}`);
     }
+    console.log(`Processing billing for branchId: ${branchId}, branchName: ${branchName}`);
 
-    const newTotalAvailableQty = productBatch.totalAvailableQty - billQty;
+    const updates = billedProducts.map(async (billedProduct) => {
+      const { productId, batchNo, billQty } = billedProduct;
+      console.log(`Billing productId: ${productId}, batchNo: ${batchNo}, billQty: ${billQty}`);
 
-    if (newTotalAvailableQty < 0) {
-      throw new Error(`Insufficient stock for productId: ${productId}, batchNo: ${batchNo}, branchId: ${branchId}`);
-    }
-
-    await productBatchSum.update(
-      { totalAvailableQty: newTotalAvailableQty },
-      {
+      const productBatch = await productBatchSum.findOne({
         where: {
+          branchId: branchId,
           productId: productId,
           batchNo: batchNo,
-          branchId: branchId,
         },
-      }
-    );
-  });
+      });
 
-  await Promise.all(updates);
+      if (!productBatch) {
+        throw new Error(`No product batch found for productId: ${productId}, batchNo: ${batchNo},branchId: ${branchId}`);
+      }
+
+      console.log(`Found productBatch: ${JSON.stringify(productBatch.dataValues)}`);
+
+      const newTotalAvailableQty = productBatch.totalAvailableQty - billQty;
+      if (newTotalAvailableQty < 0) {
+        throw new Error(`Insufficient quantity for productId: ${productId}, batchNo: ${batchNo}, branchId: ${branchId}, Available: ${productBatch.totalAvailableQty}, Requested: ${billQty}`);
+      }
+
+      await productBatchSum.update(
+        { totalAvailableQty: newTotalAvailableQty },
+        {
+          where: {
+            productId: productId,
+            batchNo: batchNo,
+            branchId: branchId,
+          },
+        }
+      );
+
+      console.log(`Updated productBatchSum for productId: ${productId}, batchNo: ${batchNo}, branchId: ${branchId} to newTotalAvailableQty: ${newTotalAvailableQty}`);
+    });
+
+    await Promise.all(updates);
+    console.log(`Billing processed successfully for branch: ${branchName}`);
+  } catch (error) {
+    console.error(`Error handling billing for branch: ${branchName}`, error);
+    throw new Error(`Error handling billing: ${error.message}`);
+  }
 };
+
+
 
 // Handling refunds process
 export const handleRefund = async (refundedProducts, branchId) => {
@@ -434,7 +451,7 @@ export const getAllProductsByBranch = async (searchTerm, branchId) => {
     });
 
     if (!products || products.length === 0) {
-      return []; // Return an empty array if no products found
+      return [];
     }
 
     return products.map(product => {
@@ -460,6 +477,7 @@ export const getAllProductsByBranch = async (searchTerm, branchId) => {
     throw new Error('Error retrieving products data by branch');
   }
 };
+
 
 export const getProductsByBarcode = async (barcode, branchId) => {
   try {
@@ -536,7 +554,7 @@ export const getProductQuantitiesByBranch = async (branchName) => {
 
     const productBatches = await productBatchSum.findAll({
       where: { branchId },
-      attributes: ['productId', [sequelize.fn('SUM', sequelize.col('totalAvailableQty')), 'totalAvailableQty' ],],
+      attributes: ['productId', [sequelize.fn('SUM', sequelize.col('totalAvailableQty')), 'totalAvailableQty'],],
       group: ['productId'],
     });
 
@@ -558,7 +576,7 @@ export const getProductQuantitiesByBranch = async (branchName) => {
           productName: product.productName,
           minQty: product.minQty,
           totalAvailableQty,
-    
+
         });
       }
     }
@@ -579,7 +597,7 @@ export const getProductQuantitiesByProductAndBranch = async (branchName, product
     const branchId = await mapBranchNameToId(branchName);
 
     const productBatches = await productBatchSum.findAll({
-      where: { branchId , productId },
+      where: { branchId, productId },
       attributes: ['productId', [sequelize.fn('SUM', sequelize.col('totalAvailableQty')), 'totalAvailableQty']],
       group: ['productId', 'branchId'],
     });
@@ -621,7 +639,7 @@ export const getAllProductQuantities = async () => {
   try {
     const productBatches = await productBatchSum.findAll({
       attributes: [
-        'productId', 
+        'productId',
         'branchId',
         'branchName',
         [sequelize.fn('SUM', sequelize.col('totalAvailableQty')), 'totalAvailableQty']
@@ -670,7 +688,7 @@ export const getProductQuantitiesByProductId = async (productId) => {
     const productBatches = await productBatchSum.findAll({
       where: { productId },
       attributes: [
-        'productId', 
+        'productId',
         'branchId',
         'branchName',
         [sequelize.fn('SUM', sequelize.col('totalAvailableQty')), 'totalAvailableQty']
@@ -710,49 +728,80 @@ export const getProductQuantitiesByProductId = async (productId) => {
 
 
 
-export const getProductDetailsByBranchName = async (branchName) => {
+export const getAllProductBatchSumDataByBranch = async (branchName) => {
   try {
-    const branch = await branches.findOne({
-      where: { branchName },
-    });
+    const branchId = await mapBranchNameToId(branchName);
 
-    if (!branch) {
-      throw new Error('Branch not found');
+    if (!branchId) {
+      throw new Error(`Branch not found for branchName: ${branchName}`);
     }
 
-    console.log("branchId", branch.branchId);
-
-    const productsData = await productBatchSum.findAll({
-      where: { branchId: branch.branchId },
-      attributes: ['productId', 'productName', 'branchName', 'discount', 'sellingPrice', 'totalAvailableQty'],
+    const productBatchSumData = await productBatchSum.findAll({
+      where: { branchId: branchId }
     });
 
-    const results = [];
-
-    for (const productData of productsData) {
-      const { productId, branchName, discount, sellingPrice , totalAvailableQty } = productData.dataValues;
-
-      const product = await products.findOne({
-        where: { productId },
-        attributes: ['productName', 'description', 'image'],
-      });
-
-      if (product) {
-        results.push({
-          branchName,
-          productId,
-          productName: product.productName,
-          description: product.description,
-          image: product.image,
-          discount,
-          sellingPrice,
-          totalAvailableQty
-        });
-      }
+    if (!productBatchSumData || productBatchSumData.length === 0) {
+      return [];
     }
 
-    return results;
+    return productBatchSumData.map(record => ({
+      productId: record.productId,
+      batchNo: record.batchNo,
+      barcode: record.barcode,
+      branchId: record.branchId,
+      branchName: record.branchName,
+      expDate: record.expDate,
+      sellingPrice: record.sellingPrice,
+      totalAvailableQty: record.totalAvailableQty,
+      productName: record.productName,
+      discount: record.discount,
+    }));
   } catch (error) {
-    throw error;
+    console.error('Error retrieving Stock summery product batch sum data by branch:', error);
+    throw new Error('Error retrieving  Stock summery product batch sum data by branch');
+  }
+};
+
+
+export const getUpcomingExpProductBatchSumDataByBranch = async (branchName) => {
+  try {
+    const branchId = await mapBranchNameToId(branchName);
+
+    if (!branchId) {
+      throw new Error(`Branch not found for branchName: ${branchName}`);
+    }
+
+    const currentDate = new Date();
+    const sixMonthsLater = new Date();
+    sixMonthsLater.setMonth(currentDate.getMonth() + 6);
+
+    const productBatchSumData = await productBatchSum.findAll({
+      where: {
+        branchId: branchId,
+        expDate: {
+          [Op.between]: [currentDate, sixMonthsLater]
+        }
+      }
+    });
+
+    if (!productBatchSumData || productBatchSumData.length === 0) {
+      return [];
+    }
+
+    return productBatchSumData.map(record => ({
+      productId: record.productId,
+      batchNo: record.batchNo,
+      barcode: record.barcode,
+      branchId: record.branchId,
+      branchName: record.branchName,
+      expDate: record.expDate,
+      sellingPrice: record.sellingPrice,
+      totalAvailableQty: record.totalAvailableQty,
+      productName: record.productName,
+      discount: record.discount,
+    }));
+  } catch (error) {
+    console.error('Error retrieving Upcoming exp product batch sum data by branch:', error);
+    throw new Error('Error retrieving Upcoming exp product batch sum data by branch');
   }
 };

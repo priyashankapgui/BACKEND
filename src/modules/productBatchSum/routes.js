@@ -8,7 +8,8 @@ productBatchSumrouter.get('/product-batch-details', ProductBatchSumController.ge
 productBatchSumrouter.get("/adjust-stock", ProductBatchSumController.getProductBatchDetailsController);
 productBatchSumrouter.get('/products-by-branch', ProductBatchSumController.getAllProductsByBranchController);
 productBatchSumrouter.get('/products-by-barcode', ProductBatchSumController.getProductsByBarcodeController);
-productBatchSumrouter.put('/achala', ProductBatchSumController.handleBillingController);
+productBatchSumrouter.get('/product-batch-sum-stockdata-branch', ProductBatchSumController.getAllProductBatchSumDataByBranchController);
+productBatchSumrouter.get('/product-batch-sum-upexp-stock-branch', ProductBatchSumController.getUpcomingExpProductBatchSumDataByBranchController);
 productBatchSumrouter.put('/product-batch-sum-discount', ProductBatchSumController.updateDiscount);
 productBatchSumrouter.get('/product-quantities-by-branch', ProductBatchSumController.getProductQuantitiesByBranchController);
 productBatchSumrouter.get('/product-quantities', ProductBatchSumController.getProductQuantities);

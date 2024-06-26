@@ -4,6 +4,7 @@ import BillProduct from './bill_Product.js';
 import Product from '../product/product.js';
 import { Codes } from "./constants.js";
 import branches from '../branch/branch.js';
+import { handleBilling } from '../productBatchSum/service.js';
 
 const { SUC_CODES } = Codes;
 
@@ -14,6 +15,7 @@ export const createBillProducts = async (billProducts) => {
         }
 
         const newBillProducts = await Promise.all(billProducts.map(entry => BillProduct.create(entry)));
+        console.log('billProduct:');
 
         return { success: true, newBillProducts };
     } catch (error) {
@@ -31,6 +33,7 @@ export const getAllBillProducts = async () => {
         throw new Error('Failed to retrieve BillProducts');
     }
 };
+
 
 export const getBillProductsByBillNumber = async (billNo) => {
     if (!billNo) {
@@ -126,6 +129,7 @@ export const getBillProductsByBillNumber = async (billNo) => {
 };
 
 
+
 export const getBillProductsByProductId = async (productId) => {
     try {
         const billProducts = await BillProduct.findAll({ where: { productId } });
@@ -148,3 +152,5 @@ export const useSuccCodes = async (req, res) => {
         return error(res, error, req.span); // Assuming ERROR is a helper function
     }
 };
+
+
