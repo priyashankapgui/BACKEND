@@ -11,6 +11,10 @@ import productGRN from "./product_GRN/product_GRN.js";
 import onlineBill from "./online_Bill/onlineBill.js";
 import { HasMany } from "sequelize";
 import online_Bill_Products from "./online_Bill_Products/online_Bill_Products.js";
+import stockTransfer from "./stockTransfer/stockTransfer.js";
+import TransferProduct from "./TransferProduct/TransferProduct.js";
+import TransferProductBatch from "./TransferProductBatch/TransferProductBatch.js";
+import cart_Product from "./cart_Product/cartProduct.js";
 
 
 
@@ -42,17 +46,22 @@ const setupProductGRNAssociations = (products, grn) => {
 //   productGRN.belongsTo(grn, { foreignKey: "GRN_NO" });
 // }
 
-const setupCartCustomerAssociations = (ShoppingCart,Customer) => {
-  ShoppingCart.hasOne(Customer);
-  Customer.belongsTo(ShoppingCart, {    foreignKey: 'customerId'  });
-}
+const setupCartCustomerAssociations = (ShoppingCart, Customer) => {
+  ShoppingCart.hasOne(Customer, { foreignKey: 'cartId' });
+  Customer.belongsTo(ShoppingCart, { foreignKey: 'cartId' });
+};
 
 const setupCartProductAssociations = (ShoppingCart, products) => {
   ShoppingCart.belongsToMany(products, { through: "cart_Product", foreignKey: 'cartId' });
   products.belongsToMany(ShoppingCart, { through: "cart_Product", foreignKey: 'productId' });
 }
 
-const setupBranchOnlineBillAssociation = (productBatchSum,onlineBill) =>{
+const customerCartProductAssociation = (Customer, cart_Product) => {
+  Customer.hasMany(cart_Product, { foreignKey: 'customerId' });
+  cart_Product.belongsTo(Customer, { foreignKey: 'customerId' });
+}
+
+const setupBranchOnlineBillAssociation = (branches,onlineBill) =>{
   branches.hasMany(onlineBill,{foreignKey:"branchId",as:"OnlineBill"});
   onlineBill.belongsTo(branches,{foreignKey:"branchId"});
 }
@@ -60,6 +69,12 @@ const setupBranchOnlineBillAssociation = (productBatchSum,onlineBill) =>{
 const setupCustomerOnlineBillAssociation = (Customer,onlineBill) =>{
   Customer.hasMany(onlineBill,{foreignKey:"customerId",as:"OnlineBill"});
   onlineBill.belongsTo(Customer,{foreignKey:"customerId"});
+}
+
+
+const setupProductStockTransferAssociations = (products, stockTransfer) => {
+  stockTransfer.belongsToMany(products, { through: "Transfer_Product", foreignKey: 'STN_NO' });
+  products.belongsToMany(stockTransfer, { through: "Transfer_Product", foreignKey: 'productId' });
 }
 
 const setupOnlineBillProductBatchAssociation = (onlineBill, productBatchSum, online_Bill_Products) => {
@@ -96,6 +111,45 @@ const setupProductBatchSumAssociations = (productBatchSum, productGRN) => {
   });
 };
 
+const setupStockTransferProductBatchAssociations = (TransferProduct, TransferProductBatch) => {
+
+  TransferProduct.hasMany(TransferProductBatch, {
+    foreignKey: 'STN_NO',
+    sourceKey: 'STN_NO',
+    as: 'batchesBySTN_NO',
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE'
+  });
+  
+  TransferProduct.hasMany(TransferProductBatch, {
+    foreignKey: 'productId',
+    sourceKey: 'productId',
+    as: 'batchesByProductId',
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE'
+  });
+  
+  TransferProductBatch.belongsTo(TransferProduct, {
+    foreignKey: 'STN_NO',
+    targetKey: 'STN_NO',
+    as: 'transferProductBySTN_NO',
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE'
+  });
+  
+  TransferProductBatch.belongsTo(TransferProduct, {
+    foreignKey: 'productId',
+    targetKey: 'productId',
+    as: 'transferProductByProductId',
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE'
+  });
+  
+
+
+};
+
+
 
 
 export const setupAssociations = () => {
@@ -108,7 +162,10 @@ export const setupAssociations = () => {
   setupProductBatchSumAssociations(productBatchSum, productGRN);
   setupBranchOnlineBillAssociation(branches,onlineBill);
   setupCustomerOnlineBillAssociation(Customer,onlineBill);
-  setupOnlineBillProductBatchAssociation(onlineBill, productBatchSum, online_Bill_Products)
+  setupOnlineBillProductBatchAssociation(onlineBill, productBatchSum, online_Bill_Products);
+  setupProductStockTransferAssociations(products, stockTransfer);
+  setupStockTransferProductBatchAssociations(TransferProduct, TransferProductBatch);
+  customerCartProductAssociation(Customer, cart_Product);
   //setupProductGRNandGRNssociations(productGRN, grn)
 
 };

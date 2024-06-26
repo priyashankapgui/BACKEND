@@ -3,6 +3,7 @@ import bill from '../bill/bill.js';
 import BillProduct from './bill_Product.js';
 import Product from '../product/product.js';
 import { Codes } from "./constants.js";
+import branches from '../branch/branch.js';
 
 const { SUC_CODES } = Codes;
 
@@ -32,8 +33,13 @@ export const getAllBillProducts = async () => {
 };
 
 export const getBillProductsByBillNumber = async (billNo) => {
+    if (!billNo) {
+        throw new Error('billNo parameter is missing');
+    }
+
     console.log("Fetching bill details for:", billNo);
     try {
+        // Fetch bill details
         const billDetails = await bill.findOne({
             where: { billNo },
             raw: true,
@@ -45,14 +51,32 @@ export const getBillProductsByBillNumber = async (billNo) => {
 
         console.log("Bill details:", billDetails);
 
-        const billProducts = await BillProduct.findAll({
-            where: { billNo },
-            attributes: ['barcode', 'productId', 'batchNo', 'productName', 'billQty', 'sellingPrice', 'discount', 'amount'],
+        // Fetch branch details
+        const branchDetails = await branches.findOne({
+            where: { branchId: billDetails.branchId },
             raw: true,
         });
 
+        if (!branchDetails) {
+            throw new Error(`Branch not found for branchId: ${billDetails.branchId}`);
+        }
+
+        console.log("Branch details:", branchDetails);
+
+        // Fetch bill products
+        const billProducts = await BillProduct.findAll({
+            where: { billNo },
+            attributes: ['barcode', 'productId', 'batchNo', 'billQty', 'sellingPrice', 'discount', 'amount'],
+            raw: true,
+        });
+
+        if (!billProducts || billProducts.length === 0) {
+            throw new Error(`No products found for billNo: ${billNo}`);
+        }
+
         console.log("Bill Products:", billProducts);
 
+        // Fetch product details for each bill product and include productName
         const billProductsWithDetails = await Promise.all(billProducts.map(async (product) => {
             const productDetails = await Product.findOne({
                 where: { productId: product.productId },
@@ -78,13 +102,18 @@ export const getBillProductsByBillNumber = async (billNo) => {
         const result = {
             billNo: billDetails.billNo,
             createdAt: billDetails.createdAt,
-            branchName: billDetails.branchName,
+            branchId: billDetails.branchId,
+            branchName: branchDetails.branchName,
+            branchAddress: branchDetails.address,
+            branchEmail: branchDetails.email,
+            branchPhone: branchDetails.contactNumber,
             billedBy: billDetails.billedBy,
             customerName: billDetails.customerName,
             contactNo: billDetails.contactNo,
             paymentMethod: billDetails.paymentMethod,
             status: billDetails.status,
             billTotalAmount: billDetails.billTotalAmount,
+            receivedAmount: billDetails.receivedAmount,
             billProducts: billProductsWithDetails,
         };
 
@@ -92,9 +121,10 @@ export const getBillProductsByBillNumber = async (billNo) => {
         return result;
     } catch (error) {
         console.error('Error fetching bill details:', error);
-        throw new Error('Failed to fetch bill details');
+        throw new Error('Failed to fetch bill details: ' + error.message);
     }
 };
+
 
 export const getBillProductsByProductId = async (productId) => {
     try {
@@ -118,3 +148,5 @@ export const useSuccCodes = async (req, res) => {
         return error(res, error, req.span); // Assuming ERROR is a helper function
     }
 };
+
+

@@ -30,10 +30,6 @@ const products = sequelize.define(
       allowNull: true,
     },
     
-    qty: {
-      type: DataTypes.INTEGER,
-      allowNull: true,
-    },
     categoryId: {
       type: DataTypes.STRING,
       allowNull: false,
@@ -46,6 +42,10 @@ const products = sequelize.define(
     },
     barcode: {
       type: DataTypes.STRING,
+      allowNull: true, 
+    },
+    minQty: {
+      type: DataTypes.FLOAT,
       allowNull: true, 
     },
    

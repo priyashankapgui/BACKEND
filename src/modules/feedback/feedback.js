@@ -18,7 +18,7 @@ const feedback = sequelize.define('feedback', {
   },
   message: {
     type: DataTypes.STRING,
-    allowNull: true,
+    allowNull: false,
   },
   branch: {
     type: DataTypes.STRING,
@@ -26,7 +26,12 @@ const feedback = sequelize.define('feedback', {
   },
   phone: {
     type: DataTypes.STRING,
+    allowNull: false,
+  },
+  actionTakenBy:{
+    type: DataTypes.STRING,
     allowNull: true,
+    defaultValue: 'N/A'
   },
   email: {
     type: DataTypes.STRING,

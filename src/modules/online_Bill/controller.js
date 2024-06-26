@@ -1,10 +1,10 @@
 import * as onlineBillServices from './service.js';
 
 export const createOnlineBillController = async (req, res) => {
-    const { branchId, customerId, acceptedBy, status } = req.body;
+    const { branchId, customerId, acceptedBy, status, hopeToPickup } = req.body;
 
     try {
-        const newBill = await onlineBillServices.createOnlineBill(branchId, customerId, acceptedBy, status);
+        const newBill = await onlineBillServices.createOnlineBill(branchId, customerId, acceptedBy, status, hopeToPickup);
         res.status(201).json(newBill);
     } catch (error) {
         console.error('Error creating online bill:', error);

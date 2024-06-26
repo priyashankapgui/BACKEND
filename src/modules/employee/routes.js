@@ -9,8 +9,9 @@ import {
   updatePersonalInfo,
   loginEmployee,
   logoutEmployee,
+  forgotPassword,
 } from "../employee/controller.js";
-import { forgotPassword, imageUploadTest } from "../employee/service.js";
+import {  imageUploadTest } from "../employee/service.js";
 import { authenticateToken, authenticateTokenWithPermission } from "../../middleware/authenticationMiddleware.js";
 import { processForm,  processMultipleForm } from "../../blobService/utils.js";
 
@@ -21,7 +22,7 @@ EmployeeRouter.get("/employees", authenticateTokenWithPermission('accounts'), ge
 EmployeeRouter.post("/employees",authenticateTokenWithPermission('accounts'), processForm(), createNewEmployee);
 EmployeeRouter.get("/employees/:employeeId",authenticateTokenWithPermission('accounts'), getEmployee);
 EmployeeRouter.put("/employees/:employeeId",authenticateTokenWithPermission('accounts'), processForm(), updateEmployee);
-EmployeeRouter.post("/employees/selfUpdate", processForm(), updatePersonalInfo)
+EmployeeRouter.post("/employees/selfUpdate", processForm(), updatePersonalInfo);
 EmployeeRouter.delete("/employees/:employeeId",authenticateTokenWithPermission('accounts'), deleteEmployee);
 EmployeeRouter.post("/api/login", loginEmployee);
 EmployeeRouter.post("/api/login/fp", forgotPassword);

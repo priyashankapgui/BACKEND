@@ -1,26 +1,15 @@
-import express from "express";
+import { imageUpload } from "./service.js";
 
-const multer = require('multer')
-const path = require('path')
-
-const addImage = async (req, res) => {
-
-    let info = {
-        image: req.file.path,
-        imagePosition: req.body.title,
-        
+export const createwebImage = async (req, res) => {
+  try {
+    const { type } = req.body;
+    if (!req.files || !type) {
+      return res.status(400).json({ error: "Incomplete request body" });
     }
-
-    const Image = await Image.create(info)
-    res.status(200).send(image)
-    console.log("image succses")
-
-}
-
-const getOneImage = async (req, res) => {
-
-    let id = req.params.id
-    let product = await Product.findOne({ where: { id: id }})
-    res.status(200).send(product)
-
-}
+    await imageUpload(req.files, type);
+    res.status(201).json({ message: "SUCCESS" });
+  } catch (error) {
+    console.error("Error adding Image:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};

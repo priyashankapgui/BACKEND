@@ -1,6 +1,7 @@
 import { DataTypes } from 'sequelize';
 import sequelize from '../../../config/database.js';
 import bcrypt from 'bcryptjs';
+import ShoppingCart from '../cart_Customer/shoppingcart.js';
 
 const Customer = sequelize.define('customer', {
     customerId: {
@@ -33,17 +34,27 @@ const Customer = sequelize.define('customer', {
         type: DataTypes.STRING,
         allowNull: false,
     },
-    },
-    { 
-        tableName: 'customer',
-        hooks: {
-            async beforeSave(customer) {
-                if (customer.changed('password')) {
-                    const saltRounds = bcrypt.genSaltSync(10); 
-                    customer.password = await bcrypt.hash(customer.password, saltRounds);
-                }
-            },
+    shoppingcartCartId: {
+        type: DataTypes.INTEGER,
+        references: {
+            model: ShoppingCart,
+            key: 'cartId'
         },
-    });
+    },
+}, {
+    tableName: 'customer',
+    hooks: {
+        async beforeSave(customer) {
+            if (customer.changed('password')) {
+                const saltRounds = bcrypt.genSaltSync(10); 
+                customer.password = await bcrypt.hash(customer.password, saltRounds);
+            }
+        },
+        async beforeCreate(customer) {
+            const cart = await ShoppingCart.create({});
+            customer.cartId = cart.cartId;
+        }
+    },
+});
 
 export default Customer;

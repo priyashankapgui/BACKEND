@@ -8,7 +8,8 @@ import {
   handleEmployeeResetPassword,
   getEmployeesByBranch,
   updateEmployeePersonalInfo,
-  handleLogin
+  handleLogin,
+  forgotPasswordService
 } from "../employee/service.js";
 import { SECRET } from "../../../config/config.js";
 import jwt, { decode } from "jsonwebtoken";
@@ -159,6 +160,7 @@ export const deleteEmployee = async (req, res) => {
 
 export const loginEmployee = async (req, res) => {
   const { employeeId, password } = req.body;
+  console.log(employeeId, password);
   if (!employeeId || !password) {
     res.status(400).json({ message: "Missing required fields" });
     return;
@@ -168,6 +170,20 @@ export const loginEmployee = async (req, res) => {
     res.status(200).json(data);
   } 
   catch (error) {
+    res.status(error.status || 500).json({ error: error.message });
+  }
+}
+
+export const forgotPassword = async (req, res) => {
+  const { employeeId } = req.body;
+  if (!employeeId) {
+    res.status(400).json({ message: "employee ID is required" });
+    return;
+  }
+  try {
+    const data = await forgotPasswordService(employeeId, "template_resetpw509");
+    res.status(200).json(data);
+  } catch (error) {
     res.status(error.status || 500).json({ error: error.message });
   }
 }
@@ -182,12 +198,19 @@ export const resetEmployeePassword = async (req, res) => {
     res.status(400).json({ message: "Passwords do not match" });
     return;
   }
-  if(newPassword.length < 8 || newPassword.length > 64){
-    res.status(400).json({ message: "Invalid password format" });
-    return;
+  // if(newPassword.length < 8 || newPassword.length > 64){
+  //   res.status(400).json({ message: "Invalid password format" });
+  //   return;
+  // }
+  // const decoded = jwt.verify(resetToken, ACCESS_TOKEN);
+  // console.log(decoded);
+  let decoded;
+  try{
+    decoded = jwt.verify(resetToken, ACCESS_TOKEN);
   }
-  const decoded = jwt.verify(resetToken, ACCESS_TOKEN);
-  console.log(decoded);
+  catch(error){
+    return res.status(401).json({ message: "This link is invalid or has expired" });
+  }
   const userId = decoded.userId;
   try {
     if(userId.startsWith("SA")){
