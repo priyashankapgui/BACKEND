@@ -26,7 +26,7 @@ const products = sequelize.define(
       allowNull: true,
     },
     image: {
-      type: DataTypes.STRING,
+      type: DataTypes.JSON,
       allowNull: true,
     },
     
@@ -44,7 +44,7 @@ const products = sequelize.define(
       type: DataTypes.STRING,
       allowNull: true, 
     },
-    minQty: {
+    qty: {
       type: DataTypes.FLOAT,
       allowNull: true, 
     },

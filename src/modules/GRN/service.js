@@ -87,49 +87,6 @@ export const addGRN = async (invoiceNo, supplierId, branchName) => {
 };
 
 
-
-
-// Function to get all GRNs
-export const getAllGRNs = async () => {
-  const getAllGRNs = grn.findAll();
-  const [err, grnAll] = await to(getAllGRNs);
-  if (err) TE(err);
-  if (!grnAll) TE("No GRNs found");
-
-  const resultPromises = grnAll.map(async (grnItem) => {
-    const getSupplier = suppliers.findOne({
-      where: { supplierId: grnItem.supplierId },
-    });
-    const [supplierErr, supplier] = await to(getSupplier);
-    if (supplierErr) TE(supplierErr);
-    if (!supplier) TE("Supplier not found for GRN_NO: " + grnItem.GRN_NO);
-
-    const getBranch = branches.findOne({
-      where: { branchId: grnItem.branchId },
-    });
-    const [branchErr, branch] = await to(getBranch);
-    if (branchErr) TE(branchErr);
-    if (!branch) TE("Branch not found for GRN_NO: " + grnItem.GRN_NO);
-
-    return {
-      GRN_NO: grnItem.GRN_NO,
-      createdAt: grnItem.createdAt,
-      branchName: branch.branchName,
-      supplierName: supplier.supplierName,
-      invoiceNo: grnItem.invoiceNo,
-    };
-  });
-
-  const [resultErr, result] = await to(Promise.all(resultPromises));
-  if (resultErr) TE(resultErr);
-  if (!result) TE("Results not found");
-
-  return result;
-};
-
-
-
-
 // Function to get GRN by GRN_NO
 export const getGRNById = async (GRN_NO) => {
   const getGRN = grn.findOne({

@@ -10,24 +10,24 @@ export const addProductsToBill = async (onlineBillNo) => {
   try {
     // Fetch customerId from OnlineBill table
     const onlineBill = await OnlineBill.findOne({ where: { onlineBillNo } });
-    if (!onlineBillNo) {
-      return res.status(400).json({
+    if (!onlineBill) {
+      return {
         httpCode: 400,
         type: 'BAD_REQUEST',
         code: 500,
-        message: '"onlineBillNo" is required',
+        message: '"onlineBillNo" is invalid or not found',
         success: false,
-      });
+      };
     }
     const customerId = onlineBill.customerId;
 
-    // Fetch shoppingcartCartId from Customer table
+    // Fetch shopping cart ID from Customer table
     const customer = await Customer.findOne({ where: { customerId } });
     if (!customer) {
       throw new Error('Customer not found');
     }
 
-    const cartId = customer.shoppingcartCartId;
+    const cartId = customer.cartId;
 
     // Fetch products from Cart_Product table
     const cartProducts = await CartProduct.findAll({ where: { cartId } });
@@ -36,9 +36,12 @@ export const addProductsToBill = async (onlineBillNo) => {
       throw new Error('No products found in the cart');
     }
 
+    // Initialize array to hold the bill products to be displayed
+    let billProducts = [];
+
     // Iterate over the products and add them to OnlineBillProduct table
     for (const cartProduct of cartProducts) {
-      const { productId, batchNo, branchId, quantity, price } = cartProduct;
+      const { productId, batchNo, branchId, quantity, sellingPrice, discount } = cartProduct;
 
       // Fetch product info from ProductBatchSum table
       const productBatchSum = await ProductBatchSum.findOne({
@@ -53,25 +56,32 @@ export const addProductsToBill = async (onlineBillNo) => {
       productBatchSum.totalAvailableQty -= quantity;
       await productBatchSum.save({ transaction });
 
-      // Calculate PayAmount
-      // const payAmount = price * quantity;
-      console.log(`Product ID: ${productId}, Batch No: ${batchNo}, Quantity: ${quantity}, Price: ${price}`);
-
       // Add product to OnlineBillProduct table
-      await OnlineBillProduct.create({
-        onlineBillNo,
-        productId,
-        batchNo,
-        branchId,
-        productName: productBatchSum.productName,
-        PurchaseQty: quantity,
-        // PayAmount: payAmount,
-        createdAt: new Date()
-      }, { transaction });
+      try {
+        const newBillProduct = await OnlineBillProduct.create({
+          onlineBillNo,
+          productId,
+          batchNo,
+          branchId,
+          productName: productBatchSum.productName,
+          sellingPrice: sellingPrice,
+          PurchaseQty: quantity,
+          discount: discount,
+          createdAt: new Date()
+        }, { transaction });
+
+        // Add the new bill product to the array
+        billProducts.push(newBillProduct);
+      } catch (createError) {
+        console.error('Error creating OnlineBillProduct:', createError);
+        throw createError;
+      }
     }
 
     await transaction.commit();
-    return { message: 'Products added to online bill successfully' };
+
+    // Return the bill products to be displayed
+    return { message: 'Products added to online bill successfully', billProducts };
 
   } catch (error) {
     await transaction.rollback();
