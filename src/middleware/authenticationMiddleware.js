@@ -45,6 +45,7 @@ export function authenticateTokenWithPermission(pageId){
   return async function(req, res, next){
     try{
       const authHeader = req.headers["authorization"];
+      console.log(authHeader);
       const token = authHeader.split(" ")[1];
       let decoded;
       try{
@@ -67,7 +68,7 @@ export function authenticateTokenWithPermission(pageId){
       }
       const userRoleId = decoded.userRoleId;
       const isAllowed = await Permission.findOne({where: {pageAccessId: pageId, userRoleId: userRoleId}});
-      console.log(isAllowed, userRoleId, pageId);
+      // console.log(isAllowed, userRoleId, pageId);
       if(isAllowed){
         next();
       } else {
@@ -75,6 +76,7 @@ export function authenticateTokenWithPermission(pageId){
       }
      }
     catch(error){
+      console.log(error);
       res.status(403).json({ error: error.message });
     }
   }
