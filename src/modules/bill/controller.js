@@ -7,52 +7,6 @@ import * as ProductBatchSum from "../productBatchSum/service.js"
 
 const { SUC_CODES } = Codes;
 
-export const getAllBillsController = async (req, res) => {
-    try {
-        const bills = await Service.getAllBills(req.query);
-        SUCCESS(res, SUC_CODES, bills, req.span);
-    } catch (err) {
-        console.error('Error fetching all bills:', err);
-        ERROR(res, err, req.span);
-    }
-};
-
-
-export const getBillDetailsController = async (req, res) => {
-    const { billNo } = req.query;
-
-    if (!billNo) {
-        return ERROR(res, { message: 'billNo parameter is missing' }, req.span, 400);
-    }
-
-    console.log("bill", billNo);
-
-    try {
-        const result = await BillProductService.getBillProductsByBillNumber(billNo);
-        console.log("hanee", result);
-        SUCCESS(res, SUC_CODES, result, req.span);
-    } catch (error) {
-        console.error('Error fetching bill details:', error);
-        ERROR(res, { message: 'Failed to fetch bill details', error: error.message }, req.span, 500);
-    }
-};
-
-
-export const getBillByNumberController = async (req, res) => {
-    try {
-        const { billNo } = req.params;
-        const bill = await Service.getBillByNumber(billNo);
-        if (bill) {
-            SUCCESS(res, SUC_CODES, bill, req.span);
-        } else {
-            ERROR(res, { message: 'Bill not found' }, req.span, 404);
-        }
-    } catch (error) {
-        console.error('Error fetching bill by number:', error);
-        ERROR(res, error, req.span);
-    }
-};
-
 export const createBillController = async (req, res) => {
     try {
         const { branchName, billedBy, customerName, contactNo, status, paymentMethod, billTotalAmount, receivedAmount, products } = req.body;
@@ -89,6 +43,55 @@ export const createBillController = async (req, res) => {
         ERROR(res, { message: 'Failed to create Bill and bill_Product entries' }, req.span, 500);
     }
 };
+
+
+
+export const getAllBillsController = async (req, res) => {
+    try {
+        const bills = await Service.getAllBills(req.query);
+        SUCCESS(res, SUC_CODES, bills, req.span);
+    } catch (err) {
+        console.error('Error fetching all bills:', err);
+        ERROR(res, err, req.span);
+    }
+};
+
+
+export const getBillDetailsController = async (req, res) => {
+    const { billNo } = req.query;
+
+    if (!billNo) {
+        return ERROR(res, { message: 'billNo parameter is missing' }, req.span, 400);
+    }
+
+    console.log("bill", billNo);
+
+    try {
+        const result = await BillProductService.getBillProductsByBillNumber(billNo);
+        console.log("Bill Details", result);
+        SUCCESS(res, SUC_CODES, result, req.span);
+    } catch (error) {
+        console.error('Error fetching bill details:', error);
+        ERROR(res, { message: 'Failed to fetch bill details', error: error.message }, req.span, 500);
+    }
+};
+
+
+export const getBillByNumberController = async (req, res) => {
+    try {
+        const { billNo } = req.params;
+        const bill = await Service.getBillByNumber(billNo);
+        if (bill) {
+            SUCCESS(res, SUC_CODES, bill, req.span);
+        } else {
+            ERROR(res, { message: 'Bill not found' }, req.span, 404);
+        }
+    } catch (error) {
+        console.error('Error fetching bill by number:', error);
+        ERROR(res, error, req.span);
+    }
+};
+
 
 
 export const updateCustomerDetailsController = async (req, res) => {

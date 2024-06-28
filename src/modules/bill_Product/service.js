@@ -24,15 +24,16 @@ export const createBillProducts = async (billProducts) => {
     }
 };
 
-export const getAllBillProducts = async () => {
-    try {
-        const billProducts = await BillProduct.findAll();
-        return billProducts;
-    } catch (error) {
-        console.error('Failed to retrieve BillProducts:', error);
-        throw new Error('Failed to retrieve BillProducts');
-    }
-};
+
+// export const getAllBillProducts = async () => {
+//     try {
+//         const billProducts = await BillProduct.findAll();
+//         return billProducts;
+//     } catch (error) {
+//         console.error('Failed to retrieve BillProducts:', error);
+//         throw new Error('Failed to retrieve BillProducts');
+//     }
+// };
 
 
 export const getBillProductsByBillNumber = async (billNo) => {
@@ -130,15 +131,15 @@ export const getBillProductsByBillNumber = async (billNo) => {
 
 
 
-export const getBillProductsByProductId = async (productId) => {
-    try {
-        const billProducts = await BillProduct.findAll({ where: { productId } });
-        return billProducts;
-    } catch (error) {
-        console.error('Failed to retrieve BillProducts by productId:', error);
-        throw new Error('Failed to retrieve BillProducts by productId');
-    }
-};
+// export const getBillProductsByProductId = async (productId) => {
+//     try {
+//         const billProducts = await BillProduct.findAll({ where: { productId } });
+//         return billProducts;
+//     } catch (error) {
+//         console.error('Failed to retrieve BillProducts by productId:', error);
+//         throw new Error('Failed to retrieve BillProducts by productId');
+//     }
+// };
 
 export const useSuccCodes = async (req, res) => {
     try {

@@ -404,37 +404,52 @@ export const handleBilling = async (billedProducts, branchName) => {
 
 
 // Handling refunds process
-export const handleRefund = async (refundedProducts, branchId) => {
-  const updates = refundedProducts.map(async (refundedProduct) => {
-    const { productId, batchNo, quantityRefunded } = refundedProduct;
-
-    const productBatch = await productBatchSum.findOne({
-      where: {
-        productId: productId,
-        batchNo: batchNo,
-        branchId: branchId,
-      },
-    });
-
-    if (!productBatch) {
-      throw new Error(`No product batch found for productId: ${productId}, batchNo: ${batchNo}, branchId: ${branchId}`);
+export const handleRefund = async (refundedProducts, branchName) => {
+  console.log(refundedProducts);
+  try {
+    const branchId = await mapBranchNameToId(branchName);
+    if (!branchId) {
+      throw new Error(`Branch not found for branchName: ${branchName}`);
     }
+    console.log(`Processing billing for branchId: ${branchId}, branchName: ${branchName}`);
 
-    const newTotalAvailableQty = productBatch.totalAvailableQty + quantityRefunded;
+    const updates = refundedProducts.map(async (refundedProduct) => {
+      const { productId, batchNo, returnQty } = refundedProduct;
 
-    await productBatchSum.update(
-      { totalAvailableQty: newTotalAvailableQty },
-      {
+      const productBatch = await productBatchSum.findOne({
         where: {
           productId: productId,
           batchNo: batchNo,
           branchId: branchId,
         },
-      }
-    );
-  });
+      });
 
-  await Promise.all(updates);
+      if (!productBatch) {
+        throw new Error(`No product batch found for productId: ${productId}, batchNo: ${batchNo}, branchId: ${branchId}`);
+      }
+
+      console.log(`Found productBatch: ${JSON.stringify(productBatch.dataValues)}`);
+
+      const newTotalAvailableQty = productBatch.totalAvailableQty + returnQty;
+
+      await productBatchSum.update(
+        { totalAvailableQty: newTotalAvailableQty },
+        {
+          where: {
+            productId: productId,
+            batchNo: batchNo,
+            branchId: branchId,
+          },
+        }
+      );
+      console.log(`Updated productBatchSum refund for productId: ${productId}, batchNo: ${batchNo}, branchId: ${branchId} to newTotalAvailableQty: ${newTotalAvailableQty}`);
+    });
+    await Promise.all(updates);
+    console.log(`Refund processed successfully for branch: ${branchName}`);
+  } catch {
+    console.error(`Error handling refund for branch: ${branchName}`, error);
+    throw new Error(`Error handling refund: ${error.message}`);
+  }
 };
 
 
