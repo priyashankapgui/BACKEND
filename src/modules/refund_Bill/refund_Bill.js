@@ -1,5 +1,6 @@
 import { DataTypes } from 'sequelize';
 import sequelize from '../../../config/database.js';
+import branches from '../branch/branch.js';
 import bill from '../bill/bill.js';
 
 const refund_Bill = sequelize.define('refund_Bill', {
@@ -20,7 +21,7 @@ const refund_Bill = sequelize.define('refund_Bill', {
         type: DataTypes.STRING,
         allowNull: false,
     },
-    branchName: {
+    returnedBy: {
         type: DataTypes.STRING,
         allowNull: false,
     },
@@ -28,21 +29,29 @@ const refund_Bill = sequelize.define('refund_Bill', {
         type: DataTypes.STRING,
         allowNull: true,
     },
-    status: {
+    contactNo: {
         type: DataTypes.STRING,
-        allowNull: false,
+        allowNull: true,
     },
     reason: {
         type: DataTypes.STRING,
         allowNull: false,
     },
+    refundTotalAmount: {
+        type: DataTypes.FLOAT,
+        allowNull: false
+    },
+    status: {
+        type: DataTypes.STRING,
+        allowNull: false,
+    },
     createdAt: {
-        type: DataTypes.DATE,
+        type: 'TIMESTAMP',
         defaultValue: DataTypes.NOW,
         allowNull: false,
     },
     updatedAt: {
-        type: DataTypes.DATE,
+        type: 'TIMESTAMP',
         defaultValue: DataTypes.NOW,
         allowNull: false,
     },
@@ -53,15 +62,7 @@ const refund_Bill = sequelize.define('refund_Bill', {
 
 // Define associations
 refund_Bill.belongsTo(bill, { foreignKey: 'billNo' });
+refund_Bill.belongsTo(branches, { foreignKey: 'branchId' });
 
-refund_Bill.addHook('beforeValidate', async (refundBill) => {
-    // Fetch branchId, branchName, and customerName using billNo
-    const billDetails = await bill.findByPk(refundBill.billNo);
-    if (billDetails) {
-        refundBill.branchId = billDetails.branchId;
-        refundBill.branchName = billDetails.branchName;
-        refundBill.customerName = billDetails.customerName;
-    }
-});
 
 export default refund_Bill;
