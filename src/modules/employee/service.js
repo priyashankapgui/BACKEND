@@ -218,7 +218,7 @@ export const updateEmployeePersonalInfo = async (req, employeeId, employeeData) 
   const t = await sequelize.transaction();
   try {
     const updatedEmployee = await employee.update(employeeData, {
-      fields: ["employeeName", "email", "phone", "address", "password"],
+      fields: ["employeeName", "email", "phone", "address"],
       transaction: t,
     });
     if(req.file){
@@ -230,6 +230,26 @@ export const updateEmployeePersonalInfo = async (req, employeeId, employeeData) 
     await t.rollback();
     throw new Error("Error updating employee: " + error.message);
   }
+};
+
+export const updateEmployeePassword = async (employeeId, employeePasswordData) => {
+  const currentPassword = employeePasswordData.currentPassword;
+  const newPassword = employeePasswordData.newPassword;
+  const employee = await Employee.findByPk(employeeId);
+  if (!employee) {
+    throw new ResponseError(400,"Employee not found");
+  }
+  const storedPassword = employee.password;
+  const passwordMatch = await bcrypt.compare(currentPassword, storedPassword);
+  if (!passwordMatch) {
+    throw new ResponseError(401,"Invalid current password");
+  }
+  if (currentPassword === newPassword) {
+    throw new ResponseError(400,"New password cannot be the same as the old password");
+  }
+  employee.password=newPassword;
+  await employee.save();
+  return newPassword;
 };
 
 export const deleteEmployeeById = async (employeeId, role, branch) => {

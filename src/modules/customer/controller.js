@@ -10,6 +10,7 @@ import {
 
 export const registerNewCustomer = async (req, res) => {
     const customer = req.body;
+    console.log(customer);
     try {
         const newCustomer = await registerCustomer(customer);
         res.status(201).json({
@@ -85,7 +86,7 @@ export const handleLoginCustomer = async (req, res) => {
       return res.status(200).json(result);
     } catch (error) {
       console.error("Login error:", error);
-      return res.status(500).json({ message: error.message });
+      return res.status(error.status || 500).json({ message: error.message });
     }
   };
 

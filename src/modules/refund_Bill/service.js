@@ -1,8 +1,10 @@
 import { Op } from 'sequelize';
+import Bill from '../bill/bill.js';
 import RefundBill from './refund_Bill.js';
 import BillProduct from '../bill_Product/bill_Product.js';
-import Branch from '../branch/branch.js';
+import branches from '../branch/branch.js';
 import ProductBatchSum from '../productBatchSum/productBatchSum.js';
+import { mapBranchNameToId } from '../branch/service.js';
 import { SUCCESS, ERROR } from '../../helper.js';
 import { Codes } from './constants.js';
 
@@ -11,7 +13,7 @@ const { SUC_CODES } = Codes;
 // Function to generate refund bill number
 export const generateRTBNo = async (branchId) => {
     console.log(`Generating refund bill number for branchId: ${branchId}`);
-    const branch = await Branch.findByPk(branchId);
+    const branch = await branches.findByPk(branchId);
     if (!branch) {
         console.error(`Branch not found for branchId: ${branchId}`);
         throw new Error('Branch not found');
@@ -44,60 +46,96 @@ export const generateRTBNo = async (branchId) => {
 };
 
 // Function to process refund
-export const createRefund = async (refundData) => {
-    const { billNo, branchId, returnedBy, customerName, reason, branchName } = refundData;
+export const createRefundBill = async ({ billNo, returnedBy, reason, refundTotalAmount, createdAt }) => {
+    try {
+        const billData = await Bill.findOne({ where: { billNo } });
+        if (!billData) {
+            throw new Error('Bill not found');
+        }
 
-    // Generate refund bill number
-    const RTBNo = await generateRTBNo(branchId);
+        const { branchId, customerName, contactNo } = billData;
 
-    // Create refund bill entry
-    const newRefundBill = await RefundBill.create({
-        RTBNo,
-        billNo,
-        branchId,
-        branchName,
-        returnedBy,
-        customerName,
-        reason,
-        status: 'Refunded', 
-    });
+        // Generate refund bill number
+        const RTBNo = await generateRTBNo(branchId);
 
-    // Fetch the original bill products
-    const billProducts = await BillProduct.findAll({ where: { billNo } });
-
-    for (const billProduct of billProducts) {
-        // Adjust product quantities batch-wise
-        await ProductBatchSum.increment(
-            { availableQty: billProduct.billQty }, // Adjust the quantity
-            { where: { batchNo: billProduct.batchNo, productId: billProduct.productId } }
-        );
+        // Create refund bill entry
+        const newRefundBill = await RefundBill.create({
+            RTBNo,
+            billNo,
+            branchId,
+            returnedBy,
+            customerName,
+            contactNo,
+            refundTotalAmount,
+            reason,
+            status: 'Refunded',
+            createdAt,
+        });
+        return newRefundBill;
+    } catch (error) {
+        throw new Error('Error creating refund bill: ' + error.message);
     }
-
-    return newRefundBill;
 };
 
-// Function to get refund bill data by RTB number
+// Function to get all refund-bills
+export const getAllRefundBills = async () => {
+    try {
+        // Use a join to include branch names
+        const refundBills = await RefundBill.findAll({
+            include: [{
+                model: branches,
+                attributes: ['branchName', 'address', 'contactNumber', 'email'],
+            }],
+        });
+
+        if (!refundBills) {
+            throw new Error("No refundBills found");
+        }
+
+        return refundBills.map(refundBillProduct => ({
+            RTBNo: refundBillProduct.RTBNo,
+            billNo: refundBillProduct.billNo,
+            branchId: refundBillProduct.branchId,
+            branchName: refundBillProduct.branch.branchName,
+            address: refundBillProduct.branch.address,
+            returnedBy: refundBillProduct.returnedBy,
+            customerName: refundBillProduct.customerName,
+            contactNo: refundBillProduct.contactNo,
+            reason: refundBillProduct.reason,
+            refundTotalAmount: refundBillProduct.refundTotalAmount,
+            status: refundBillProduct.status,
+            createdAt: refundBillProduct.createdAt,
+        }));
+    } catch (error) {
+        console.error('Error fetching refund bills:', error.message);
+        throw new Error('Failed to fetch refund bills');
+    }
+};
+
+// Function to get refund bill by RTBNo
 export const getRefundBillByRTBNo = async (RTBNo) => {
     try {
-        const refundBill = await RefundBill.findOne({ where: { RTBNo } });
+        const refundBill = await RefundBill.findByPk(RTBNo);
         if (!refundBill) {
             throw new Error('Refund bill not found');
         }
         return refundBill;
     } catch (error) {
-        throw new Error(`Failed to retrieve refund bill: ${error.message}`);
+        throw new Error('Error fetching refund bill by RTBNo: ' + error.message);
     }
 };
 
-// Function to get refund bill products by product ID
+// Function to get refund bill products by productId
 export const getRefundBillProductsByProductId = async (productId) => {
     try {
-        const refundBillProducts = await BillProduct.findAll({ where: { productId } });
-        if (refundBillProducts.length === 0) {
-            throw new Error('No refund bill products found for the given product ID');
+        const refundBillProducts = await BillProduct.findAll({
+            where: { productId },
+        });
+        if (!refundBillProducts.length) {
+            throw new Error('No refund bill products found for this productId');
         }
         return refundBillProducts;
     } catch (error) {
-        throw new Error(`Failed to retrieve refund bill products: ${error.message}`);
+        throw new Error('Error fetching refund bill products by productId: ' + error.message);
     }
 };
