@@ -822,7 +822,46 @@ export const getUpcomingExpProductBatchSumDataByBranch = async (branchName) => {
 };
 
 
+export const getAlreadyExpProductBatchSumDataByBranch = async (branchName) => {
+  try {
+    const branchId = await mapBranchNameToId(branchName);
 
+    if (!branchId) {
+      throw new Error(`Branch not found for branchName: ${branchName}`);
+    }
+
+    const currentDate = new Date();
+
+    const productBatchSumData = await productBatchSum.findAll({
+      where: {
+        branchId: branchId,
+        expDate: {
+          [Op.lt]: currentDate  // Find records where expDate is less than currentDate
+        }
+      }
+    });
+
+    if (!productBatchSumData || productBatchSumData.length === 0) {
+      return [];
+    }
+
+    return productBatchSumData.map(record => ({
+      productId: record.productId,
+      batchNo: record.batchNo,
+      barcode: record.barcode,
+      branchId: record.branchId,
+      branchName: record.branchName,
+      expDate: record.expDate,
+      sellingPrice: record.sellingPrice,
+      totalAvailableQty: record.totalAvailableQty,
+      productName: record.productName,
+      discount: record.discount,
+    }));
+  } catch (error) {
+    console.error('Error retrieving Already exp product batch sum data by branch:', error);
+    throw new Error('Error retrieving Already exp product batch sum data by branch');
+  }
+};
 
 export const getProductDetailsByBranchName = async (branchName) => {
   try {
@@ -844,7 +883,7 @@ export const getProductDetailsByBranchName = async (branchName) => {
     const results = [];
 
     for (const productData of productsData) {
-      const { productId, branchName, discount, sellingPrice , totalAvailableQty } = productData.dataValues;
+      const { productId, branchName, discount, sellingPrice, totalAvailableQty } = productData.dataValues;
 
       const product = await products.findOne({
         where: { productId },

@@ -107,11 +107,24 @@ export const updateCustomerDetailsController = async (req, res) => {
 };
 
 export const cancelBillByNumberController = async (req, res) => {
+    console.log("Hiiii cancel");
     try {
-        const { billNo } = req.params;
+        const { billNo, products, branchName } = req.body;
+
+        const RefundBillProducts = products.map(product => ({
+            billNo,
+            productId: product.productId,
+            batchNo: product.batchNo,
+            billQty: product.billQty,
+            returnQty: product.billQty,
+            sellingPrice: product.sellingPrice,
+            discount: product.discount,
+        }));
         const canceledBill = await Service.cancelBillByNumber(billNo);
         if (canceledBill) {
             SUCCESS(res, SUC_CODES, canceledBill, req.span);
+
+            const results = await ProductBatchSum.handleRefund(RefundBillProducts, branchName);
         } else {
             ERROR(res, { message: 'Bill not found' }, req.span, 404);
         }

@@ -307,11 +307,31 @@ export const getUpcomingExpProductBatchSumDataByBranchController = async (req, r
 }
 
 
+export const getAlreadyExpProductBatchSumDataByBranchController = async (req, res) => {
+  const { branchName } = req.query;
 
+  console.log(`Received request for branch: ${branchName}`);
+
+  try {
+    const data = await ProductBatchSumService.getAlreadyExpProductBatchSumDataByBranch(branchName);
+    return res.status(200).json({
+      success: true,
+      message: `Already exp Product batch sum data retrieved successfully for branch: ${branchName}`,
+      data,
+    });
+  } catch (error) {
+    console.error('Error retrieving Already exp product batch sum data by branch:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Error retrieving Already exp product batch sum data by branch',
+      error: error.message,
+    });
+  }
+};
 
 export const getProductDetailsByBranchNameController = async (req, res) => {
   const { branchName } = req.body;
-  console.log("branchName",branchName);
+  console.log("branchName", branchName);
 
   try {
     const products = await ProductBatchSumService.getProductDetailsByBranchName(branchName);

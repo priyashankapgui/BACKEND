@@ -10,6 +10,7 @@ productBatchSumrouter.get('/products-by-branch', ProductBatchSumController.getAl
 productBatchSumrouter.get('/products-by-barcode', ProductBatchSumController.getProductsByBarcodeController);
 productBatchSumrouter.get('/product-batch-sum-stockdata-branch', ProductBatchSumController.getAllProductBatchSumDataByBranchController);
 productBatchSumrouter.get('/product-batch-sum-upexp-stock-branch', ProductBatchSumController.getUpcomingExpProductBatchSumDataByBranchController);
+productBatchSumrouter.get('/product-batch-sum-expired-stock-branch', ProductBatchSumController.getAlreadyExpProductBatchSumDataByBranchController);
 productBatchSumrouter.put('/product-batch-sum-discount', ProductBatchSumController.updateDiscount);
 productBatchSumrouter.get('/product-quantities-by-branch', ProductBatchSumController.getProductQuantitiesByBranchController);
 productBatchSumrouter.get('/product-quantities', ProductBatchSumController.getProductQuantities);

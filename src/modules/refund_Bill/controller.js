@@ -2,6 +2,7 @@ import * as Service from './service.js';
 import * as refundBillProductService from '../refund_Bill_Product/service.js';
 import { Codes } from "./constants.js";
 import { SUCCESS, ERROR } from "../../helper.js";
+import * as ProductBatchSum from "../productBatchSum/service.js"
 
 const { SUC_CODES } = Codes;
 
@@ -27,11 +28,14 @@ export const createRefundBillController = async (req, res) => {
         // Create refund bill products entries
         const result = await refundBillProductService.createRefundBillProduct(RefundBillProducts);
 
+
         if (result.success) {
             res.status(201).json({ message: 'Refund Bill and refund_Bill_Product entries created successfully', newRefundBill, newRefundBillProducts: result.newRefundBillProduct });
         } else {
             res.status(400).json({ message: 'Validation error creating refund_Bill_Product entries' });
         }
+        const results = await ProductBatchSum.handleRefund(RefundBillProducts, req.body.branchName);
+
     } catch (error) {
         console.error('Error creating Refund Bill and refund_Bill_Product entries:', error);
         res.status(500).json({ message: 'Failed to create Refund Bill and refund_Bill_Product entries' });
