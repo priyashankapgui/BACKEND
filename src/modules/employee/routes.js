@@ -10,6 +10,7 @@ import {
   loginEmployee,
   logoutEmployee,
   forgotPassword,
+  updatePassword,
 } from "../employee/controller.js";
 import {  imageUploadTest } from "../employee/service.js";
 import { authenticateToken, authenticateTokenWithPermission } from "../../middleware/authenticationMiddleware.js";
@@ -23,6 +24,7 @@ EmployeeRouter.post("/employees",authenticateTokenWithPermission('accounts'), pr
 EmployeeRouter.get("/employees/:employeeId",authenticateTokenWithPermission('accounts'), getEmployee);
 EmployeeRouter.put("/employees/:employeeId",authenticateTokenWithPermission('accounts'), processForm(), updateEmployee);
 EmployeeRouter.post("/employees/selfUpdate", processForm(), updatePersonalInfo);
+EmployeeRouter.post("/employees/updatePw", updatePassword);
 EmployeeRouter.delete("/employees/:employeeId",authenticateTokenWithPermission('accounts'), deleteEmployee);
 EmployeeRouter.post("/api/login", loginEmployee);
 EmployeeRouter.post("/api/login/fp", forgotPassword);

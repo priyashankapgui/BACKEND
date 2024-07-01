@@ -5,24 +5,26 @@ import jwt from "jsonwebtoken";
 import { AUTH, SECRET } from "../../../config/config.js";
 const { SECRET_KEY: ACCESS_TOKEN } = SECRET;
 import emailjs from "@emailjs/nodejs";
+import ResponseError from "../../ResponseError.js";
 
 export const registerCustomer = async (customer) => {
+  console.log("Registering customer", customer)
   const { email, password, phone } = customer;
   //Check if the email already exists
   const existingCustomer = await Customer.findOne({ where: { email: email } });
   if (existingCustomer) {
     throw new Error("Email already exists");
   }
-  // Validate email
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!emailRegex.test(email)) {
-    throw new Error("Invalid email format");
-  }
+  // // Validate email
+  // const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  // if (!emailRegex.test(email)) {
+  //   throw new Error("Invalid email format");
+  // }
   // Validate phone number
-  const phoneRegex = /^[0-9]{10}$/;
-  if (!phoneRegex.test(phone)) {
-    throw new Error("Invalid phone number");
-  }
+  // const phoneRegex = /^[0-9]{10}$/;
+  // if (!phoneRegex.test(phone)) {
+  //   throw new Error("Invalid phone number");
+  // }
   try {
     const newCustomer = await Customer.create(customer);
     return newCustomer;
@@ -82,7 +84,7 @@ export const loginCustomerService = async (email, password) => {
   const tempUser = await Customer.findOne({ where: { email: email } });
   //console.log(tempUser.email);
   if (!tempUser) {
-    throw new Error("Email not found");
+    throw new ResponseError(404,"Email not found");
   }
   if(tempUser.failedLoginAttempts >= AUTH.MAX_FAILED_ATTEMPTS && tempUser.loginAttemptTime > new Date(new Date() - AUTH.FAILED_ATTEMPT_TIMEOUT)){
     const remainingTime = Math.round((tempUser.loginAttemptTime - new Date(new Date() - AUTH.FAILED_ATTEMPT_TIMEOUT)) / (60*1000));
@@ -126,7 +128,7 @@ export const loginCustomerService = async (email, password) => {
       await resetPasswordEmail(tempUser.email, "template_securityw509"); 
     }
     await tempUser.save();
-    throw new Error("Invalid Credentials");
+    throw new ResponseError(401,"Invalid Credentials");
     
   }
 };
