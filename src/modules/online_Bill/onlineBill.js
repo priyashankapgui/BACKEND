@@ -35,7 +35,7 @@ const onlineBill = sequelize.define('onlineBill', {
     allowNull: true,
   },
   acceptedAt: {
-    type: 'TIMESTAMP',
+    type: DataTypes.DATE,
     defaultValue: DataTypes.NOW,
     allowNull: true,
   },
@@ -44,8 +44,13 @@ const onlineBill = sequelize.define('onlineBill', {
     defaultValue: "New",
     allowNull: false,
   },
-  hopeToPickup: {
+  pickupTime: { 
     type: DataTypes.DATE,
+    defaultValue: DataTypes.NOW,
+    allowNull: true,
+  },
+  pickupBy:{ 
+    type: DataTypes.STRING,
     allowNull: true,
   }
 }, {
