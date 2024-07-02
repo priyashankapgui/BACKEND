@@ -9,11 +9,12 @@ import {
   getEmployeesByBranch,
   updateEmployeePersonalInfo,
   handleLogin,
-  forgotPasswordService
+  forgotPasswordService,
+  updateEmployeePassword
 } from "../employee/service.js";
 import { SECRET } from "../../../config/config.js";
 import jwt, { decode } from "jsonwebtoken";
-import { handleSuperAdminResetPassword, updateSuperAdminById } from "../superAdmin/service.js";
+import { handleSuperAdminResetPassword, updateSuperAdminById, updateSuperAdminPassword } from "../superAdmin/service.js";
 import Employee from "./employee.js";
 import SuperAdmin from "../superAdmin/superAdmin.js";
 const ACCESS_TOKEN = SECRET.SECRET_KEY;
@@ -108,8 +109,11 @@ export const updatePersonalInfo = async (req, res) => {
     const token = authHeader.split(" ")[1];
     const decoded = jwt.verify(token, ACCESS_TOKEN);
     const employeeId = decoded.employeeId || decoded.userID;
-    const updatedEmployeeData = JSON.parse(req.body.data);;
-    console.log("ghiuhiuhiu: ",updatedEmployeeData, employeeId);
+    const updatedEmployeeData = JSON.parse(req.body.data); // ifphone or address or email = "" set it to null
+    if(updatedEmployeeData.phone === "") updatedEmployeeData.phone = null;
+    if(updatedEmployeeData.address === "") updatedEmployeeData.address = null;
+    if(updatedEmployeeData.email === "") updatedEmployeeData.email = null;
+    //console.log(updatedEmployeeData, employeeId);
     let updatedEmployee;
     if(employeeId.startsWith("SA")){
       updatedEmployeeData.superAdminName = updatedEmployeeData.employeeName;
@@ -133,6 +137,34 @@ export const updatePersonalInfo = async (req, res) => {
     }
   }
 }
+
+export const updatePassword = async (req, res) => {
+  try {
+    console.log(req.body);
+    const authHeader = req.headers["authorization"];
+    const token = authHeader.split(" ")[1];
+    const decoded = jwt.verify(token, ACCESS_TOKEN);
+    const employeeId = decoded.employeeId || decoded.userID;
+    // const updatedEmployeePassword = JSON.parse(req.body.data);
+    const updatedEmployeePassword=req.body;
+    console.log(updatedEmployeePassword);
+    let updatedPassword;
+    if (employeeId.startsWith("SA")){
+      updatedPassword= await updateSuperAdminPassword( employeeId, updatedEmployeePassword);
+    }
+    else{
+      updatedPassword = await updateEmployeePassword(employeeId, updatedEmployeePassword);
+    }
+    if (!updatedPassword) {
+      res.status(404).json({ error: "Couldn't Update" });
+      return;
+    } 
+    res.status(200).json({ message: "Password updated successfully" });
+  }
+  catch (error) {
+    res.status(error.status || 500).json({ error: error.message });
+  }
+};
 
 export const deleteEmployee = async (req, res) => {
   const authHeader = req.headers["authorization"];

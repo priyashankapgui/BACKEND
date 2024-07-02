@@ -39,7 +39,10 @@ export const submitStockTransferAndProductBatch = async (req, res) => {
 //Function to update totalAvailableQty when saving the stock Transfer OUT
 export const updateOrAddProductBatchSumController = async (req, res) => {
   try {
-    const { STN_NO, requestBranch, products } = req.body;
+    const { STN_NO, requestBranch, products } = req.body.updates;
+    console.log("STN_NO",STN_NO);
+    console.log("requestBranch",requestBranch);
+    console.log("products",products);
 
     if (!STN_NO || !requestBranch || !products || products.length === 0) {
       return res.status(400).json({ message: 'STN_NO, requestBranch, and products are required' });

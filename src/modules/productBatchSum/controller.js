@@ -1,4 +1,3 @@
-//import { updateProductBatchSum, getBatchDetailsByProductName, getAllProductBatchSumData, getProductSumBatchByProductId, getProductSumBatchByBarcode, getBatchSumByBranchId, adjustProductGRNQuantity } from "../productBatchSum/service.js";
 import * as ProductBatchSumService from "../productBatchSum/service.js";
 import * as Service from '../productBatchUpdateReason/service.js'
 import branches from "../branch/branch.js";
