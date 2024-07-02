@@ -39,26 +39,4 @@ export const createStockTransferProductService = async (stockTransferProducts) =
 
 
 
-  //Function to get transfer data using produtId
-  export const getStockTransfersByProductId = async (productId) => {
-
-    const [err, transferProducts] = await to(TransferProduct.findAll({
-      where: { productId },
-      attributes: ['STN_NO'], 
-    }));
-  
-    if (err) TE(err);
-    if (!transferProducts || transferProducts.length === 0) TE("No stock transfers found for this product");
-  
-    const STN_NOs = transferProducts.map(tp => tp.STN_NO);
-  
-    const [stockTransferErr, stockTransfers] = await to(stockTransfer.findAll({
-      where: { STN_NO: STN_NOs },
-      attributes: ['STN_NO', 'createdAt', 'requestBranch', 'status', 'requestedBy', 'submittedBy', 'submittedAt'],
-    }));
-  
-    if (stockTransferErr) TE(stockTransferErr);
-    if (!stockTransfers || stockTransfers.length === 0) TE("No stock transfer details found for the provided STN_NO(s)");
-  
-    return stockTransfers;
-  };
+ 
