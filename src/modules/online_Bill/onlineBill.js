@@ -25,6 +25,10 @@ const onlineBill = sequelize.define('onlineBill', {
       key: 'customerId'
     }
   },
+  totalAmont:{
+    type:DataTypes.FLOAT,
+    allowNull:true,
+  },
   createdAt: {
     type: 'TIMESTAMP',
     defaultValue: DataTypes.NOW,
