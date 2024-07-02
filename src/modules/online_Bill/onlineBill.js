@@ -25,7 +25,7 @@ const onlineBill = sequelize.define('onlineBill', {
       key: 'customerId'
     }
   },
-  totalAmont:{
+  onlineBillTotal:{
     type:DataTypes.FLOAT,
     allowNull:true,
   },
