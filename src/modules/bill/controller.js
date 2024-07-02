@@ -133,3 +133,35 @@ export const cancelBillByNumberController = async (req, res) => {
         ERROR(res, error, req.span);
     }
 };
+
+export const getSumOfBillTotalAmountForDateController = async (req, res) => {
+    try {
+        const { branchName, date } = req.query;
+
+        if (!branchName || !date) {
+            return ERROR(res, { message: 'branchName and date parameters are required' }, req.span, 400);
+        }
+
+        const totalAmount = await Service.getSumOfBillTotalAmountForDate(branchName, date);
+        SUCCESS(res, Codes.SUC_CODES, { totalAmount }, req.span);
+    } catch (error) {
+        console.error('Error fetching sum of billTotalAmount for date:', error);
+        ERROR(res, { message: 'Failed to fetch sum of billTotalAmount for date', error: error.message }, req.span, 500);
+    }
+};
+
+export const getNetTotalAmountForDateController = async (req, res) => {
+    try {
+        const { branchName, date } = req.query;
+
+        if (!branchName || !date) {
+            return ERROR(res, { message: 'branchName and date parameters are required' }, req.span, 400);
+        }
+
+        const result = await Service.getNetTotalAmountForDate(branchName, date);
+        SUCCESS(res, SUC_CODES, result, req.span);
+    } catch (error) {
+        console.error('Error fetching net total amount for date:', error);
+        ERROR(res, { message: 'Failed to fetch net total amount for date', error: error.message }, req.span, 500);
+    }
+};

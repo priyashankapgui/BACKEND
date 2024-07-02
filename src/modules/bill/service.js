@@ -1,7 +1,9 @@
+import sequelize from "../../../config/database.js";
 import { Op } from 'sequelize';
 import bill from './bill.js';
 import branches from '../branch/branch.js';
 import { mapBranchNameToId } from '../branch/service.js';
+import { getSumOfRefundBillTotalAmountForDate } from '../refund_Bill/service.js';
 
 // Generate Bill Number
 const generateBillNumber = async (branchId) => {
@@ -139,5 +141,54 @@ export const updateCustomerDetailsByBillNumber = async (billNo, customerData) =>
     } catch (error) {
         console.error('Error updating customer details:', error);
         throw new Error('Error updating customer details: ' + error.message);
+    }
+};
+
+
+export const getSumOfBillTotalAmountForDate = async (branchName, date) => {
+    try {
+        const branchId = await mapBranchNameToId(branchName);
+
+        // Ensure the date is in the correct format (YYYY-MM-DD)
+        const formattedDate = new Date(date).toISOString().split('T')[0];
+
+        const result = await bill.findOne({
+            attributes: [
+                [sequelize.fn('SUM', sequelize.col('billTotalAmount')), 'totalAmount']
+            ],
+            where: {
+                branchId,
+                status: { [Op.ne]: 'Canceled' },
+                [Op.and]: sequelize.where(sequelize.fn('DATE', sequelize.col('createdAt')), '=', formattedDate)
+            }
+        });
+
+        if (!result) {
+            throw new Error("No data found");
+        }
+
+        return result.dataValues.totalAmount || 0; // Return 0 if no bills found
+    } catch (error) {
+        console.error('Error in getSumOfBillTotalAmountForDate:', error);
+        throw new Error('Error fetching sum of billTotalAmount for date: ' + error.message);
+    }
+};
+
+
+export const getNetTotalAmountForDate = async (branchName, date) => {
+    try {
+        const totalAmount = await getSumOfBillTotalAmountForDate(branchName, date);
+        const totalRefundAmount = await getSumOfRefundBillTotalAmountForDate(branchName, date);
+
+        const newTotalAmount = totalAmount - totalRefundAmount;
+
+        return {
+            totalAmount,
+            totalRefundAmount,
+            newTotalAmount,
+        };
+    } catch (error) {
+        console.error('Error fetching net total amount for date:', error);
+        throw new Error('Error fetching net total amount for date: ' + error.message);
     }
 };

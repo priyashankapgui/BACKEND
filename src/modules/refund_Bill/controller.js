@@ -28,12 +28,12 @@ export const createRefundBillController = async (req, res) => {
         // Create refund bill products entries
         const result = await refundBillProductService.createRefundBillProduct(RefundBillProducts);
 
-
         if (result.success) {
             res.status(201).json({ message: 'Refund Bill and refund_Bill_Product entries created successfully', newRefundBill, newRefundBillProducts: result.newRefundBillProduct });
         } else {
             res.status(400).json({ message: 'Validation error creating refund_Bill_Product entries' });
         }
+
         const results = await ProductBatchSum.handleRefund(RefundBillProducts, req.body.branchName);
 
     } catch (error) {
@@ -91,5 +91,22 @@ export const getRefundBillDetailsController = async (req, res) => {
     } catch (error) {
         console.error('Error fetching Refund Bill details:', error);
         ERROR(res, { message: 'Failed to fetch Refund Bill details', error: error.message }, req.span, 500);
+    }
+};
+
+
+export const getSumOfRefundBillTotalAmountForDateController = async (req, res) => {
+    try {
+        const { branchName, date } = req.query;
+
+        if (!branchName || !date) {
+            return ERROR(res, { message: 'branchName and date parameters are required' }, req.span, 400);
+        }
+
+        const totalAmount = await Service.getSumOfRefundBillTotalAmountForDate(branchName, date);
+        SUCCESS(res, Codes.SUC_CODES, { totalRefundAmount }, req.span);
+    } catch (error) {
+        console.error('Error fetching sum of refundBillTotalAmount for date:', error);
+        ERROR(res, { message: 'Failed to fetch sum of refundBillTotalAmount for date', error: error.message }, req.span, 500);
     }
 };

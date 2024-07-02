@@ -1,3 +1,4 @@
+import sequelize from "../../../config/database.js";
 import { Op } from 'sequelize';
 import Bill from '../bill/bill.js';
 import RefundBill from './refund_Bill.js';
@@ -137,5 +138,34 @@ export const getRefundBillProductsByProductId = async (productId) => {
         return refundBillProducts;
     } catch (error) {
         throw new Error('Error fetching refund bill products by productId: ' + error.message);
+    }
+};
+
+
+export const getSumOfRefundBillTotalAmountForDate = async (branchName, date) => {
+    try {
+        const branchId = await mapBranchNameToId(branchName);
+
+        // Ensure the date is in the correct format (YYYY-MM-DD)
+        const formattedDate = new Date(date).toISOString().split('T')[0];
+
+        const result = await RefundBill.findOne({
+            attributes: [
+                [sequelize.fn('SUM', sequelize.col('refundTotalAmount')), 'totalRefundAmount']
+            ],
+            where: {
+                branchId,
+                [Op.and]: sequelize.where(sequelize.fn('DATE', sequelize.col('createdAt')), '=', formattedDate)
+            }
+        });
+
+        if (!result) {
+            throw new Error("No data found");
+        }
+
+        return result.dataValues.totalRefundAmount || 0; // Return 0 if no bills found
+    } catch (error) {
+        console.error('Error in getSumOfRefundBillTotalAmountForDate:', error);
+        throw new Error('Error fetching sum of refundBillTotalAmount for date: ' + error.message);
     }
 };

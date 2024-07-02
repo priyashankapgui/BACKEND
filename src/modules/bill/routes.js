@@ -10,6 +10,6 @@ billRouter.post('/bills', Validator.create, Controller.createBillController);
 billRouter.put('/bills/:billNo', Validator.update, Controller.updateCustomerDetailsController);
 billRouter.post('/bills/cancel', Controller.cancelBillByNumberController);
 billRouter.get('/bills-all', Controller.getBillDetailsController);
-
-
+billRouter.get('/billTotalAmountForDate', Controller.getSumOfBillTotalAmountForDateController);
+billRouter.get('/netBillTotalAmountForDate', Controller.getNetTotalAmountForDateController);
 export default billRouter;

@@ -36,6 +36,7 @@ const generateGRNNumber = async (branchName) => {
   }
 };
 
+
 // Function to get the last GRN number for a specific branch from the database
 const getLastBranchGRNNumber = async (branchCode) => {
   try {
