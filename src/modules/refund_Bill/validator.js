@@ -4,23 +4,19 @@ import { VALIDATION_ERROR } from '../../helper.js';
 // Schema to validate refund bill data
 const CreateRefundBillSchema = Joi.object({
     billNo: Joi.string().required(),
-    branchId: Joi.string().required(),
     branchName: Joi.string().required(),
     returnedBy: Joi.string().required(),
     customerName: Joi.string().optional(),
+    contactNo: Joi.string().optional(),
     reason: Joi.string().required(),
+    refundTotalAmount: Joi.number().required(),
     products: Joi.array().items(Joi.object({
-        billNo: Joi.string().required(),
-        branchId: Joi.string().required(),
-        branchName: Joi.string().required(),
         productId: Joi.string().required(),
         batchNo: Joi.string().required(),
-        barcode: Joi.string().required(),
-        productName: Joi.string().required(),
-        billQty: Joi.string().required(),
-        returnQty: Joi.string().required(),
-        returnPriceAmount: Joi.string().required(),
-        reason: Joi.string().required(),
+        billQty: Joi.number().required(),
+        returnQty: Joi.number().required(),
+        sellingPrice: Joi.number().required(),
+        discount: Joi.number().optional(),
     })).required()
 });
 

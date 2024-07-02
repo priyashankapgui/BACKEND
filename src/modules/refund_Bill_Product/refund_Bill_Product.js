@@ -12,8 +12,6 @@ const refund_Bill_Product = sequelize.define('refund_Bill_Product', {
             model: refund_Bill,
             key: 'RTBNo'
         },
-        onDelete: 'CASCADE',
-        onUpdate: 'CASCADE'
     },
     productId: {
         type: DataTypes.STRING,
@@ -23,8 +21,6 @@ const refund_Bill_Product = sequelize.define('refund_Bill_Product', {
             model: billProduct,
             key: 'productId'
         },
-        onDelete: 'CASCADE',
-        onUpdate: 'CASCADE'
     },
     batchNo: {
         type: DataTypes.STRING,
@@ -34,27 +30,21 @@ const refund_Bill_Product = sequelize.define('refund_Bill_Product', {
             model: billProduct,
             key: 'batchNo'
         },
-        onDelete: 'CASCADE',
-        onUpdate: 'CASCADE'
-    },
-    productName: {
-        type: DataTypes.STRING,
-        allowNull: false,
     },
     billQty: {
         type: DataTypes.FLOAT,
         allowNull: false,
     },
+    sellingPrice: {
+        type: DataTypes.FLOAT,
+        allowNull: false,
+    },
+    discount: {
+        type: DataTypes.FLOAT,
+        allowNull: true,
+    },
     returnQty: {
         type: DataTypes.FLOAT,
-        allowNull: false,
-    },
-    returnPriceAmount: {
-        type: DataTypes.FLOAT,
-        allowNull: false,
-    },
-    reason: {
-        type: DataTypes.STRING,
         allowNull: false,
     },
     createdAt: {
@@ -73,7 +63,7 @@ const refund_Bill_Product = sequelize.define('refund_Bill_Product', {
     indexes: [
         {
             unique: true,
-            fields: ['RTBNo', 'productId','batchNo']
+            fields: ['RTBNo', 'productId', 'batchNo']
         }
     ]
 });

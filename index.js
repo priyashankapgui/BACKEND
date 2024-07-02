@@ -37,7 +37,8 @@ import refundBillRouter from "./src/modules/refund_Bill/routes.js";
 import cartRoutes from "./src/modules/cart_Product/routes.js"
 import ShoppingCart from "./src/modules/cart_Customer/shoppingcart.js";
 import onlineBill from "./src/modules/online_Bill/onlineBill.js";
-import onlineBillRoutes from "./src/modules/online_Bill/routes.js"
+import onlineBillRoutes from "./src/modules/online_Bill/routes.js";
+import onlineBillProductRoutes from "./src/modules/online_Bill_Products/routes.js"
 import ProductBatchUpdateReason from "./src/modules/productBatchUpdateReason/productBatchUpdateReason.js";
 import productBatchUpdateReasonRouter from "./src/modules/productBatchUpdateReason/routes.js";
 import stockTransferRouter from "./src/modules/stockTransfer/routes.js";
@@ -80,6 +81,7 @@ app.use('/',productBatchUpdateReasonRouter);
 app.use('/',stockTransferRouter);
 app.use('/',TransferProductBatchRouter);
 app.use('/',onlineBillRoutes);
+app.use('/',onlineBillProductRoutes);
 app.use('/',webImagesrouter);
 
 

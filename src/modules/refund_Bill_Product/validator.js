@@ -5,12 +5,11 @@ import { VALIDATION_ERROR } from '../../helper.js';
 const CreateRefundBillProductSchema = Joi.object({
     RTBNo: Joi.string().required(),
     productId: Joi.string().required(),
-    productName: Joi.string().required(),
     batchNo: Joi.string().required(),
     billQty: Joi.string().required(),
     returnQty: Joi.number().integer().min(1).required(),
-    returnPriceAmount: Joi.string().required(),
-    reason: Joi.string().required(),
+    sellingPrice: Joi.number().required(),
+    discount: Joi.number().optional(),
 });
 
 // Middleware function to validate refund bill product data

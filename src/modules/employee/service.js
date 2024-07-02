@@ -110,8 +110,6 @@ export const getEmployeeById = async (employeeId) => {
 };
 
 export const createEmployee = async (req) => {
-  // const newEmployeeId = await generateEmployeeId();
-  //console.log(req.body.employee);
   const {
     employeeId,
     employeeName,
@@ -193,10 +191,10 @@ export const updateEmployeeById = async (
   if (!employee) {
     throw new Error("Employee not found");
   }
+  const t = await sequelize.transaction();
   try {
-    if (role == 1 || branch === branchRow.branchName) {
+    if (role == 1 || (role!=userRole.userRoleId && branch === branchRow.branchName)) {
       console.log(employeeData);
-      const t = await sequelize.transaction();
       const updatedEmployee = await employee.update(employeeData, {transaction: t});
       if (req.file) {
         await imageUploadwithCompression(req.file, "cms-data", employeeId);
@@ -220,7 +218,7 @@ export const updateEmployeePersonalInfo = async (req, employeeId, employeeData) 
   const t = await sequelize.transaction();
   try {
     const updatedEmployee = await employee.update(employeeData, {
-      fields: ["employeeName", "email", "phone", "address", "password"],
+      fields: ["employeeName", "email", "phone", "address"],
       transaction: t,
     });
     if(req.file){
@@ -232,6 +230,26 @@ export const updateEmployeePersonalInfo = async (req, employeeId, employeeData) 
     await t.rollback();
     throw new Error("Error updating employee: " + error.message);
   }
+};
+
+export const updateEmployeePassword = async (employeeId, employeePasswordData) => {
+  const currentPassword = employeePasswordData.currentPassword;
+  const newPassword = employeePasswordData.newPassword;
+  const employee = await Employee.findByPk(employeeId);
+  if (!employee) {
+    throw new ResponseError(400,"Employee not found");
+  }
+  const storedPassword = employee.password;
+  const passwordMatch = await bcrypt.compare(currentPassword, storedPassword);
+  if (!passwordMatch) {
+    throw new ResponseError(401,"Invalid current password");
+  }
+  if (currentPassword === newPassword) {
+    throw new ResponseError(400,"New password cannot be the same as the old password");
+  }
+  employee.password=newPassword;
+  await employee.save();
+  return newPassword;
 };
 
 export const deleteEmployeeById = async (employeeId, role, branch) => {
@@ -328,13 +346,12 @@ export const handleLoginSuccess = async (employeeId) => {
 };
 
 export const forgotPasswordService = async (employeeId, emaliTemplate) => {
-  try {
     const user = await Employee.findOne({ where: { employeeId: employeeId } });
     if (!user) {
-      throw new Error("Employee ID not found");
+      throw new ResponseError(400, "Employee ID not found");
     }
     else if (!user.email) {
-      throw new Error("Email not given, Please contact an Admin");
+      throw new ResponseError(400, "Email not given, Please contact an Admin");
     }
     else {
       const passwordResetToken = jwt.sign(
@@ -343,7 +360,7 @@ export const forgotPasswordService = async (employeeId, emaliTemplate) => {
           email: user.email,
         },
         ACCESS_TOKEN,
-        { expiresIn: "5m" }
+        { expiresIn: "10m" }
       );
       const resetLink = `http://localhost:3000/login/resetpw?token=${passwordResetToken}`;
       emailjs.init({
@@ -372,14 +389,10 @@ export const forgotPasswordService = async (employeeId, emaliTemplate) => {
         },
         (error) => {
           console.log("FAILED...", error);
-          throw new Error("Failed to send email" + error.message);
+          throw new Error("Failed to send email " + error.message);
         }
       );
     }
-  } catch (error) {
-    console.error("Forgot password error:", error);
-    throw new Error("Internal server error" + error.message);
-  }
 };
 
 export const handleEmployeeResetPassword = async (userId, newPassword) => {

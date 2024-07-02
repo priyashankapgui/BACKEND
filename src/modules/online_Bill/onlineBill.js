@@ -34,13 +34,23 @@ const onlineBill = sequelize.define('onlineBill', {
     type: DataTypes.STRING,
     allowNull: true,
   },
+  acceptedAt: {
+    type: DataTypes.DATE,
+    defaultValue: DataTypes.NOW,
+    allowNull: true,
+  },
   status: {
     type: DataTypes.STRING,
     defaultValue: "New",
     allowNull: false,
   },
-  hopeToPickup: {
+  pickupTime: { 
     type: DataTypes.DATE,
+    defaultValue: DataTypes.NOW,
+    allowNull: true,
+  },
+  pickupBy:{ 
+    type: DataTypes.STRING,
     allowNull: true,
   }
 }, {

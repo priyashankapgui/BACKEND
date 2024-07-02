@@ -55,7 +55,7 @@ export const getBranchByName = async (branchName) => {
 export const getAllBranchesWeb = async () => {
     try{
         const branchReq = await branches.findAll({
-            attributes: ['branchId', 'branchName']
+            attributes: ['branchId', 'branchName','address','email','contactNumber']
         });
         return branchReq;
     }catch (error) {

@@ -15,8 +15,11 @@ const updateOnlineBillSchema = Joi.object({
     branchId: Joi.string().optional(),
     customerId: Joi.number().integer().optional(),
     acceptedBy: Joi.string().optional(),
+    acceptedAt:Joi.date().iso().optional(),
     status: Joi.string().optional(),
-    hopeToPickup: Joi.date().optional()
+    hopeToPickup: Joi.date().optional(),
+    pickupBy:Joi.string().optional(),
+    pickupTime: Joi.date().iso().optional(),
 });
 
 const create = async (req, res, next) => {

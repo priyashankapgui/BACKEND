@@ -8,6 +8,7 @@ import emailjs from "@emailjs/nodejs";
 import UserRole from "../userRole/userRole.js";
 import { imageUploadwithCompression } from "../../blobService/utils.js";
 import sequelize from "../../../config/database.js";
+import ResponseError from "../../ResponseError.js";
 
 export const getAllSuperAdmins = async () => {
   try {
@@ -154,3 +155,24 @@ export const updateSuperAdminById = async (req, superAdminID, updatedSuperAdminD
     throw new Error("Error updating superAdmin: " + error.message);
   }
 };
+
+export const updateSuperAdminPassword = async ( superAdminID, superAdminPasswordData) => {
+  console.log(superAdminPasswordData);
+  const currentPassword = superAdminPasswordData.currentPassword;
+  const newPassword = superAdminPasswordData.newPassword;
+  const superAdmin = await SuperAdmin.findByPk(superAdminID);
+  if (!superAdmin) {
+    throw new ResponseError(400,"SuperAdmin not found");
+  }
+  const storedPassword = await superAdmin.password;
+  const passwordMatch = await bcrypt.compare(currentPassword, storedPassword);
+  if (!passwordMatch) {
+    throw new ResponseError(401,"Invalid old password");
+  }
+  if (currentPassword === newPassword) {
+    throw new ResponseError(400,"New password cannot be the same as old password");
+  }
+  superAdmin.password = newPassword;
+  await superAdmin.save();
+  return newPassword;
+}
