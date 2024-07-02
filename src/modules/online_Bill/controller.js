@@ -42,10 +42,10 @@ export const getOnlineBillByNumberController = async (req, res) => {
 
 export const updateOnlineBillController = async (req, res) => {
     const { onlineBillNo } = req.params;
-    const { totalAmont } = req.body;
+    const { onlineBillTotal } = req.body;
 
     try {
-        const updatedBill = await onlineBillServices.updateOnlineBill(onlineBillNo, { totalAmont });
+        const updatedBill = await onlineBillServices.updateOnlineBill(onlineBillNo, { onlineBillTotal });
         res.status(200).json(updatedBill);
     } catch (error) {
         console.error('Error updating online bill:', error);

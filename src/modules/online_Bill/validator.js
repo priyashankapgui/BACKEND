@@ -20,7 +20,7 @@ const updateOnlineBillSchema = Joi.object({
     hopeToPickup: Joi.date().optional(),
     pickupBy:Joi.string().optional(),
     pickupTime: Joi.date().iso().optional(),
-    totalAmont: Joi.number().optional(),
+    onlineBillTotal: Joi.number().optional(),
 });
 
 const create = async (req, res, next) => {
