@@ -5,8 +5,7 @@ import {
     resetPasswordEmail,
     updateCustomerService,
     updatePasswordService,
-    
-} from "../customer/service.js";       
+} from "../customer/service.js";  
 
 export const registerNewCustomer = async (req, res) => {
     const customer = req.body;

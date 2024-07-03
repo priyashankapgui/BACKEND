@@ -1,3 +1,5 @@
+import { getCustomerById } from '../customer/service.js';
+import onlineBill from './onlineBill.js';
 import * as onlineBillServices from './service.js';
 
 export const createOnlineBillController = async (req, res) => {
@@ -23,6 +25,23 @@ export const getAllOnlineBillsController = async (req, res) => {
         res.status(500).json({ message: 'Error fetching online bills', error: error.message });
     }
 };
+
+export const getOnlineBillsByCustomerId = async (req, res) => {
+    const customerId = req.params.customerId;
+    try {
+        const orders = await onlineBill.findAll({
+            where: { customerId: customerId },
+        });
+        if (!orders) {
+            res.status(404).json({ error: "Orders not found for Customer ID" });
+            return;
+        }
+        res.status(200).json(orders);
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ error: "Internal server error" });
+    }
+}
 
 export const getOnlineBillByNumberController = async (req, res) => {
     const { onlineBillNo } = req.params;
