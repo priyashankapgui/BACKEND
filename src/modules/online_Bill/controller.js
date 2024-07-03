@@ -15,7 +15,7 @@ export const createOnlineBillController = async (req, res) => {
 };
 
 export const getAllOnlineBillsController = async (req, res) => {
-    const filters = req.query; // Use query parameters for filtering
+    const filters = req.query; 
 
     try {
         const bills = await onlineBillServices.getAllOnlineBills(filters);
@@ -59,7 +59,7 @@ export const getOnlineBillByNumberController = async (req, res) => {
     }
 };
 
-export const updateOnlineBillController = async (req, res) => {
+export const updateOnlineBillAmountController = async (req, res) => {
     const { onlineBillNo } = req.params;
     const { onlineBillTotal } = req.body;
 
@@ -72,4 +72,15 @@ export const updateOnlineBillController = async (req, res) => {
     }
 };
 
+export const updateOnlineBillController = async (req, res) => {
+    const { onlineBillNo } = req.params;
+    const updates = req.body;
 
+    try {
+        const updatedBill = await onlineBillServices.updateOnlineBill(onlineBillNo, updates);
+        res.status(200).json(updatedBill);
+    } catch (error) {
+        console.error('Error updating online bill:', error);
+        res.status(500).json({ message: 'Error updating online bill', error: error.message });
+    }
+};

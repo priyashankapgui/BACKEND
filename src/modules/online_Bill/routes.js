@@ -10,5 +10,5 @@ router.get('/onlineBills', onlineBillControllers.getAllOnlineBillsController);
 router.get('/onlineBills/:onlineBillNo', onlineBillControllers.getOnlineBillByNumberController);
 router.get('/onlineBillsByCustomer/:customerId', authenticateCustomerToken,onlineBillControllers.getOnlineBillsByCustomerId)
 router.put('/onlineBills/:onlineBillNo', validator.update, onlineBillControllers.updateOnlineBillController);
-
+router.put('/onlineBillAmount/:onlineBillNo', validator.update, onlineBillControllers.updateOnlineBillAmountController);
 export default router;
