@@ -103,8 +103,8 @@ export const getSumOfRefundBillTotalAmountForDateController = async (req, res) =
             return ERROR(res, { message: 'branchName and date parameters are required' }, req.span, 400);
         }
 
-        const totalAmount = await Service.getSumOfRefundBillTotalAmountForDate(branchName, date);
-        SUCCESS(res, Codes.SUC_CODES, { totalRefundAmount }, req.span);
+        const result = await Service.getSumOfRefundBillTotalAmountForDate(branchName, date);
+        SUCCESS(res, Codes.SUC_CODES, { totalRefundAmount }, result, req.span);
     } catch (error) {
         console.error('Error fetching sum of refundBillTotalAmount for date:', error);
         ERROR(res, { message: 'Failed to fetch sum of refundBillTotalAmount for date', error: error.message }, req.span, 500);

@@ -192,3 +192,25 @@ export const getNetTotalAmountForDate = async (branchName, date) => {
         throw new Error('Error fetching net total amount for date: ' + error.message);
     }
 };
+
+//for chart
+export const getDailySalesDataForMonth = async (branchName, year, month) => {
+    try {
+        const branchId = await mapBranchNameToId(branchName);
+        const startDate = new Date(year, month - 1, 1);
+        const endDate = new Date(year, month, 0); // Last day of the month
+        const salesData = [];
+
+        for (let day = 1; day <= endDate.getDate(); day++) {
+            const date = new Date(year, month - 1, day);
+            const formattedDate = date.toISOString().split('T')[0];
+            const { newTotalAmount } = await getNetTotalAmountForDate(branchName, formattedDate);
+            salesData.push({ day, totalAmount: newTotalAmount });
+        }
+
+        return salesData;
+    } catch (error) {
+        console.error('Error in getDailySalesDataForMonth:', error);
+        throw new Error('Error fetching daily sales data for month: ' + error.message);
+    }
+};

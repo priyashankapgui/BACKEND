@@ -165,3 +165,21 @@ export const getNetTotalAmountForDateController = async (req, res) => {
         ERROR(res, { message: 'Failed to fetch net total amount for date', error: error.message }, req.span, 500);
     }
 };
+
+
+//for chart
+export const getDailySalesDataForMonthController = async (req, res) => {
+    try {
+        const { branchName, year, month } = req.query;
+
+        if (!branchName || !year || !month) {
+            return ERROR(res, { message: 'branchName, year, and month parameters are required' }, req.span, 400);
+        }
+
+        const salesData = await Service.getDailySalesDataForMonth(branchName, year, month);
+        SUCCESS(res, Codes.SUC_CODES, { salesData }, req.span);
+    } catch (error) {
+        console.error('Error fetching daily sales data for month:', error);
+        ERROR(res, { message: 'Failed to fetch daily sales data for month', error: error.message }, req.span, 500);
+    }
+};
