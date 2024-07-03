@@ -33,8 +33,6 @@ export const generateSTN_NO = async () => {
 
 
 
-
-
 // Function to create Stock TransferOUT
 export const addStockTransfer = async (requestedBy, requestBranch, supplyingBranch) => {
     try {
@@ -56,10 +54,6 @@ export const addStockTransfer = async (requestedBy, requestBranch, supplyingBran
 
 
 
-
-
-  
-  
 //Function to update data in stock transfer table when staock transfer IN
   export const updateStockTransferSubmitted = async (STN_NO, submittedBy) => {
     try {
@@ -82,33 +76,6 @@ export const addStockTransfer = async (requestedBy, requestBranch, supplyingBran
 
 
   
-//Function to get all transfers
-  export const getAllStockTransfers = async () => {
-    try {
-      const stockTransfers = await stockTransfer.findAll();
-      return stockTransfers;
-    } catch (error) {
-      throw new Error("Error fetching stock transfers: " + error.message);
-    }
-  };
-
-
-
-  //Function to display the data to a supplying branch
-  export const getStockTransfersBySupplyingBranch = async (supplyingBranch) => {
-    const [err, stockTransfers] = await to(stockTransfer.findAll({
-      where: { supplyingBranch },
-      attributes: ['STN_NO', 'createdAt', 'requestBranch', 'supplyingBranch', 'status', 'requestedBy', 'submittedBy', 'submittedAt'],
-    }));
-  
-    if (err) TE(err);
-    if (!stockTransfers || stockTransfers.length === 0) TE("No stock transfers found for this supplying branch");
-  
-    return stockTransfers;
-  };
-  
-
-
 //Function to cancel stock request IN
 export const cancelStockTransfer = async (STN_NO, submittedBy) => {
   const [err, stockTransferRecord] = await to(stockTransfer.findOne({
@@ -132,81 +99,48 @@ export const cancelStockTransfer = async (STN_NO, submittedBy) => {
 
 
 
-//Function to display the data to a requested branch
-  export const getStockTransfersByRequestBranch = async (requestBranch) => {
+  export const getAllStockTransfers = async () => {
     try {
-      const stockTransfers = await stockTransfer.findAll({
-        where: { requestBranch },
-        attributes: [
-          'STN_NO',
-          'createdAt',
-          'requestBranch',
-          'supplyingBranch',
-          'status',
-          'requestedBy',
-          'submittedBy',
-          'submittedAt'
-        ],
-      });
-  
-      return stockTransfers;
-    } catch (error) {
-      console.error('Error fetching stock transfers by request branch:', error);
-      throw new Error('Failed to fetch stock transfers');
-    }
-  };
-
-
-
-  export const getStockTransferDetailsBySTN_NO = async (STN_NO) => {
-    try {
-      const transferData = await stockTransfer.findOne({
-        where: { STN_NO },
-        attributes: ['STN_NO', 'requestBranch', 'supplyingBranch'],
-        raw: true,
-      });
-  
-      if (!transferData) {
-        throw new Error('Stock transfer not found');
-      }
-  
-      const productData = await TransferProduct.findAll({
-        where: { STN_NO },
-        attributes: ['productId', 'requestedQty'],
-        raw: true,
-      });
-  
-      if (!productData.length) {
-        throw new Error('No products found for the given STN_NO');
-      }
-  
-      const productsWithDetails = await Promise.all(productData.map(async (product) => {
-        const productInfo = await products.findOne({
-          where: { productId: product.productId },
-          attributes: ['productName'],
-          raw: true,
+        const stockTransfers = await stockTransfer.findAll({
+            attributes: ['STN_NO', 'requestBranch', 'supplyingBranch', 'submittedBy', 'requestedBy', 'submittedAt', 'status', 'createdAt'],
         });
-  
-        if (!productInfo) {
-          throw new Error(`Product not found for productId: ${product.productId}`);
-        }
-  
-        return {
-          ...product,
-          productName: productInfo.productName,
-        };
-      }));
-  
-      return {
-        ...transferData,
-        products: productsWithDetails,
-      };
+
+        const transfersWithProducts = await Promise.all(stockTransfers.map(async (transfer) => {
+            const productData = await TransferProduct.findAll({
+                where: { STN_NO: transfer.STN_NO },
+                attributes: ['productId', 'requestedQty', 'createdAt'],
+            });
+
+            const productsWithDetails = await Promise.all(productData.map(async (product) => {
+                const productInfo = await products.findOne({
+                    where: { productId: product.productId },
+                    attributes: ['productName'],
+                    raw: true,
+                });
+
+                if (!productInfo) {
+                    throw new Error(`Product not found for productId: ${product.productId}`);
+                }
+
+                return {
+                    ...product.dataValues,
+                    productName: productInfo.productName,
+                };
+            }));
+
+            return {
+                ...transfer.dataValues,
+                products: productsWithDetails,
+            };
+        }));
+
+        return transfersWithProducts;
     } catch (error) {
-      console.error('Error fetching stock transfer details by STN_NO:', error);
-      throw new Error('Failed to fetch stock transfer details');
+        console.error('Error fetching stock transfers:', error);
+        throw new Error('Failed to fetch stock transfers');
     }
-  };
-  
+};
+
 
 
 
@@ -280,21 +214,3 @@ export const cancelStockTransfer = async (STN_NO, submittedBy) => {
 
 
 
-  // Function to get stock transfers in date range
-export const getStockTransfersByDateRange = async (start, end) => {
-  try {
-    const stockTransfers = await stockTransfer.findAll({
-      where: {
-        createdAt: {
-          [Op.between]: [start, end],
-        },
-      },
-      attributes: ['STN_NO', 'createdAt', 'requestedBranch', 'status', 'requestedBy', 'submittedBy', 'submittedAt'],
-    });
-
-    return stockTransfers;
-  } catch (error) {
-    console.error('Error fetching stock transfers by date range:', error);
-    throw error;
-  }
-};

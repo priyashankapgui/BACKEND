@@ -25,7 +25,7 @@ const branches = sequelize.define('branches', {
         type: DataTypes.STRING(15)
     },
     createdAt: {
-        type: 'TIMESTAMP',
+        type: 'TIMESTAMP', 
         defaultValue: DataTypes.NOW,
         allowNull: false
     }, 
