@@ -107,16 +107,79 @@ export const updateCustomerDetailsController = async (req, res) => {
 };
 
 export const cancelBillByNumberController = async (req, res) => {
+    console.log("Hiiii cancel");
     try {
-        const { billNo } = req.params;
+        const { billNo, products, branchName } = req.body;
+
+        const RefundBillProducts = products.map(product => ({
+            billNo,
+            productId: product.productId,
+            batchNo: product.batchNo,
+            billQty: product.billQty,
+            returnQty: product.billQty,
+            sellingPrice: product.sellingPrice,
+            discount: product.discount,
+        }));
         const canceledBill = await Service.cancelBillByNumber(billNo);
         if (canceledBill) {
             SUCCESS(res, SUC_CODES, canceledBill, req.span);
+
+            const results = await ProductBatchSum.handleRefund(RefundBillProducts, branchName);
         } else {
             ERROR(res, { message: 'Bill not found' }, req.span, 404);
         }
     } catch (error) {
         console.error('Error canceling bill:', error);
         ERROR(res, error, req.span);
+    }
+};
+
+export const getSumOfBillTotalAmountForDateController = async (req, res) => {
+    try {
+        const { branchName, date } = req.query;
+
+        if (!branchName || !date) {
+            return ERROR(res, { message: 'branchName and date parameters are required' }, req.span, 400);
+        }
+
+        const totalAmount = await Service.getSumOfBillTotalAmountForDate(branchName, date);
+        SUCCESS(res, Codes.SUC_CODES, { totalAmount }, req.span);
+    } catch (error) {
+        console.error('Error fetching sum of billTotalAmount for date:', error);
+        ERROR(res, { message: 'Failed to fetch sum of billTotalAmount for date', error: error.message }, req.span, 500);
+    }
+};
+
+export const getNetTotalAmountForDateController = async (req, res) => {
+    try {
+        const { branchName, date } = req.query;
+
+        if (!branchName || !date) {
+            return ERROR(res, { message: 'branchName and date parameters are required' }, req.span, 400);
+        }
+
+        const result = await Service.getNetTotalAmountForDate(branchName, date);
+        SUCCESS(res, SUC_CODES, result, req.span);
+    } catch (error) {
+        console.error('Error fetching net total amount for date:', error);
+        ERROR(res, { message: 'Failed to fetch net total amount for date', error: error.message }, req.span, 500);
+    }
+};
+
+
+//for chart
+export const getDailySalesDataForMonthController = async (req, res) => {
+    try {
+        const { branchName, year, month } = req.query;
+
+        if (!branchName || !year || !month) {
+            return ERROR(res, { message: 'branchName, year, and month parameters are required' }, req.span, 400);
+        }
+
+        const salesData = await Service.getDailySalesDataForMonth(branchName, year, month);
+        SUCCESS(res, Codes.SUC_CODES, { salesData }, req.span);
+    } catch (error) {
+        console.error('Error fetching daily sales data for month:', error);
+        ERROR(res, { message: 'Failed to fetch daily sales data for month', error: error.message }, req.span, 500);
     }
 };

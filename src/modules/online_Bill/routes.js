@@ -11,4 +11,7 @@ router.get('/onlineBills/:onlineBillNo', onlineBillControllers.getOnlineBillByNu
 router.get('/onlineBillsByCustomer/:customerId', authenticateCustomerToken,onlineBillControllers.getOnlineBillsByCustomerId)
 router.put('/onlineBills/:onlineBillNo', validator.update, onlineBillControllers.updateOnlineBillController);
 router.put('/onlineBillAmount/:onlineBillNo', validator.update, onlineBillControllers.updateOnlineBillAmountController);
+router.get('/billTotalsForDate', onlineBillControllers.getSumOfOnlineBillTotalAmountForDateController);
+router.get('/daily-online-sales-data', onlineBillControllers.getDailyOnlineSalesDataForMonthController);
+
 export default router;
