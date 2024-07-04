@@ -39,7 +39,7 @@ export const submitStockTransferAndProductBatch = async (req, res) => {
 //Function to update totalAvailableQty when saving the stock Transfer OUT
 export const updateOrAddProductBatchSumController = async (req, res) => {
   try {
-    const { STN_NO, requestBranch, products } = req.body.updates;
+    const { STN_NO, requestBranch, products } = req.body;
     console.log("STN_NO",STN_NO);
     console.log("requestBranch",requestBranch);
     console.log("products",products);
