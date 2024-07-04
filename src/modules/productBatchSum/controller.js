@@ -329,7 +329,7 @@ export const getAlreadyExpProductBatchSumDataByBranchController = async (req, re
 };
 
 export const getProductDetailsByBranchNameController = async (req, res) => {
-  const { branchName } = req.body;
+  const { branchName } = req.query;
   console.log("branchName", branchName);
 
   try {
