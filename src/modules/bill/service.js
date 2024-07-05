@@ -197,12 +197,12 @@ export const getNetTotalAmountForDate = async (branchName, date) => {
 export const getDailySalesDataForMonth = async (branchName, year, month) => {
     try {
         const branchId = await mapBranchNameToId(branchName);
-        const startDate = new Date(year, month - 1, 1);
-        const endDate = new Date(year, month, 0); // Last day of the month
+        const startDate = new Date(Date.UTC(year, month - 1, 1));
+        const endDate = new Date(Date.UTC(year, month, 0)); // Last day of the month
         const salesData = [];
 
-        for (let day = 1; day <= endDate.getDate(); day++) {
-            const date = new Date(year, month - 1, day);
+        for (let day = 1; day <= endDate.getUTCDate(); day++) {
+            const date = new Date(Date.UTC(year, month - 1, day));
             const formattedDate = date.toISOString().split('T')[0];
             const { newTotalAmount } = await getNetTotalAmountForDate(branchName, formattedDate);
             salesData.push({ day, totalAmount: newTotalAmount });

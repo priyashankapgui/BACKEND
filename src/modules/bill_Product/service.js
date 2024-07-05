@@ -143,14 +143,12 @@ export const getBillProductsByBillNumber = async (billNo) => {
 
 export const useSuccCodes = async (req, res) => {
     try {
-        // Perform some operation
         const result = await SomeOperation();
+        return SUCCESS(res, SUC_CODES, result, req.span);
 
-        // Example usage of SUC_CODES
-        return SUCCESS(res, SUC_CODES, result, req.span); // Assuming SUCCESS is a helper function
     } catch (error) {
         console.error('Error performing operation:', error);
-        return error(res, error, req.span); // Assuming ERROR is a helper function
+        return error(res, error, req.span); 
     }
 };
 

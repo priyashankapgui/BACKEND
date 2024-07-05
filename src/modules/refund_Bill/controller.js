@@ -110,3 +110,15 @@ export const getSumOfRefundBillTotalAmountForDateController = async (req, res) =
         ERROR(res, { message: 'Failed to fetch sum of refundBillTotalAmount for date', error: error.message }, req.span, 500);
     }
 };
+
+
+export const getRefundBillProductsByBillNumberController = async (req, res) => {
+    try {
+        const { billNo } = req.params;
+        const refundBillProducts = await refundBillProductService.getRefundBillProductsByBillNumber(billNo);
+        res.status(200).json(refundBillProducts);
+    } catch (error) {
+        console.error('Failed to retrieve refund bill products:', error);
+        res.status(500).json({ error: error.message });
+    }
+};

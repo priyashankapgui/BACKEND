@@ -154,12 +154,12 @@ const getSumOfOnlineBillTotalAmountForDate = async (branchName, date) => {
 export const getDailyOnlineSalesDataForMonth = async (branchName, year, month) => {
     try {
         const branchId = await mapBranchNameToId(branchName);
-        const startDate = new Date(year, month - 1, 1);
-        const endDate = new Date(year, month, 0);
+        const startDate = new Date(Date.UTC(year, month - 1, 1));
+        const endDate = new Date(Date.UTC(year, month, 0));
         const onlineSalesData = [];
 
-        for (let day = 1; day <= endDate.getDate(); day++) {
-            const date = new Date(year, month - 1, day);
+        for (let day = 1; day <= endDate.getUTCDate(); day++) {
+            const date = new Date(Date.UTC(year, month - 1, day));
             const formattedDate = date.toISOString().split('T')[0];
             const onlineBillTotalAmount = await getSumOfOnlineBillTotalAmountForDate(branchName, formattedDate);
             onlineSalesData.push({ day, totalAmount: onlineBillTotalAmount });
@@ -172,6 +172,7 @@ export const getDailyOnlineSalesDataForMonth = async (branchName, year, month) =
         throw new Error('Error fetching daily online sales data for month: ' + error.message);
     }
 };
+
 export {
     generateOnlineBillNo,
     createOnlineBill,
