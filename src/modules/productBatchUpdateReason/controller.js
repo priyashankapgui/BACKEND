@@ -23,8 +23,7 @@ const { SUC_CODES } = Codes;
 
 
 export const adjustStockDetails = async (req, res) => {
-  const updates = req.body.updates;
-  console.log("data ha",updates);
+  const updates = req.body;
 
   if (!updates || !updates.length) {
     return res.status(400).json({ error: 'At least one update is required' });
