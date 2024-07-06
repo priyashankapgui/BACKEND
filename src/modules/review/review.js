@@ -49,7 +49,7 @@ const Review = sequelize.define('Review', {
             console.log('Before save hook execution:', review.toJSON());
 
             const totalStars =
-                (review.oneStar || 0) +
+                (review.oneStar || 0)*1 +
                 (review.twoStars || 0) * 2 +
                 (review.threeStars || 0) * 3 +
                 (review.fourStars || 0) * 4 +
