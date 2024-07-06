@@ -1,0 +1,6 @@
+# dotenv environment variables file
+.env
+/node_modules
+
+/src/blobService/uploads
+
