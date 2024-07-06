@@ -5,6 +5,7 @@ import * as reviewService from './service.js'; // Import the service functions
 const createReview = async (req, res) => {
     try {
         const review = await reviewService.createReview(req.body);
+        
         res.status(201).json(review);
     } catch (err) {
         res.status(400).json({ error: err.message });
@@ -26,24 +27,17 @@ const getReviewById = async (req, res) => {
 };
 
 const updateReview = async (req, res) => {
-    const { id } = req.params;
+    const { productId } = req.params; // Assuming productId is part of the URL
     try {
-        const review = await reviewService.updateReview(id, req.body);
+        // Assuming reviewService.updateReview handles updating based on productId
+        const review = await reviewService.updateReview(productId, req.body);
         res.json(review);
     } catch (err) {
         res.status(400).json({ error: err.message });
     }
 };
 
-const deleteReview = async (req, res) => {
-    const { id } = req.params;
-    try {
-        await reviewService.deleteReview(id);
-        res.json({ message: 'Review deleted successfully' });
-    } catch (err) {
-        res.status(400).json({ error: err.message });
-    }
-};
+
 
 const getAllReviews = async (req, res) => {
     try {
@@ -68,7 +62,6 @@ export {
     createReview,
     getReviewById,
     updateReview,
-    deleteReview,
     getAllReviews,
     getReviewsByProductId,
 };

@@ -1,15 +1,18 @@
 // services/reviewService.js
 
+import e from 'express';
 import Review from './review.js';
 
 const createReview = async (reviewData) => {
     try {
         const review = await Review.create(reviewData);
         return review;
+        
     } catch (err) {
-        throw new Error('Failed to create review');
+        throw new Error(err);
     }
 };
+
 
 const getReviewById = async (id) => {
     try {
@@ -20,40 +23,37 @@ const getReviewById = async (id) => {
     }
 };
 
-const updateReview = async (id, reviewData) => {
+const updateReview = async (productId, reviewData) => {
     try {
-        const [updated] = await Review.update(reviewData, {
-            where: { reviewId: id },
+        // Assuming your Sequelize model is named Review and you want to update reviews for a product
+        const updatedRows = await Review.update(reviewData, {
+            where: { productId: productId },
         });
-        if (updated) {
-            const updatedReview = await Review.findByPk(id);
-            return updatedReview;
+
+        if (updatedRows > 0) {
+            // Successfully updated, retrieve the updated review(s)
+            const updatedReviews = await Review.findAll({
+                where: { productId: productId },
+            });
+            return updatedReviews;
         }
-        throw new Error('Review not found');
+
+        throw new Error('Review not found or not updated');
     } catch (err) {
         throw new Error('Failed to update review');
     }
 };
 
-const deleteReview = async (id) => {
-    try {
-        const deleted = await Review.destroy({
-            where: { reviewId: id },
-        });
-        if (!deleted) {
-            throw new Error('Review not found');
-        }
-    } catch (err) {
-        throw new Error('Failed to delete review');
-    }
-};
+
+
 
 const getAllReviews = async () => {
     try {
         const reviews = await Review.findAll();
+        console.log(reviews);
         return reviews;
     } catch (err) {
-        throw new Error('Failed to retrieve reviews');
+        throw new Error(err);
     }
 };
 
@@ -72,7 +72,6 @@ export {
     createReview,
     getReviewById,
     updateReview,
-    deleteReview,
     getAllReviews,
     getReviewsByProductId,
 };

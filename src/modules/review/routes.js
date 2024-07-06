@@ -5,18 +5,16 @@ import {
     createReview,
     getReviewById,
     updateReview,
-    deleteReview,
     getAllReviews,
     getReviewsByProductId,
 } from './controller.js'; // Import the controller functions
 
-const router = express.Router();
+const reviewRouter = express.Router();
 
-router.post('/review', createReview);
-router.get('/review/:id', getReviewById);
-router.put('/review/:id', updateReview);
-router.delete('/review/:id', deleteReview);
-router.get('/review', getAllReviews);
-router.get('/review/product/:productId', getReviewsByProductId);
+reviewRouter.post('/review', createReview);
+reviewRouter.get('/review/:id', getReviewById);
+reviewRouter.put('/review/:id', updateReview);
+reviewRouter.get('/reviews', getAllReviews);
+reviewRouter.get('/review/product/:productId', getReviewsByProductId);
 
-export default router;
+export default reviewRouter;
