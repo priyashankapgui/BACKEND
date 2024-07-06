@@ -16,6 +16,7 @@ Productrouter.get("/products-category", Controller.getProductsByCategory);
 Productrouter.delete("/products/:productId", Controller.deleteProduct);
 Productrouter.put("/products/:productId", upload.single('image'), Controller.updateProduct); 
 Productrouter.get('/active-stock', Controller.getTotalQuantityByBranchAndProduct);
+Productrouter.get('/products-by-category-and-branch', Controller.getProductAndBatchSumDetailsController);
 
 
 

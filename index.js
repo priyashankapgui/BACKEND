@@ -46,6 +46,7 @@ import TransferProductBatchRouter from "./src/modules/TransferProductBatch/route
 import TransferProduct from "./src/modules/TransferProduct/TransferProduct.js";
 import TransferProductBatch from "./src/modules/TransferProductBatch/TransferProductBatch.js";
 import webImagesrouter from "./src/modules/web_Images/routes.js";
+import review from "./src/modules/review/review.js";
 import bodyParser from "body-parser";
 
 import Stripe from 'stripe';
@@ -83,7 +84,7 @@ app.use('/',TransferProductBatchRouter);
 app.use('/',onlineBillRoutes);
 app.use('/',onlineBillProductRoutes);
 app.use('/',webImagesrouter);
-
+app.use('/',review);
 
 app.use("/api", Productrouter);
 app.use("/api", categoryRouter);
@@ -102,7 +103,7 @@ app.use('/api',productBatchUpdateReasonRouter);
 app.use('/api',stockTransferRouter);
 app.use('/api',TransferProductBatchRouter);
 app.use('/api',webImagesrouter);
-
+app.use('/api',review);
 
 
 
