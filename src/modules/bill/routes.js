@@ -13,5 +13,7 @@ billRouter.get('/bills-all', Controller.getBillDetailsController);
 billRouter.get('/billTotalAmountForDate', Controller.getSumOfBillTotalAmountForDateController);
 billRouter.get('/netBillTotalAmountForDate', Controller.getNetTotalAmountForDateController);
 billRouter.get('/daily-sales-data-chart', Controller.getDailySalesDataForMonthController);
+billRouter.get('/bills-by-branch-and-date-range', Controller.getAllBillsByBranchAndDateRangeController);
+
 
 export default billRouter;

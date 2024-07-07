@@ -863,6 +863,7 @@ export const getAlreadyExpProductBatchSumDataByBranch = async (branchName) => {
   }
 };
 
+
 export const getProductDetailsByBranchName = async (branchName) => {
   try {
     const branch = await branches.findOne({
