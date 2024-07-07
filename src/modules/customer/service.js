@@ -9,11 +9,14 @@ import ResponseError from "../../ResponseError.js";
 
 export const registerCustomer = async (customer) => {
   console.log("Registering customer", customer)
-  const { email, password, phone } = customer;
+  const { email, password} = customer;
   //Check if the email already exists
   const existingCustomer = await Customer.findOne({ where: { email: email } });
   if (existingCustomer) {
     throw new Error("Email already exists");
+  }
+  if (password.length < 8 || password.length > 64) {
+    throw new Error("Invalid password format");
   }
   try {
     const newCustomer = await Customer.create(customer);
@@ -70,7 +73,7 @@ export const updatePasswordService = async (customerId, oldPassword, newPassword
   }
 };
 
-export const loginCustomerService = async (email, password) => {
+export const loginCustomerService = async (email, password, returnHostLink) => {
   const tempUser = await Customer.findOne({ where: { email: email } });
   //console.log(tempUser.email);
   if (!tempUser) {
@@ -115,7 +118,7 @@ export const loginCustomerService = async (email, password) => {
   } else {
     tempUser.failedLoginAttempts = (tempUser.failedLoginAttempts || 0) + 1;
     if(tempUser.failedLoginAttempts >= AUTH.MAX_FAILED_ATTEMPTS) {
-      await resetPasswordEmail(tempUser.email, "template_securityw509"); 
+      await resetPasswordEmail(tempUser.email, "template_securityw509", returnHostLink); 
     }
     await tempUser.save();
     throw new ResponseError(401,"Invalid Credentials");
@@ -123,7 +126,7 @@ export const loginCustomerService = async (email, password) => {
   }
 };
 
-export const resetPasswordEmail = async (email, emaliTemplate) => {
+export const resetPasswordEmail = async (email, emaliTemplate, returnHostLink) => {
   if (!email) {
       throw new Error("Email is required");
   }
@@ -143,7 +146,7 @@ export const resetPasswordEmail = async (email, emaliTemplate) => {
           expiresIn: "15m",
         }
       );
-      const resetLink = `http://localhost:3000/login/forgotpw/resetpw?token=${passwordResetToken}`;
+      const resetLink = `http://${returnHostLink}/login/forgotpw/resetpw?token=${passwordResetToken}`;
       emailjs.init({
         publicKey: "U4RoOjKB87mzLhhqW",
         privateKey: process.env.EMAILJS_API_KEY,

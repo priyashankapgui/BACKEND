@@ -192,13 +192,14 @@ export const deleteEmployee = async (req, res) => {
 
 export const loginEmployee = async (req, res) => {
   const { employeeId, password } = req.body;
+  const returnHostLink = req.get('origin');
   console.log(employeeId, password);
   if (!employeeId || !password) {
     res.status(400).json({ error: "Missing required fields" });
     return;
   }
   try {
-    const data = await handleLogin(employeeId, password);
+    const data = await handleLogin(employeeId, password, returnHostLink);
     res.status(200).json(data);
   } 
   catch (error) {
@@ -208,12 +209,13 @@ export const loginEmployee = async (req, res) => {
 
 export const forgotPassword = async (req, res) => {
   const { employeeId } = req.body;
+  const returnHostLink = req.get('origin');
   if (!employeeId) {
     res.status(400).json({error: "employee ID is required" });
     return;
   }
   try {
-    const data = await forgotPasswordService(employeeId, "template_resetpw509");
+    const data = await forgotPasswordService(employeeId, "template_resetpw509", returnHostLink);
     res.status(200).json(data);
   } catch (error) {
     res.status(error.status || 500).json({ error: error.message });

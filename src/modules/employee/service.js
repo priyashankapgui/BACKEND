@@ -138,10 +138,10 @@ export const createEmployee = async (req) => {
   if (!userRoleID) {
     throw new Error("User role does not exist");
   }
-  // // Validate password
-  // if (password.length < 8 || password.length > 64) {
-  //   throw new Error("Invalid password format");
-  // }
+  // Validate password
+  if (password.length < 8 || password.length > 64) {
+    throw new Error("Invalid password format");
+  }
 
   const t = await sequelize.transaction();
   try {
@@ -185,17 +185,27 @@ export const updateEmployeeById = async (
   if (userRole.userRoleId === 1){
     throw new Error("Cannot assign super admin role to employee");
   }
+  const password = employeeData.password;
+  if (password.length < 8 || password.length > 64) {
+    throw new Error("Invalid password format");
+  }
   employeeData.userRoleId = userRole.userRoleId;
   const employee = await Employee.findByPk(employeeId);
-  console.log(employee);
+  //console.log(employee);
   if (!employee) {
     throw new Error("Employee not found");
   }
   const t = await sequelize.transaction();
   try {
     if (role == 1 || (role!=userRole.userRoleId && branch === branchRow.branchName)) {
-      console.log(employeeData);
-      const updatedEmployee = await employee.update(employeeData, {transaction: t});
+      const tempEmployeeData = {
+        ...employeeData,
+        email: employeeData.email !== "" ? employeeData.email : null,
+        phone: employeeData.phone !== "" ? employeeData.phone : null,
+        address: employeeData.address !== "" ? employeeData.address : null,
+      }
+      console.log(tempEmployeeData);
+      const updatedEmployee = await employee.update(tempEmployeeData, {transaction: t});
       if (req.file) {
         await imageUploadwithCompression(req.file, "cms-data", employeeId);
       }
@@ -239,6 +249,9 @@ export const updateEmployeePassword = async (employeeId, employeePasswordData) =
   if (!employee) {
     throw new ResponseError(400,"Employee not found");
   }
+  if (newPassword.length < 8 || newPassword.length > 64) {
+    throw new Error("Invalid password format");
+  }
   const storedPassword = employee.password;
   const passwordMatch = await bcrypt.compare(currentPassword, storedPassword);
   if (!passwordMatch) {
@@ -277,7 +290,7 @@ export const deleteEmployeeById = async (employeeId, role, branch) => {
   }
 };
 
-export const handleLogin = async (employeeId, password) => {
+export const handleLogin = async (employeeId, password, returnHostLink) => {
   const tempUser = await Employee.findByPk(employeeId);
   if (!tempUser) {
     throw new ResponseError(404, "Employee not found")
@@ -299,7 +312,7 @@ export const handleLogin = async (employeeId, password) => {
   else {
     tempUser.failedLoginAttempts = (tempUser.failedLoginAttempts || 0) + 1;
     if(tempUser.failedLoginAttempts >= AUTH.MAX_FAILED_ATTEMPTS) {
-      await forgotPasswordService(tempUser.employeeId, "template_securityw509"); 
+      await forgotPasswordService(tempUser.employeeId, "template_securityw509", returnHostLink); 
     }
     await tempUser.save();
     throw new ResponseError(401, "Invalid credentials");
@@ -345,7 +358,7 @@ export const handleLoginSuccess = async (employeeId) => {
   };
 };
 
-export const forgotPasswordService = async (employeeId, emaliTemplate) => {
+export const forgotPasswordService = async (employeeId, emaliTemplate, returnHostLink) => {
     const user = await Employee.findOne({ where: { employeeId: employeeId } });
     if (!user) {
       throw new ResponseError(400, "Employee ID not found");
@@ -362,7 +375,8 @@ export const forgotPasswordService = async (employeeId, emaliTemplate) => {
         ACCESS_TOKEN,
         { expiresIn: "10m" }
       );
-      const resetLink = `http://localhost:3000/login/resetpw?token=${passwordResetToken}`;
+      const resetLink = `${returnHostLink}/login/resetpw?token=${passwordResetToken}`;
+      console.log(returnHostLink, resetLink);
       emailjs.init({
         publicKey: "U4RoOjKB87mzLhhqW",
         privateKey: process.env.EMAILJS_API_KEY,
