@@ -21,6 +21,10 @@ const Customer = sequelize.define('customer', {
     email: {
         type: DataTypes.STRING,
         allowNull: false,
+        unique: {
+            args: true,
+            msg: "Email already associated with an account",
+          },
         validate: {
             isEmail: {
                 args: true,
