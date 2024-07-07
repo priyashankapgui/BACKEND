@@ -125,8 +125,6 @@ const updateOnlineBill = async (onlineBillNo, updates) => {
 const getSumOfOnlineBillTotalAmountForDate = async (branchName, date) => {
     try {
         const branchId = await mapBranchNameToId(branchName);
-
-        // Ensure the date is in the correct format (YYYY-MM-DD)
         const formattedDate = new Date(date).toISOString().split('T')[0];
 
         const result = await onlineBill.findOne({
@@ -143,14 +141,14 @@ const getSumOfOnlineBillTotalAmountForDate = async (branchName, date) => {
             throw new Error("No data found");
         }
 
-        return result.dataValues.onlineBillTotalAmount || 0; // Return 0 if no bills found
+        return result.dataValues.onlineBillTotalAmount || 0; 
     } catch (error) {
         console.error('Error in getSumOfOnlineBillTotalAmountForDate:', error);
         throw new Error('Error fetching sum of onlineBillTotalAmount for date: ' + error.message);
     }
 };
 
-//for Chart
+
 export const getDailyOnlineSalesDataForMonth = async (branchName, year, month) => {
     try {
         const branchId = await mapBranchNameToId(branchName);
