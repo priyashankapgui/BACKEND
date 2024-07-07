@@ -9,7 +9,7 @@ const categoryRouter = express.Router();
 const upload = multer({ storage: multer.memoryStorage() });
 categoryRouter.post("/categories", authenticateTokenWithPermission('products'), upload.single('image'), Controller.createCategory);
 categoryRouter.put("/categories/:categoryId", authenticateTokenWithPermission('products'), upload.single('image'), Controller.updateCategory); 
-categoryRouter.get("/categories", authenticateTokenWithPermission('products'), Controller.getCategories);
+categoryRouter.get("/categories", Controller.getCategories);
 categoryRouter.get("/categories/:categoryId", authenticateTokenWithPermission('products'), Controller.getCategory);
 categoryRouter.delete("/categories/:categoryId", authenticateTokenWithPermission('products'), Controller.deleteCategory);
 
