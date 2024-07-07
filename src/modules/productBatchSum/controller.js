@@ -143,7 +143,7 @@ export const getProductsByBarcodeController = async (req, res) => {
 
 //Function to update the discount
 export const updateDiscount = async (req, res) => {
-  const updates = req.body.updates; // Assuming updates is an array of objects
+  const updates = req.body; // Assuming updates is an array of objects
 
   try {
     const results = await Promise.all(
@@ -162,29 +162,6 @@ export const updateDiscount = async (req, res) => {
       })
     );
 
-    SUCCESS(res, SUC_CODES, results, req.span);
-  } catch (err) {
-    console.log(err);
-    ERROR(res, err, res.span);
-  }
-};
-
-
-
-//Function to minQty
-export const getProductQuantitiesByBranchController = async (req, res) => {
-  try {
-    const { branchName } = req.query;
-
-    if (!branchName) {
-      return res.status(400).json({ error: 'Branch name is required' });
-    }
-
-    const results = await ProductBatchSumService.getProductQuantitiesByBranch(branchName);
-
-    if (results.length === 0) {
-      return res.status(404).json({ message: 'No products found with quantities less than minQty' });
-    }
     SUCCESS(res, SUC_CODES, results, req.span);
   } catch (err) {
     console.log(err);

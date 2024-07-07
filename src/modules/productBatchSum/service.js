@@ -909,3 +909,46 @@ export const getProductDetailsByBranchName = async (branchName) => {
     throw error;
   }
 };
+
+
+export const getProductsAndBatchSumDetails = async (categoryId, branchName) => {
+  try {
+    // Find the branchId from branchName
+    const branch = await branches.findOne({
+      where: { branchName },
+      attributes: ['branchId']
+    });
+
+    if (!branch) {
+      throw new Error('Branch not found');
+    }
+
+    const branchId = branch.branchId;
+
+    // Fetch products based on categoryId
+    const productDetails = await products.findAll({
+      where: { categoryId },
+      attributes: ['productId', 'productName', 'barcode', 'description', 'image'],
+    });
+
+    // Extract productIds from the productDetails
+    const productIds = productDetails.map(product => product.productId);
+
+    if (productIds.length === 0) {
+      return { productDetails, batchSumDetails: [] }; // No products found for the given category
+    }
+
+    // Fetch product batch sums based on productIds and branchId
+    const batchSumDetails = await productBatchSum.findAll({
+      where: {
+        productId: productIds,
+        branchId
+      },
+      attributes: ['productId', 'productName', 'batchNo', 'barcode', 'totalAvailableQty', 'discount', 'branchId', 'branchName', 'expDate', 'sellingPrice'],
+    });
+
+    return { productDetails, batchSumDetails };
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};

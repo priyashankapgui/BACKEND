@@ -151,9 +151,23 @@ SUCCESS(res, SUC_CODES, result, req.span);
 }
 };
 
+//Function to get product and batch sum details
 
+export const getProductAndBatchSumDetailsController = async (req, res) => {
+  try {
+    const { categoryId, branchName } = req.query;
 
+    if (!categoryId || !branchName) {
+      return res.status(400).json({ message: 'categoryId and branchName are required' });
+    }
 
+    // Call the service function to get product and batch sum details
+    const { productDetails, batchSumDetails } = await ProductBatchSumService.getProductsAndBatchSumDetails(categoryId, branchName);
 
-
+    // Send the response back to the client
+    res.status(200).json({ productDetails, batchSumDetails });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
 

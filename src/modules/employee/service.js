@@ -161,7 +161,7 @@ export const createEmployee = async (req) => {
     return newEmployee;
   } catch (error) {
     await t.rollback();
-    throw new Error("Error creating employee: " + error.message);
+    throw new Error("Error creating employee: " + error.errors[0]?.message ? error.errors[0].message : error.message);
   }
 };
 
@@ -206,7 +206,7 @@ export const updateEmployeeById = async (
     }
   } catch (error) {
     await t.rollback();
-    throw new Error("Error updating employee: " + error.message);
+    throw new Error("Error updating employee: " + error.errors[0]?.message ? error.errors[0].message : error.message);
   }
 };
 

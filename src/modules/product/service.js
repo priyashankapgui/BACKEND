@@ -197,6 +197,3 @@ export const deleteProductById = async (productId) => {
   return { message: 'Product successfully deleted' };
 };
 
-
-
-

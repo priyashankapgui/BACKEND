@@ -3,11 +3,6 @@ import sequelize from '../../../config/database.js';
 import ProductBatchSum from '../productBatchSum/productBatchSum.js';
 
 const ProductBatchUpdateReason = sequelize.define('ProductBatchUpdateReason', {
-  // reasonId: {
-  //   type: DataTypes.INTEGER,
-  //   autoIncrement: true,
-  //   primaryKey: true,
-  // },
   productId: {
     type: DataTypes.STRING,
     allowNull: false,
@@ -56,13 +51,6 @@ const ProductBatchUpdateReason = sequelize.define('ProductBatchUpdateReason', {
 }, {
   tableName: 'product_batch_update_reason',
   timestamps: false,
-  // indexes: [
-  //   {
-  //     unique: true,
-  //     fields: ['productId', 'batchNo', 'branchId', 'updatedAt'],
-  //     name: 'unique_reason_index'
-  //   }
-  // ]
 });
 
 export default ProductBatchUpdateReason;
