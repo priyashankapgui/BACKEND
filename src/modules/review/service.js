@@ -30,7 +30,7 @@ const updateReview = async (productId, reviewData) => {
         });
 
         if (!existingReview) {
-            throw new Error('Review not found');
+            createReview(reviewData);
         }
 
         // Update the values by adding the new data to the existing data
