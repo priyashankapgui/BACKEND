@@ -7,16 +7,15 @@ const createReview = async (reviewData) => {
     try {
         const review = await Review.create(reviewData);
         return review;
-        
     } catch (err) {
         throw new Error(err);
     }
 };
 
 
-const getReviewById = async (id) => {
+const getReviewById = async (productId) => {
     try {
-        const review = await Review.findByPk(id);
+        const review = await Review.findByPk(productId);
         return review;
     } catch (err) {
         throw new Error('Failed to retrieve review');
@@ -25,24 +24,62 @@ const getReviewById = async (id) => {
 
 const updateReview = async (productId, reviewData) => {
     try {
-        // Assuming your Sequelize model is named Review and you want to update reviews for a product
-        const updatedRows = await Review.update(reviewData, {
+        // Retrieve the existing review data for the product
+        const existingReview = await Review.findOne({
             where: { productId: productId },
         });
 
-        if (updatedRows > 0) {
-            // Successfully updated, retrieve the updated review(s)
-            const updatedReviews = await Review.findAll({
-                where: { productId: productId },
-            });
-            return updatedReviews;
+        if (!existingReview) {
+            throw new Error('Review not found');
         }
 
-        throw new Error('Review not found or not updated');
+        // Update the values by adding the new data to the existing data
+        const updatedOneStar = (existingReview.oneStar || 0) + (reviewData.oneStar || 0);
+        const updatedTwoStars = (existingReview.twoStars || 0) + (reviewData.twoStars || 0);
+        const updatedThreeStars = (existingReview.threeStars || 0) + (reviewData.threeStars || 0);
+        const updatedFourStars = (existingReview.fourStars || 0) + (reviewData.fourStars || 0);
+        const updatedFiveStars = (existingReview.fiveStars || 0) + (reviewData.fiveStars || 0);
+
+        // Calculate totalStars, numberOfReviews, and averageRating
+        const totalStars = 
+            updatedOneStar * 1 +
+            updatedTwoStars * 2 +
+            updatedThreeStars * 3 +
+            updatedFourStars * 4 +
+            updatedFiveStars * 5;
+        const numberOfReviews =
+            updatedOneStar +
+            updatedTwoStars +
+            updatedThreeStars +
+            updatedFourStars +
+            updatedFiveStars;
+        const averageRating = numberOfReviews ? totalStars / numberOfReviews : 0;
+
+        // Update the review data
+        const updatedReviewData = {
+            oneStar: updatedOneStar,
+            twoStars: updatedTwoStars,
+            threeStars: updatedThreeStars,
+            fourStars: updatedFourStars,
+            fiveStars: updatedFiveStars,
+            totalStars: totalStars,
+            numberOfReviews: numberOfReviews,
+            averageRating: averageRating,
+        };
+
+        await existingReview.update(updatedReviewData);
+
+        // Retrieve the updated review
+        const updatedReview = await Review.findOne({
+            where: { productId: productId },
+        });
+
+        return updatedReview;
     } catch (err) {
         throw new Error('Failed to update review');
     }
 };
+
 
 
 

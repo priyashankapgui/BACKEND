@@ -13,7 +13,7 @@ const reviewRouter = express.Router();
 
 reviewRouter.post('/review', createReview);
 reviewRouter.get('/review/:id', getReviewById);
-reviewRouter.put('/review/:id', updateReview);
+reviewRouter.put('/review/:productId', updateReview);
 reviewRouter.get('/reviews', getAllReviews);
 reviewRouter.get('/review/product/:productId', getReviewsByProductId);
 

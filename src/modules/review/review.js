@@ -4,19 +4,17 @@ import products from '../product/product.js';
 
 const Review = sequelize.define('Review', {
     reviewId: {
-        type: DataTypes.UUID,
-        defaultValue: DataTypes.UUIDV4,
-        allowNull:false,
-        primaryKey: true,
+        type: DataTypes.INTEGER,
         autoIncrement: true,
+        allowNull: false,
+        primaryKey: true,
     },
     productId: {
         type: DataTypes.STRING,
         allowNull: false,
-        primaryKey: true,
         references: {
-          model: products,
-          key: 'productId',
+            model: products,
+            key: 'productId',
         },
     },
     oneStar: {
@@ -43,33 +41,40 @@ const Review = sequelize.define('Review', {
         type: DataTypes.INTEGER,
         allowNull: true,
     },
-}, {
-    hooks: {
-        async beforeSave(review) {
-            console.log('Before save hook execution:', review.toJSON());
-
-            const totalStars =
-                (review.oneStar || 0)*1 +
-                (review.twoStars || 0) * 2 +
-                (review.threeStars || 0) * 3 +
-                (review.fourStars || 0) * 4 +
-                (review.fiveStars || 0) * 5;
-            const numberOfReviews =
-                (review.oneStar || 0) +
-                (review.twoStars || 0) +
-                (review.threeStars || 0) +
-                (review.fourStars || 0) +
-                (review.fiveStars || 0);
-            const averageRating = numberOfReviews ? totalStars / numberOfReviews : 0;
-
-            // Update the instance with calculated values
-            review.totalStars = totalStars;
-            review.setDataValue('numberOfReviews', numberOfReviews); // Use setDataValue for virtual fields
-            review.setDataValue('averageRating', averageRating); // Use setDataValue for virtual fields
-        },
+    numberOfReviews: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
     },
-}
-);
+    averageRating: {
+        type: DataTypes.FLOAT,
+        allowNull: true,
+    },
+// }, {
+//     hooks: {
+//         async beforeSave(review) {
+//             console.log('Before save hook execution:', review.toJSON());
+
+//             const totalStars =
+//                 (review.oneStar || 0) * 1 +
+//                 (review.twoStars || 0) * 2 +
+//                 (review.threeStars || 0) * 3 +
+//                 (review.fourStars || 0) * 4 +
+//                 (review.fiveStars || 0) * 5;
+//             const numberOfReviews =
+//                 (review.oneStar || 0) +
+//                 (review.twoStars || 0) +
+//                 (review.threeStars || 0) +
+//                 (review.fourStars || 0) +
+//                 (review.fiveStars || 0);
+//             const averageRating = numberOfReviews ? totalStars / numberOfReviews : 0;
+
+//             review.totalStars = totalStars;
+//             review.setDataValue('numberOfReviews', numberOfReviews);
+//             review.setDataValue('averageRating', averageRating);
+//         },
+//     },
+  
+});
 
 Review.belongsTo(products, { foreignKey: 'productId' });
 
