@@ -9,6 +9,9 @@ import Customer from "../modules/customer/customer.js";
 export const authenticateToken = async(req, res, next) => {
   try{
     const authHeader = req.headers["authorization"];
+    if(!authHeader){
+      res.status(400).json({ error: "Token Missing" });
+    }
     const token = authHeader.split(" ")[1];
     if(!token){
       res.status(400).json({ error: "Token Missing" });
@@ -45,8 +48,14 @@ export function authenticateTokenWithPermission(pageId){
   return async function(req, res, next){
     try{
       const authHeader = req.headers["authorization"];
+      if(!authHeader){
+        res.status(400).json({ error: "Token Missing" });
+      }
       console.log(authHeader);
       const token = authHeader.split(" ")[1];
+      if(!token){
+        res.status(400).json({ error: "Token Missing" });
+      }
       let decoded;
       try{
         decoded = jwt.verify(token, SECRET_KEY);
@@ -85,7 +94,13 @@ export function authenticateTokenWithPermission(pageId){
 export const authenticateCustomerToken = async (req, res, next) => {
   try {
     const authHeader = req.headers["authorization"];
+    if (!authHeader) {
+      res.status(400).json({ error: "Token Missing" });
+    }
     const token = authHeader.split(" ")[1];
+    if (!token) {
+      res.status(400).json({ error: "Token Missing" });
+    }
     let decoded;
     try{
       decoded = jwt.verify(token, SECRET_KEY);
