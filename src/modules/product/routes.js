@@ -16,6 +16,7 @@ Productrouter.get("/products-category", authenticateTokenWithPermission('product
 Productrouter.delete("/products/:productId", authenticateTokenWithPermission('products'), Controller.deleteProduct);
 Productrouter.put("/products/:productId", authenticateTokenWithPermission('products'), upload.single('image'), Controller.updateProduct); 
 Productrouter.get('/active-stock', authenticateTokenWithPermission('stock-balance'), Controller.getTotalQuantityByBranchAndProduct);
+Productrouter.get('/products-by-category-and-branch', Controller.getProductAndBatchSumDetailsController);
 
 
 

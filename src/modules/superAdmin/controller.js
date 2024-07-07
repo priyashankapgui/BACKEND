@@ -20,10 +20,10 @@ export const getSuperAdmins = async (req, res) => {
 };
 
 export const superAdminLogin = async (req, res) => {
-
     const { userID, password } = req.body;
+    const returnHostLink = req.get('origin')
     try {
-        const data = await handleSuperAdminLogin(userID, password);
+        const data = await handleSuperAdminLogin(userID, password, returnHostLink);
         const token = data.token;
         const user = data.superAdmin;
         res.status(200).json({ 
@@ -45,8 +45,9 @@ export const superAdminLogin = async (req, res) => {
 
 export const superAdminForgotPassword = async (req, res) => {
     const { userID } = req.body;
+    const returnHostLink = req.get('origin');
     try {
-        const data = await sendSuperAdminPasswordResetEmail(userID, "template_resetpw509");
+        const data = await sendSuperAdminPasswordResetEmail(userID, "template_resetpw509", returnHostLink);
         console.log(data);
         res.status(200).json(data);
     } catch (error) {

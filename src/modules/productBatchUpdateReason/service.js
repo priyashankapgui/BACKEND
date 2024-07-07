@@ -126,6 +126,9 @@ export const getProductBatchDetails = async (productId, branchName) => {
 
 
 
+
+
+
 // export const adjustStockDetails = async (updateRequests) => {
 //   try {
 //     const results = await Promise.all(updateRequests.map(async (update) => {

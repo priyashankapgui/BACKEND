@@ -1,11 +1,10 @@
 import TransferProduct from "../TransferProduct/TransferProduct.js";
-import stockTransfer from "../stockTransfer/stockTransfer.js";
 import { to, TE } from "../../helper.js";
 
-
-
 //Function to create Stock transfer OUT
-export const createStockTransferProductService = async (stockTransferProducts) => {
+export const createStockTransferProductService = async (
+  stockTransferProducts
+) => {
   try {
     if (!Array.isArray(stockTransferProducts)) {
       throw new Error("stockTransferProducts should be an array");
@@ -17,7 +16,7 @@ export const createStockTransferProductService = async (stockTransferProducts) =
       const [err, result] = await to(TransferProduct.create(entry));
 
       if (err) {
-        if (err.name === 'SequelizeValidationError') {
+        if (err.name === "SequelizeValidationError") {
           console.error("Validation error for entry:", entry, err.errors);
         } else {
           console.error("Error creating entry:", entry, err);
@@ -35,8 +34,3 @@ export const createStockTransferProductService = async (stockTransferProducts) =
     throw new Error("Error creating Stock Transfer Product: " + error.message);
   }
 };
-
-
-
-
- 
