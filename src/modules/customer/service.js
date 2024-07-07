@@ -15,21 +15,11 @@ export const registerCustomer = async (customer) => {
   if (existingCustomer) {
     throw new Error("Email already exists");
   }
-  // // Validate email
-  // const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  // if (!emailRegex.test(email)) {
-  //   throw new Error("Invalid email format");
-  // }
-  // Validate phone number
-  // const phoneRegex = /^[0-9]{10}$/;
-  // if (!phoneRegex.test(phone)) {
-  //   throw new Error("Invalid phone number");
-  // }
   try {
     const newCustomer = await Customer.create(customer);
     return newCustomer;
   } catch (error) {
-    throw new Error("Error creating customer: " + error.message);
+    throw new Error("Error Creating Customer: " + error.errors[0]?.message ? error.errors[0].message : error.message);
   }
 };
 
@@ -54,7 +44,7 @@ export const updateCustomerService = async (customerId, updatedCustomerData) => 
     console.log(customerData);
     return customerData;
   } catch (error) {
-    throw new Error("Error updating customer: " + error.message);
+    throw new Error("Error Updating Customer: " + error.errors[0]?.message ? error.errors[0].message : error.message);
   }
 };
 

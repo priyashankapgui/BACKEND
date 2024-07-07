@@ -21,7 +21,10 @@ const Employee = sequelize.define('employee', {
             type: DataTypes.STRING,
             allowNull: true,
             validate: {
-                isEmail: true,
+                isEmail: {
+                    args: true,
+                    msg: "Email address is invalid"
+                },
             },
         },
         password: {
@@ -32,7 +35,10 @@ const Employee = sequelize.define('employee', {
             type: DataTypes.STRING,
             allowNull: true,
             validate: {
-                is: /^(?:7|0|(?:\+94))[0-9]{9,10}$/,
+                is: {
+                    args: /^((\+94)[0-9]{9}|(0)[0-9]{9})$/,
+                    msg: "Phone number is invalid"
+                },
             },
         },
         address: {
