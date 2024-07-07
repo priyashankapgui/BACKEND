@@ -13,15 +13,6 @@ const createReview = async (reviewData) => {
 };
 
 
-const getReviewById = async (productId) => {
-    try {
-        const review = await Review.findByPk(productId);
-        return review;
-    } catch (err) {
-        throw new Error('Failed to retrieve review');
-    }
-};
-
 const updateReview = async (productId, reviewData) => {
     try {
         // Retrieve the existing review data for the product
@@ -99,15 +90,20 @@ const getReviewsByProductId = async (productId) => {
         const reviews = await Review.findAll({
             where: { productId },
         });
+        if (reviews.length === 0) {
+            throw new Error('No reviews found for the product');
+            
+        }
         return reviews;
     } catch (err) {
+        console.log(err);
         throw new Error('Failed to retrieve reviews for product');
     }
 };
 
+
 export {
     createReview,
-    getReviewById,
     updateReview,
     getAllReviews,
     getReviewsByProductId,
