@@ -111,6 +111,7 @@ export const getRefundBillProductsByRTBNumber = async (RTBNo) => {
     }
 };
 
+
 export const getRefundBillProductsByBillNumber = async (billNo) => {
     if (!billNo) {
         throw new Error('Bill No parameter is missing');
@@ -118,68 +119,74 @@ export const getRefundBillProductsByBillNumber = async (billNo) => {
 
     console.log("Fetching refund bill details for:", billNo);
     try {
-        // Fetch refund bill details
-        const refundBillDetails = await refund_Bill.findOne({
+        // Fetch all refund bill details related to the bill number
+        const refundBillDetailsList = await refund_Bill.findAll({
             where: { billNo },
             raw: true,
         });
 
-        if (!refundBillDetails) {
-            throw new Error(`refund Bill not found for billNo: ${billNo}`);
+        if (!refundBillDetailsList || refundBillDetailsList.length === 0) {
+            throw new Error(`Refund Bills not found for billNo: ${billNo}`);
         }
 
-        console.log("Refund Bill details:", refundBillDetails);
+        console.log("Refund Bill details list:", refundBillDetailsList);
 
-        // Fetch branch details
-        const branchDetails = await branches.findOne({
-            where: { branchId: refundBillDetails.branchId },
-            raw: true,
-        });
+        const refundBillProductsWithDetailsList = [];
 
-        if (!branchDetails) {
-            throw new Error(`Branch not found for branchId: ${refundBillDetails.branchId}`);
-        }
-
-        console.log("Branch details:", branchDetails);
-
-        // Fetch refund bill products
-        const refundBillProducts = await RefundBillProduct.findAll({
-            where: { RTBNo: refundBillDetails.RTBNo },
-            attributes: ['productId', 'batchNo', 'billQty', 'returnQty', 'sellingPrice', 'discount'],
-            raw: true,
-        });
-
-        if (!refundBillProducts || refundBillProducts.length === 0) {
-            throw new Error(`No products found for RTBNo: ${refundBillDetails.RTBNo}`);
-        }
-
-        console.log("Refund Bill Products:", refundBillProducts);
-
-        // Fetch refund product details for each refund bill product and include productName
-        const refundBillProductsWithDetails = await Promise.all(refundBillProducts.map(async (product) => {
-            const productDetails = await Product.findOne({
-                where: { productId: product.productId },
-                attributes: ['productName'],
+        // Iterate over each refund bill detail
+        for (const refundBillDetails of refundBillDetailsList) {
+            // Fetch branch details
+            const branchDetails = await branches.findOne({
+                where: { branchId: refundBillDetails.branchId },
                 raw: true,
             });
 
-            if (!productDetails) {
-                throw new Error(`Product not found for productId: ${product.productId}`);
+            if (!branchDetails) {
+                throw new Error(`Branch not found for branchId: ${refundBillDetails.branchId}`);
             }
 
-            return {
-                ...product,
-                productName: productDetails.productName,
-            };
-        }));
+            console.log("Branch details:", branchDetails);
+
+            // Fetch refund bill products
+            const refundBillProducts = await RefundBillProduct.findAll({
+                where: { RTBNo: refundBillDetails.RTBNo },
+                attributes: ['productId', 'batchNo', 'billQty', 'returnQty', 'sellingPrice', 'discount'],
+                raw: true,
+            });
+
+            if (!refundBillProducts || refundBillProducts.length === 0) {
+                throw new Error(`No products found for RTBNo: ${refundBillDetails.RTBNo}`);
+            }
+
+            console.log("Refund Bill Products for RTBNo:", refundBillDetails.RTBNo, refundBillProducts);
+
+            // Fetch refund product details for each refund bill product and include productName
+            const refundBillProductsWithDetails = await Promise.all(refundBillProducts.map(async (product) => {
+                const productDetails = await Product.findOne({
+                    where: { productId: product.productId },
+                    attributes: ['productName'],
+                    raw: true,
+                });
+
+                if (!productDetails) {
+                    throw new Error(`Product not found for productId: ${product.productId}`);
+                }
+
+                return {
+                    ...product,
+                    productName: productDetails.productName,
+                };
+            }));
+
+            refundBillProductsWithDetailsList.push(...refundBillProductsWithDetails);
+        }
 
         const result = {
-            RTBNo: refundBillDetails.RTBNo,
-            billNo: refundBillDetails.billNo,
-            refundBillProducts: refundBillProductsWithDetails,
+            billNo,
+            refundBillProducts: refundBillProductsWithDetailsList,
         };
 
-        console.log("Final result related billNo:", result);
+        console.log("Final result related to billNo:", result);
         return result;
     } catch (error) {
         console.error('Error fetching refund bill details related to billNo:', error);

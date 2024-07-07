@@ -53,16 +53,16 @@ export const getAllRefundBillsController = async (req, res) => {
     }
 };
 
-export const getRefundBillByRTBNoController = async (req, res) => {
-    try {
-        const { RTBNo } = req.params;
-        const refundBill = await Service.getRefundBillByRTBNo(RTBNo);
-        res.status(200).json(refundBill);
-    } catch (error) {
-        console.error('Failed to retrieve refund bill:', error);
-        res.status(500).json({ error: error.message });
-    }
-};
+// export const getRefundBillByRTBNoController = async (req, res) => {
+//     try {
+//         const { RTBNo } = req.params;
+//         const refundBill = await Service.getRefundBillByRTBNo(RTBNo);
+//         res.status(200).json(refundBill);
+//     } catch (error) {
+//         console.error('Failed to retrieve refund bill:', error);
+//         res.status(500).json({ error: error.message });
+//     }
+// };
 
 export const getRefundBillProductsByProductIdController = async (req, res) => {
     try {
@@ -120,5 +120,25 @@ export const getRefundBillProductsByBillNumberController = async (req, res) => {
     } catch (error) {
         console.error('Failed to retrieve refund bill products:', error);
         res.status(500).json({ error: error.message });
+    }
+};
+
+
+// Controller to get refund bills by branch and date range
+export const getRefundBillsByBranchAndDateRangeController = async (req, res) => {
+    try {
+        const { branchName, startDate, endDate } = req.query;
+
+        if (!branchName || !startDate || !endDate) {
+            return ERROR(res, { message: 'branchName, startDate, and endDate parameters are required' }, req.span, 400);
+        }
+
+        console.log(`Received request with branchName: ${branchName}, startDate: ${startDate}, endDate: ${endDate}`);
+
+        const refundBills = await Service.getRefundBillsByBranchAndDateRange(branchName, startDate, endDate);
+        SUCCESS(res, SUC_CODES, refundBills, req.span);
+    } catch (error) {
+        console.error('Error fetching refund bills by branch and date range:', error.message);
+        ERROR(res, { message: 'Failed to fetch refund bills by branch and date range', error: error.message }, req.span, 500);
     }
 };

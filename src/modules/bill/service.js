@@ -167,7 +167,7 @@ export const getSumOfBillTotalAmountForDate = async (branchName, date) => {
             throw new Error("No data found");
         }
 
-        return result.dataValues.totalAmount || 0; // Return 0 if no bills found
+        return result.dataValues.totalAmount || 0;
     } catch (error) {
         console.error('Error in getSumOfBillTotalAmountForDate:', error);
         throw new Error('Error fetching sum of billTotalAmount for date: ' + error.message);
@@ -212,5 +212,47 @@ export const getDailySalesDataForMonth = async (branchName, year, month) => {
     } catch (error) {
         console.error('Error in getDailySalesDataForMonth:', error);
         throw new Error('Error fetching daily sales data for month: ' + error.message);
+    }
+};
+
+
+// Get All Bills by Branch and Date Range
+export const getAllBillsByBranchAndDateRange = async (branchName, startDate, endDate) => {
+    try {
+        const branchId = await mapBranchNameToId(branchName);
+
+        const bills = await bill.findAll({
+            where: {
+                branchId,
+                createdAt: {
+                    [Op.between]: [new Date(startDate), new Date(endDate)]
+                },
+                status: { [Op.ne]: 'Canceled' }
+            },
+            include: [{
+                model: branches,
+                attributes: ['branchName', 'address', 'contactNumber', 'email'],
+            }],
+        });
+
+        if (!bills) {
+            throw new Error("No bills found");
+        }
+
+        return bills.map(billProduct => ({
+            billNo: billProduct.billNo,
+            branchId: billProduct.branchId,
+            branchName: billProduct.branch.branchName,
+            billedBy: billProduct.billedBy,
+            customerName: billProduct.customerName,
+            contactNo: billProduct.contactNo,
+            paymentMethod: billProduct.paymentMethod,
+            billTotalAmount: billProduct.billTotalAmount,
+            receivedAmount: billProduct.receivedAmount,
+            status: billProduct.status,
+            createdAt: billProduct.createdAt,
+        }));
+    } catch (error) {
+        throw new Error('Error fetching bills by branch and date range: ' + error.message);
     }
 };
