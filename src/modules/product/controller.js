@@ -1,52 +1,65 @@
 import * as ProductBatchSumService from "../productBatchSum/service.js";
-import * as Service from "../product/service.js";
+import * as Service from "../product/service.js"
 import { SUCCESS, ERROR } from "../../helper.js";
 import { Codes } from "../category/constants.js";
 import cloudinary from "../../blobService/cloudinary.js";
 
+
 const { SUC_CODES } = Codes;
+
+
 
 // Controller function to get all products
 export const getProducts = async (req, res) => {
-  try {
-    const result = await Service.getAllProducts(req.query);
-    SUCCESS(res, SUC_CODES, result, req.span);
-  } catch (err) {
-    console.log(err);
-    ERROR(res, err, res.span);
-  }
+try {
+  const result = await Service.getAllProducts(req.query);
+  SUCCESS(res, SUC_CODES, result, req.span);
+} catch (err) {
+  console.log(err);
+  ERROR(res, err, res.span);
+}
 };
+
 
 //Function to get product using productId
 export const getProduct = async (req, res) => {
-  try {
-    const result = await Service.getProductById(req.params.productId);
-    SUCCESS(res, SUC_CODES, result, req.span);
-  } catch (error) {
-    console.log(error);
-    ERROR(res, error, res.span);
-  }
-};
+try {
+  const result = await Service.getProductById(req.params.productId);
+  SUCCESS(res, SUC_CODES, result, req.span);
+} catch (error) {
+  console.log(error);
+  ERROR(res, error, res.span);
+}
+}; 
+
 
 //function to get product details using categoryName
 export const getProductsByCategory = async (req, res) => {
-  const { categoryId } = req.query;
+   const { categoryId } = req.query;
+   console.log("cataaa1",categoryId);
   try {
     const results = await Service.getProductsByCategoryName(categoryId);
-    SUCCESS(res, 200, results, req.span);
+    SUCCESS(res, 200, results, req.span); 
   } catch (err) {
     console.error("Error fetching products:", err);
     ERROR(res, err, req.span);
   }
 };
 
+
+
+
+
 // // Controller function to update a product
 export const updateProduct = async (req, res) => {
   try {
     const { productId } = req.params;
     const updatedProductData = { ...req.body };
+    console.log("productId",productId);
+    console.log("products",updatedProductData);
+    
     if (req.file) {
-      console.log("file", req.file);
+      console.log("file",req.file);
       const uploadRes = await new Promise((resolve, reject) => {
         const stream = cloudinary.uploader.upload_stream(
           { resource_type: "image", folder: "products" },
@@ -59,18 +72,15 @@ export const updateProduct = async (req, res) => {
       });
 
       updatedProductData.image = uploadRes.secure_url;
-    } else if (req.body.image) {
+    }else if (req.body.image) {
       // Handle base64 encoded image upload
       const uploadRes = await cloudinary.uploader.upload(req.body.image, {
-        upload_preset: "flexflow",
+        upload_preset: "flexflow"
       });
       updatedProductData.image = uploadRes.secure_url;
     }
 
-    const result = await Service.updateProductById(
-      productId,
-      updatedProductData
-    );
+    const result = await Service.updateProductById(productId, updatedProductData);
     SUCCESS(res, 200, result, req.span);
   } catch (error) {
     console.log(error);
@@ -78,16 +88,16 @@ export const updateProduct = async (req, res) => {
   }
 };
 
+
 //function to create product
 export const createProduct = async (req, res) => {
-  const { productName, description, categoryName, barcode, minQty, image } =
-    req.body;
+  const { productName, description, categoryName, barcode, minQty, image } = req.body;
 
   try {
     let imageUrl = null;
     if (image) {
       const uploadRes = await cloudinary.uploader.upload(image, {
-        upload_preset: "flexflow",
+        upload_preset: "flexflow"
       });
       imageUrl = uploadRes.secure_url;
     }
@@ -97,7 +107,7 @@ export const createProduct = async (req, res) => {
       categoryName,
       image: imageUrl,
       barcode,
-      minQty,
+      minQty
     });
 
     res.status(200).send(result);
@@ -106,28 +116,58 @@ export const createProduct = async (req, res) => {
   }
 };
 
+
+
+
+
+
 // Controller function to delete a product
 export const deleteProduct = async (req, res) => {
   try {
     const result = await Service.deleteProductById(req.params.productId);
+  
     SUCCESS(res, SUC_CODES, result, req.span);
   } catch (error) {
     console.log(error);
+  
     ERROR(res, error, res.span);
   }
-};
+  };
+  
+
+
+
 
 //Function to get active stock
 export const getTotalQuantityByBranchAndProduct = async (req, res) => {
-  try {
+  try { 
     const { branchName, productId } = req.query;
-    const result = await ProductBatchSumService.getProductTotalQuantity(
-      branchName,
-      productId
-    );
-    SUCCESS(res, SUC_CODES, result, req.span);
+    const result = await ProductBatchSumService.getProductTotalQuantity(branchName, productId);
+SUCCESS(res, SUC_CODES, result, req.span);
+} catch (error) {
+  console.log(error);
+
+  ERROR(res, error, res.span);
+}
+};
+
+//Function to get product and batch sum details
+
+export const getProductAndBatchSumDetailsController = async (req, res) => {
+  try {
+    const { categoryId, branchName } = req.query;
+
+    if (!categoryId || !branchName) {
+      return res.status(400).json({ message: 'categoryId and branchName are required' });
+    }
+
+    // Call the service function to get product and batch sum details
+    const { productDetails, batchSumDetails } = await ProductBatchSumService.getProductsAndBatchSumDetails(categoryId, branchName);
+
+    // Send the response back to the client
+    res.status(200).json({ productDetails, batchSumDetails });
   } catch (error) {
-    console.log(error);
-    ERROR(res, error, res.span);
+    res.status(500).json({ message: error.message });
   }
 };
+
