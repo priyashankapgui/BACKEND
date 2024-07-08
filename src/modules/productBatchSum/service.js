@@ -122,8 +122,17 @@ export const getProductTotalQuantity = async (branchName, productId) => {
   if (categoryErr) TE(categoryErr);
   if (!category) TE("Category not found");
 
+  const currentDate = new Date();
+
   const [qtyErr, totalAvailableQty] = await to(
-    productBatchSum.sum('totalAvailableQty', { where: { productId, branchId } })
+    productBatchSum.sum('totalAvailableQty', {
+       where: { 
+        productId, 
+        branchId,
+        expDate: {
+          [Op.gt]: currentDate, 
+        }
+      } })
   );
   if (qtyErr) TE(qtyErr);
 
@@ -147,8 +156,16 @@ export const getBatchDetailsByProductName = async (productId, branchName) => {
     if (branchErr) TE(branchErr);
     if (!branch) TE(new Error("Branch not found"));
 
+    const currentDate = new Date();
+
     const [productBatchSumDataErr, productBatchSumData] = await to(
-      productBatchSum.findAll({ where: { productId, branchId } })
+      productBatchSum.findAll({ 
+        where: { 
+          productId, 
+          branchId,  
+          expDate: {
+        [Op.gt]: currentDate, 
+      } } })
     );
     if (productBatchSumDataErr) TE(productBatchSumDataErr);
 
@@ -246,7 +263,7 @@ export const updateOrAddProductBatchSum = async (requestBranch, productDetails) 
 
   try {
     for (const product of productDetails) {
-      const { productId, batchNo, transferQty } = product;
+      const { productId, batchNo, transferQty, unitPrice, expDate } = product;
 
       const [branchErr, branch] = await to(branches.findOne({ where: { branchName: requestBranch } }));
       if (branchErr) TE(branchErr);
@@ -285,6 +302,8 @@ export const updateOrAddProductBatchSum = async (requestBranch, productDetails) 
           productName,
           branchName: requestBranch,
           totalAvailableQty: transferQty,
+          sellingPrice: unitPrice,
+          expDate
         });
       }
 
@@ -315,18 +334,25 @@ export const getBatchNumbersByBranchAndProduct = async (branchName, productId) =
 
     const branchId = branch.branchId;
 
+    const currentDate = new Date();
+
     const batchNumbers = await productBatchSum.findAll({
-      attributes: ['batchNo', 'totalAvailableQty', 'sellingPrice'],
+      attributes: ['batchNo', 'totalAvailableQty', 'sellingPrice', 'expDate'],
       where: {
         branchId,
         productId,
+        expDate: {
+          [Op.gt]: currentDate, // Check if expDate is greater than the current date
+        }
       },
     });
+    console.log("data",batchNumbers);
 
     return batchNumbers.map(record => ({
       batchNo: record.batchNo,
       totalAvailableQty: record.totalAvailableQty,
       sellingPrice: record.sellingPrice,
+      expDate: record.expDate,
     }));
   } catch (error) {
     console.error('Error fetching batch numbers:', error);
@@ -567,8 +593,15 @@ export const getProductQuantitiesByBranch = async (branchName) => {
   try {
     const branchId = await mapBranchNameToId(branchName);
 
+    const currentDate = new Date();
+
     const productBatches = await productBatchSum.findAll({
-      where: { branchId },
+      where: { 
+        branchId,
+        expDate: {
+          [Op.gt]: currentDate, 
+        }
+      },
       attributes: ['productId', [sequelize.fn('SUM', sequelize.col('totalAvailableQty')), 'totalAvailableQty'],],
       group: ['productId'],
     });
@@ -611,8 +644,15 @@ export const getProductQuantitiesByProductAndBranch = async (branchName, product
   try {
     const branchId = await mapBranchNameToId(branchName);
 
+    const currentDate = new Date();
+
     const productBatches = await productBatchSum.findAll({
-      where: { branchId, productId },
+      where: { 
+        branchId, 
+        productId,  
+        expDate: {
+        [Op.gt]: currentDate, 
+      } },
       attributes: ['productId', [sequelize.fn('SUM', sequelize.col('totalAvailableQty')), 'totalAvailableQty']],
       group: ['productId', 'branchId'],
     });
@@ -652,7 +692,12 @@ export const getProductQuantitiesByProductAndBranch = async (branchName, product
 //min qty without any parameter
 export const getAllProductQuantities = async () => {
   try {
+    const currentDate = new Date();
     const productBatches = await productBatchSum.findAll({
+      where: {  
+        expDate: {
+      [Op.gt]: currentDate, 
+    } },
       attributes: [
         'productId',
         'branchId',
@@ -700,8 +745,14 @@ export const getAllProductQuantities = async () => {
 
 export const getProductQuantitiesByProductId = async (productId) => {
   try {
+    const currentDate = new Date();
+
     const productBatches = await productBatchSum.findAll({
-      where: { productId },
+      where: { 
+        productId,
+        expDate: {
+          [Op.gt]: currentDate, 
+        } },
       attributes: [
         'productId',
         'branchId',
@@ -863,6 +914,7 @@ export const getAlreadyExpProductBatchSumDataByBranch = async (branchName) => {
   }
 };
 
+
 export const getProductDetailsByBranchName = async (branchName) => {
   try {
     const branch = await branches.findOne({
@@ -911,7 +963,52 @@ export const getProductDetailsByBranchName = async (branchName) => {
 };
 
 
+export const getProductsAndBatchSumDetails = async (categoryId, branchName) => {
+  try {
+    // Find the branchId from branchName
+    const branch = await branches.findOne({
+      where: { branchName },
+      attributes: ['branchId']
+    });
 
+    if (!branch) {
+      throw new Error('Branch not found');
+    }
 
+    const branchId = branch.branchId;
 
+    // Fetch products based on categoryId
+    const productDetails = await products.findAll({
+      where: { categoryId },
+      attributes: ['productId', 'productName', 'barcode', 'description', 'image'],
+    });
 
+    // Extract productIds from the productDetails
+    const productIds = productDetails.map(product => product.productId);
+
+    if (productIds.length === 0) {
+      return { productDetails, batchSumDetails: [] }; // No products found for the given category
+    }
+
+    const currentDate = new Date();
+    const nearExpiryThreshold = 30 * 24 * 60 * 60 * 1000; // 30 days in milliseconds
+    const nearExpiryDate = new Date(currentDate.getTime() + nearExpiryThreshold);
+
+    // Fetch one product batch sum based on productIds and branchId, excluding near-expiration batches
+    const batchSumDetail = await productBatchSum.findOne({
+      where: {
+        productId: productIds,
+        branchId,
+        expDate: {
+          [Op.gt]: nearExpiryDate, // Exclude near-expiration batches
+        }
+      },
+      attributes: ['productId', 'productName', 'batchNo', 'barcode', 'totalAvailableQty', 'discount', 'branchId', 'branchName', 'expDate', 'sellingPrice'],
+      order: [['expDate', 'ASC']] // Optional: Order by expiration date
+    });
+
+    return { productDetails, batchSumDetails: batchSumDetail ? [batchSumDetail] : [] };
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};

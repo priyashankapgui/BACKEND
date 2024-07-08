@@ -122,7 +122,7 @@ const updateOnlineBill = async (onlineBillNo, updates) => {
     }
 };
 
-const getSumOfOnlineBillTotalAmountForDate = async (branchName, date) => {
+const getSumOfOnlineBillTotalAmountForDate = async (branchName, startDate, endDate) => {
     try {
         const branchId = await mapBranchNameToId(branchName);
 
@@ -131,12 +131,16 @@ const getSumOfOnlineBillTotalAmountForDate = async (branchName, date) => {
 
         const result = await onlineBill.findOne({
             attributes: [
-                [sequelize.fn('SUM', sequelize.col('onlineBillTotal')), 'onlineBillTotalAmount']
+                [sequelize.fn('DATE', sequelize.col('createdAt')), 'date'],
+                [sequelize.fn('SUM', sequelize.col('onlineBillTotal')), 'totalAmount']
             ],
             where: {
                 branchId,
-                [Op.and]: sequelize.where(sequelize.fn('DATE', sequelize.col('createdAt')), '=', formattedDate)
-            }
+                createdAt: {
+                    [Op.between]: [startDate, endDate]
+                }
+            },
+            group: [sequelize.fn('DATE', sequelize.col('createdAt'))]
         });
 
         if (!result) {
@@ -145,28 +149,30 @@ const getSumOfOnlineBillTotalAmountForDate = async (branchName, date) => {
 
         return result.dataValues.onlineBillTotalAmount || 0; // Return 0 if no bills found
     } catch (error) {
-        console.error('Error in getSumOfOnlineBillTotalAmountForDate:', error);
-        throw new Error('Error fetching sum of onlineBillTotalAmount for date: ' + error.message);
+        console.error('Error in getSumOfOnlineBillTotalAmountForDates:', error);
+        throw new Error('Error fetching sum of onlineBillTotalAmount for dates: ' + error.message);
     }
 };
 
-//for Chart
+
 export const getDailyOnlineSalesDataForMonth = async (branchName, year, month) => {
     try {
-        const branchId = await mapBranchNameToId(branchName);
-        const startDate = new Date(year, month - 1, 1);
-        const endDate = new Date(year, month, 0);
-        const onlineSalesData = [];
-
-        for (let day = 1; day <= endDate.getDate(); day++) {
-            const date = new Date(year, month - 1, day);
-            const formattedDate = date.toISOString().split('T')[0];
-            const onlineBillTotalAmount = await getSumOfOnlineBillTotalAmountForDate(branchName, formattedDate);
-            onlineSalesData.push({ day, totalAmount: onlineBillTotalAmount });
-        }
-
-        return onlineSalesData;
+        const startDate = new Date(Date.UTC(year, month - 1, 1));
+        const endDate = new Date(Date.UTC(year, month, 0));
         
+        const onlineSalesData = await getSumOfOnlineBillTotalAmountForDate(branchName, startDate, endDate);
+        
+        const salesData = Array.from({ length: endDate.getUTCDate() }, (_, i) => ({
+            day: i + 1,
+            totalAmount: 0
+        }));
+
+        onlineSalesData.forEach(item => {
+            const day = new Date(item.date).getUTCDate();
+            salesData[day - 1].totalAmount = item.totalAmount;
+        });
+
+        return salesData;
     } catch (error) {
         console.error('Error in getDailyOnlineSalesDataForMonth:', error);
         throw new Error('Error fetching daily online sales data for month: ' + error.message);

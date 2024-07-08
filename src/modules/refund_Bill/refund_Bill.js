@@ -50,11 +50,6 @@ const refund_Bill = sequelize.define('refund_Bill', {
         defaultValue: DataTypes.NOW,
         allowNull: false,
     },
-    updatedAt: {
-        type: 'TIMESTAMP',
-        defaultValue: DataTypes.NOW,
-        allowNull: false,
-    },
 }, {
     tableName: 'refund_Bill',
     timestamps: true,

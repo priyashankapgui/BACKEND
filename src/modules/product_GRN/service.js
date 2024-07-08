@@ -129,15 +129,14 @@ export const getGRNDetailsByNo = async (GRN_NO) => {
 
 //Function to get all grn data
 export const getAllGRNDetails = async () => {
-  console.log("Fetching all GRN details...");
   try {
     const allGRNs = await grn.findAll({
       raw: true,
+      order: [["createdAt", "DESC"]],
     });
     if (!allGRNs || allGRNs.length === 0) {
       throw new Error("No GRNs found");
     }
-    console.log("Found", allGRNs.length, "GRNs");
     const supplierIds = allGRNs.map((grn) => grn.supplierId);
     const suppliersData = await suppliers.findAll({
       where: { supplierId: supplierIds },
@@ -154,24 +153,12 @@ export const getAllGRNDetails = async () => {
     if (!branchesData || branchesData.length === 0) {
       throw new Error("No branches found for GRNs");
     }
-    console.log("Found branches for all GRNs");
-
     const grnNumbers = allGRNs.map((grn) => grn.GRN_NO);
     const productGRNs = await productGRN.findAll({
       where: { GRN_NO: grnNumbers },
-      attributes: [
-        "GRN_NO",
-        "batchNo",
-        "productId",
-        "totalQty",
-        "sellingPrice",
-        "purchasePrice",
-        "freeQty",
-        "expDate",
-        "amount",
-        "comment",
-      ],
+      attributes: [ "GRN_NO","batchNo","productId","totalQty", "sellingPrice","purchasePrice","freeQty","expDate", "amount", "comment",],
       raw: true,
+      
     });
     const productGRNsWithDetails = await Promise.all(
       productGRNs.map(async (productGRN) => {

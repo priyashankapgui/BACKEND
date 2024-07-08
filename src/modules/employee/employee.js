@@ -36,7 +36,7 @@ const Employee = sequelize.define('employee', {
             allowNull: true,
             validate: {
                 is: {
-                    args: /^((\+94)[0-9]{9}|(0)[0-9]{9})$/,
+                    args: /(^(\+94|0)?[1-9]{2}[0-9]{7}$)|(^(\+94|0)?7[0-9]{8}$)/,
                     msg: "Phone number is invalid"
                 },
             },

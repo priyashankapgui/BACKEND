@@ -15,7 +15,7 @@ import stockTransfer from "./stockTransfer/stockTransfer.js";
 import TransferProduct from "./TransferProduct/TransferProduct.js";
 import TransferProductBatch from "./TransferProductBatch/TransferProductBatch.js";
 import cart_Product from "./cart_Product/cartProduct.js";
-
+import Review from './review/review.js';
 
 
 const setupGRNSupplierAssociations = (grn, suppliers) => { 
@@ -45,6 +45,11 @@ const setupProductGRNAssociations = (products, grn) => {
 //   grn.hasMany(productGRN, { foreignKey: 'GRN_NO' });
 //   productGRN.belongsTo(grn, { foreignKey: "GRN_NO" });
 // }
+
+export const setupreviewAssociations = () => {
+  products.hasMany(Review, { foreignKey: 'productId' });
+  Review.belongsTo(products, { foreignKey: 'productId' });
+};
 
 const setupCartCustomerAssociations = (ShoppingCart, Customer) => {
   ShoppingCart.hasOne(Customer, { foreignKey: 'cartId' });
@@ -148,6 +153,9 @@ const setupStockTransferProductBatchAssociations = (TransferProduct, TransferPro
 
 
 };
+
+
+
 
 
 

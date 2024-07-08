@@ -1,6 +1,7 @@
 import ProductBatchSum from "../productBatchSum/productBatchSum.js";
 import ProductBatchUpdateReason from "../productBatchUpdateReason/productBatchUpdateReason.js";
 import branches from "../branch/branch.js";
+import { Op } from "sequelize";
 import { to, TE } from "../../helper.js";
 
 //function to adjust stock details
@@ -87,12 +88,17 @@ export const getProductBatchDetails = async (productId, branchName) => {
   if (branchErr) TE(branchErr);
   if (!branch) TE("Branch not found");
 
+  const currentDate = new Date();
+
   const branchId = branch.branchId;
   let [productBatchSumErr, productBatchSumRecords] = await to(
     ProductBatchSum.findAll({
       where: {
         productId,
         branchId,
+        expDate: {
+          [Op.gt]: currentDate,
+        }
       },
       attributes: ["batchNo", "expDate", "sellingPrice", "totalAvailableQty"],
       raw: true,

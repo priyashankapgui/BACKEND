@@ -21,6 +21,10 @@ const Customer = sequelize.define('customer', {
     email: {
         type: DataTypes.STRING,
         allowNull: false,
+        unique: {
+            args: true,
+            msg: "Email already associated with an account",
+          },
         validate: {
             isEmail: {
                 args: true,
@@ -38,7 +42,7 @@ const Customer = sequelize.define('customer', {
         allowNull: false,
         validate: {
             is: {
-                args: /^((\+94)[0-9]{9}|(0)[0-9]{9})$/,
+                args: /(^(\+94|0)?[1-9]{2}[0-9]{7}$)|(^(\+94|0)?7[0-9]{8}$)/,
                 msg: "Phone number is invalid"
             },
         },
