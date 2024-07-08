@@ -37,7 +37,7 @@ const createReview = async (req, res) => {
 
 
 const updateReview = async (req, res) => {
-    const { productId } = req.body; 
+    const { productId } = req.params; 
     
     
     console.log(productId);// Assuming productId is part of the URL
