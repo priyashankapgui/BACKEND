@@ -914,6 +914,7 @@ export const getAlreadyExpProductBatchSumDataByBranch = async (branchName) => {
   }
 };
 
+
 export const getProductDetailsByBranchName = async (branchName) => {
   try {
     const branch = await branches.findOne({
@@ -962,7 +963,52 @@ export const getProductDetailsByBranchName = async (branchName) => {
 };
 
 
+export const getProductsAndBatchSumDetails = async (categoryId, branchName) => {
+  try {
+    // Find the branchId from branchName
+    const branch = await branches.findOne({
+      where: { branchName },
+      attributes: ['branchId']
+    });
 
+    if (!branch) {
+      throw new Error('Branch not found');
+    }
 
+    const branchId = branch.branchId;
 
+    // Fetch products based on categoryId
+    const productDetails = await products.findAll({
+      where: { categoryId },
+      attributes: ['productId', 'productName', 'barcode', 'description', 'image'],
+    });
 
+    // Extract productIds from the productDetails
+    const productIds = productDetails.map(product => product.productId);
+
+    if (productIds.length === 0) {
+      return { productDetails, batchSumDetails: [] }; // No products found for the given category
+    }
+
+    const currentDate = new Date();
+    const nearExpiryThreshold = 30 * 24 * 60 * 60 * 1000; // 30 days in milliseconds
+    const nearExpiryDate = new Date(currentDate.getTime() + nearExpiryThreshold);
+
+    // Fetch one product batch sum based on productIds and branchId, excluding near-expiration batches
+    const batchSumDetail = await productBatchSum.findOne({
+      where: {
+        productId: productIds,
+        branchId,
+        expDate: {
+          [Op.gt]: nearExpiryDate, // Exclude near-expiration batches
+        }
+      },
+      attributes: ['productId', 'productName', 'batchNo', 'barcode', 'totalAvailableQty', 'discount', 'branchId', 'branchName', 'expDate', 'sellingPrice'],
+      order: [['expDate', 'ASC']] // Optional: Order by expiration date
+    });
+
+    return { productDetails, batchSumDetails: batchSumDetail ? [batchSumDetail] : [] };
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};

@@ -19,7 +19,7 @@ export const getAllSuperAdmins = async () => {
   }
 };
 
-export const handleSuperAdminLogin = async (superAdminId, password) => {
+export const handleSuperAdminLogin = async (superAdminId, password, returnHostLink) => {
   try {
     const superAdmin = await SuperAdmin.findByPk(superAdminId);
     if (!superAdmin) {
@@ -42,7 +42,7 @@ export const handleSuperAdminLogin = async (superAdminId, password) => {
     if (!isPasswordValid) {
       superAdmin.failedLoginAttempts += 1;
       if(superAdmin.failedLoginAttempts >= AUTH.MAX_FAILED_ATTEMPTS){
-        sendSuperAdminPasswordResetEmail(superAdmin.superAdminId, "template_securityw509")
+        sendSuperAdminPasswordResetEmail(superAdmin.superAdminId, "template_securityw509", returnHostLink)
       }
       await superAdmin.save();
       throw new Error("Invalid credentials");
@@ -68,7 +68,7 @@ export const handleSuperAdminLogin = async (superAdminId, password) => {
   }
 };
 
-export const sendSuperAdminPasswordResetEmail = async (userID, emailTemplate) => {
+export const sendSuperAdminPasswordResetEmail = async (userID, emailTemplate, returnHostLink) => {
   try {
     const user = await SuperAdmin.findByPk(userID);
     if (!user) {
@@ -84,7 +84,7 @@ export const sendSuperAdminPasswordResetEmail = async (userID, emailTemplate) =>
           expiresIn: "5m",
         }
       );
-      const resetLink = `http://localhost:3000/login/resetpw?token=${passwordResetToken}`;
+      const resetLink = `http://${returnHostLink}/login/resetpw?token=${passwordResetToken}`;
       emailjs.init({
         publicKey: "U4RoOjKB87mzLhhqW",
         privateKey: process.env.EMAILJS_API_KEY,
@@ -126,6 +126,9 @@ export const handleSuperAdminResetPassword = async (userId, newPassword) => {
   if (!user) {
     throw new TypeError("Super Admin ID not found");
   }
+  if (newPassword.length < 8 || newPassword.length > 64) {
+    throw new Error("Invalid password format");
+  }
   const passwordMatch = await bcrypt.compare(newPassword, user.password);
   if (passwordMatch) {
     throw new TypeError("New password cannot be the same as the old password");
@@ -163,6 +166,9 @@ export const updateSuperAdminPassword = async ( superAdminID, superAdminPassword
   const superAdmin = await SuperAdmin.findByPk(superAdminID);
   if (!superAdmin) {
     throw new ResponseError(400,"SuperAdmin not found");
+  }
+  if (newPassword.length < 8 || newPassword.length > 64) {
+    throw new Error("Invalid password format");
   }
   const storedPassword = await superAdmin.password;
   const passwordMatch = await bcrypt.compare(currentPassword, storedPassword);

@@ -19,7 +19,6 @@ import GRNRouter from "./src/modules/GRN/routes.js";
 //import productGRNRouter from "./src/modules/product_GRN/routes.js";
 //import branchSupplierRouter from "./src/modules/branch_Supplier/routes.js";
 import { setupAssociations } from "./src/modules/associationSetup.js";
-import listedProductsRouter from "./src/modules/listedProducts/routes.js";
 import productBatchSumrouter from "./src/modules/productBatchSum/routes.js";
 import feedback from "./src/modules/feedback/feedback.js";
 import feedbackrouter from "./src/modules/feedback/routes.js";
@@ -31,7 +30,6 @@ import SuperAdminRouter from "./src/modules/superAdmin/routes.js";
 import PermissionRouter from "./src/modules/permission/routes.js";
 import UserRoleRouter from "./src/modules/userRole/routes.js";
 import PageAccessRouter from "./src/modules/pageAccess/routes.js";
-import salesRouter from "./src/modules/sales/routes.js";
 import billRouter from "./src/modules/bill/routes.js";
 import refundBillRouter from "./src/modules/refund_Bill/routes.js";
 import cartRoutes from "./src/modules/cart_Product/routes.js"
@@ -46,6 +44,8 @@ import TransferProductBatchRouter from "./src/modules/TransferProductBatch/route
 import TransferProduct from "./src/modules/TransferProduct/TransferProduct.js";
 import TransferProductBatch from "./src/modules/TransferProductBatch/TransferProductBatch.js";
 import webImagesrouter from "./src/modules/web_Images/routes.js";
+import review from "./src/modules/review/review.js";
+import reviewRouter from "./src/modules/review/routes.js";
 import bodyParser from "body-parser";
 
 import Stripe from 'stripe';
@@ -65,10 +65,8 @@ app.use("/", GRNRouter);
 app.use('/', Branchrouter);
 app.use('/', EmployeeRouter);
 app.use('/', CustomerRouter);
-app.use('/', listedProductsRouter);
 app.use('/', billRouter);
 app.use('/', refundBillRouter);
-app.use('/', salesRouter);
 app.use('/', feedbackrouter);
 app.use('/', productBatchSumrouter);
 app.use('/', productBatchSumrouter);
@@ -83,7 +81,7 @@ app.use('/',TransferProductBatchRouter);
 app.use('/',onlineBillRoutes);
 app.use('/',onlineBillProductRoutes);
 app.use('/',webImagesrouter);
-
+app.use('/',reviewRouter);
 
 app.use("/api", Productrouter);
 app.use("/api", categoryRouter);
@@ -91,10 +89,7 @@ app.use("/api", supplierRouter);
 app.use("/api", GRNRouter);
 app.use('/api', EmployeeRouter);
 app.use('/api', CustomerRouter);
-app.use('/api', listedProductsRouter);
-app.use('/api', billRouter);
-app.use('/api', refundBillRouter);
-app.use('/api', salesRouter);
+app.use('/api', billRouter);;
 app.use('/api', feedback);
 app.use('/api', productBatchSumrouter);
 app.use('/api', cartRoutes);
@@ -102,7 +97,7 @@ app.use('/api',productBatchUpdateReasonRouter);
 app.use('/api',stockTransferRouter);
 app.use('/api',TransferProductBatchRouter);
 app.use('/api',webImagesrouter);
-
+app.use('/api',reviewRouter);
 
 
 
@@ -142,7 +137,38 @@ process.on('unhandledRejection', (err) => {
   console.error('Unhandled Promise Rejection:', err);
 });
 
-// Stripe Checkout Session Route
+// // Stripe Checkout Session Route
+// app.post('/create-checkout-session', async (req, res) => {
+//   const { items } = req.body;
+
+//   try {
+//     const session = await stripe.checkout.sessions.create({
+//       payment_method_types: ['card'],
+//       line_items: items.map(item => ({
+//         price_data: {
+//           currency: 'lkr',
+//           product_data: {
+//             name: item.productName,
+//             Subtotal:	item.Subtotal,
+//             Discount:	item.Discount,
+//             Total:	item.Total
+//           },
+//           unit_amount: item.sellingPrice * 100,  
+//         },
+//         quantity: item.quantity,
+//       })),
+//       mode: 'payment',
+//       success_url: 'http://localhost:3001/success',
+//       cancel_url: 'http://localhost:3001/cancel',
+//     });
+
+//     res.json({ sessionId: session.id });
+//   } catch (error) {
+//     console.error('Error creating checkout session:', error);
+//     res.status(500).json({ error: 'Internal Server Error' });
+//   }
+// });
+
 app.post('/create-checkout-session', async (req, res) => {
   const { items } = req.body;
 
@@ -153,12 +179,9 @@ app.post('/create-checkout-session', async (req, res) => {
         price_data: {
           currency: 'lkr',
           product_data: {
-            name: item.productName,
-            Subtotal:	item.Subtotal,
-            Discount:	item.Discount,
-            Total:	item.Total
+            name: item.product.productName,
           },
-          unit_amount: item.sellingPrice * 100,  
+          unit_amount: Math.round((item.sellingPrice * (1 - item.discount / 100)) * 100),
         },
         quantity: item.quantity,
       })),
@@ -174,5 +197,4 @@ app.post('/create-checkout-session', async (req, res) => {
   }
 });
 
-
-export { sequelize, categories, suppliers, grn, products, branches, feedback, ShoppingCart, productBatchSum, SuperAdmin, onlineBill , ProductBatchUpdateReason,bill, TransferProduct, TransferProductBatch};
+export { sequelize, categories, suppliers, grn, products, branches, feedback, ShoppingCart, productBatchSum, SuperAdmin, onlineBill , ProductBatchUpdateReason,bill, TransferProduct, TransferProductBatch, review};

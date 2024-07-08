@@ -75,13 +75,14 @@ export const updatePassword = async (req, res) => {
 
 export const handleLoginCustomer = async (req, res) => {
     const { email, password } = req.body;
+    const returnHostLink = req.get('origin');
     if (!email || !password) {
       return res
         .status(400)
         .json({ message: "email and password are required" });
     }
     try {
-      const result = await loginCustomerService(email, password);
+      const result = await loginCustomerService(email, password, returnHostLink);
       return res.status(200).json(result);
     } catch (error) {
       console.error("Login error:", error);
@@ -91,11 +92,13 @@ export const handleLoginCustomer = async (req, res) => {
 
 export const forgotPasswordCustomer = async (req, res) => {
     const { email } = req.body;
+    const returnHostLink = req.get('origin');
+
     if (!email) {
       return res.status(400).json({ message: "Email is required" });
     }
     try {
-        const result = await resetPasswordEmail(email, "template_resetpw509");
+        const result = await resetPasswordEmail(email, "template_resetpw509",returnHostLink);
         return res.status(200).json(result);    
     } catch (error) {
       return res.status(500).json({ message: error.message});
