@@ -94,6 +94,7 @@ export const updateEmployee = async (req, res) => {
     }
     res.status(200).json(updatedEmployee);
   } catch (error) {
+    console.log(error);
     if(error.message === "Unauthorized"){
       res.status(403).json({ error: error.message });
     }

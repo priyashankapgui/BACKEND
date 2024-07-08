@@ -186,7 +186,7 @@ export const updateEmployeeById = async (
     throw new Error("Cannot assign super admin role to employee");
   }
   const password = employeeData.password;
-  if (password.length < 8 || password.length > 64) {
+  if (password && (password.length < 8 || password.length > 64)) {
     throw new Error("Invalid password format");
   }
   employeeData.userRoleId = userRole.userRoleId;
@@ -418,6 +418,7 @@ export const handleEmployeeResetPassword = async (userId, newPassword) => {
   if (passwordMatch) {
     throw new TypeError("New password cannot be the same as the old password");
   }
+  user.failedLoginAttempts = 0;
   user.password = newPassword;
   await user.save();
   return;

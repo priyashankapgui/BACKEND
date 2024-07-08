@@ -84,7 +84,7 @@ export const sendSuperAdminPasswordResetEmail = async (userID, emailTemplate, re
           expiresIn: "5m",
         }
       );
-      const resetLink = `http://${returnHostLink}/login/resetpw?token=${passwordResetToken}`;
+      const resetLink = `${returnHostLink}/login/resetpw?token=${passwordResetToken}`;
       emailjs.init({
         publicKey: "U4RoOjKB87mzLhhqW",
         privateKey: process.env.EMAILJS_API_KEY,
@@ -133,6 +133,7 @@ export const handleSuperAdminResetPassword = async (userId, newPassword) => {
   if (passwordMatch) {
     throw new TypeError("New password cannot be the same as the old password");
   }
+  user.failedLoginAttempts = 0;
   user.password = newPassword;
   await user.save();
   return;
