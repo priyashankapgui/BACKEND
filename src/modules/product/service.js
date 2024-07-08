@@ -90,7 +90,9 @@ export const getProductById = async (productId) => {
     categoryName: category.categoryName,
     description: product.description,
     barcode: product.barcode,
-    minQty: product.minQty
+    minQty: product.minQty,
+    image: product.image,
+    
   };
 
   return result;
