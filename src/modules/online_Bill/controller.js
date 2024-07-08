@@ -17,7 +17,7 @@ export const createOnlineBillController = async (req, res) => {
 };
 
 export const getAllOnlineBillsController = async (req, res) => {
-    const filters = req.query; 
+    const filters = req.query;
     try {
         const bills = await onlineBillServices.getAllOnlineBills(filters);
         res.status(200).json(bills);
