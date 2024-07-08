@@ -418,6 +418,7 @@ export const handleEmployeeResetPassword = async (userId, newPassword) => {
   if (passwordMatch) {
     throw new TypeError("New password cannot be the same as the old password");
   }
+  user.failedLoginAttempts = 0;
   user.password = newPassword;
   await user.save();
   return;

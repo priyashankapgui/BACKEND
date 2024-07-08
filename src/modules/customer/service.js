@@ -207,6 +207,7 @@ export const resetPasswordCustomer = async (req, res) => {
     if (newPassword === user.password) {
       return res.status(400).json({ message: "New password cannot be the same as old password" });
     }
+    user.failedLoginAttempts = 0;
     user.password = newPassword;
     await user.save();
     return res.status(200).json({ message: "Password reset successfull" });
