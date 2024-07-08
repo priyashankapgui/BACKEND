@@ -8,7 +8,6 @@ import ProductBatchSum from '../productBatchSum/productBatchSum.js';
 export const addProductsToBill = async (onlineBillNo) => {
   const transaction = await sequelize.transaction();
   try {
-    // Fetch customerId from OnlineBill table
     const onlineBill = await OnlineBill.findOne({ where: { onlineBillNo } });
     if (!onlineBill) {
       return {
@@ -21,7 +20,6 @@ export const addProductsToBill = async (onlineBillNo) => {
     }
     const customerId = onlineBill.customerId;
 
-    // Fetch shopping cart ID from Customer table
     const customer = await Customer.findOne({ where: { customerId } });
     if (!customer) {
       throw new Error('Customer not found');
@@ -29,21 +27,17 @@ export const addProductsToBill = async (onlineBillNo) => {
 
     const cartId = customer.cartId;
 
-    // Fetch products from Cart_Product table
     const cartProducts = await CartProduct.findAll({ where: { cartId } });
 
     if (cartProducts.length === 0) {
       throw new Error('No products found in the cart');
     }
 
-    // Initialize array to hold the bill products to be displayed
     let billProducts = [];
 
-    // Iterate over the products and add them to OnlineBillProduct table
     for (const cartProduct of cartProducts) {
       const { productId, batchNo, branchId, quantity, sellingPrice, discount } = cartProduct;
 
-      // Fetch product info from ProductBatchSum table
       const productBatchSum = await ProductBatchSum.findOne({
         where: { productId, batchNo, branchId },
       });
@@ -52,11 +46,11 @@ export const addProductsToBill = async (onlineBillNo) => {
         throw new Error(`Insufficient stock for product: ${productId}, batch: ${batchNo}`);
       }
 
-      // Deduct the purchased quantity from ProductBatchSum
+      
       productBatchSum.totalAvailableQty -= quantity;
       await productBatchSum.save({ transaction });
 
-      // Add product to OnlineBillProduct table
+      
       try {
         const newBillProduct = await OnlineBillProduct.create({
           onlineBillNo,
@@ -70,7 +64,7 @@ export const addProductsToBill = async (onlineBillNo) => {
           createdAt: new Date()
         }, { transaction });
 
-        // Add the new bill product to the array
+        
         billProducts.push(newBillProduct);
       } catch (createError) {
         console.error('Error creating OnlineBillProduct:', createError);
@@ -80,7 +74,6 @@ export const addProductsToBill = async (onlineBillNo) => {
 
     await transaction.commit();
 
-    // Return the bill products to be displayed
     return { message: 'Products added to online bill successfully', billProducts };
 
   } catch (error) {

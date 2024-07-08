@@ -125,7 +125,11 @@ const updateOnlineBill = async (onlineBillNo, updates) => {
 const getSumOfOnlineBillTotalAmountForDate = async (branchName, startDate, endDate) => {
     try {
         const branchId = await mapBranchNameToId(branchName);
-        const result = await onlineBill.findAll({
+
+        // Ensure the date is in the correct format (YYYY-MM-DD)
+        const formattedDate = new Date(date).toISOString().split('T')[0];
+
+        const result = await onlineBill.findOne({
             attributes: [
                 [sequelize.fn('DATE', sequelize.col('createdAt')), 'date'],
                 [sequelize.fn('SUM', sequelize.col('onlineBillTotal')), 'totalAmount']
@@ -139,17 +143,18 @@ const getSumOfOnlineBillTotalAmountForDate = async (branchName, startDate, endDa
             group: [sequelize.fn('DATE', sequelize.col('createdAt'))]
         });
 
-        return result.map(row => ({
-            date: row.dataValues.date,
-            totalAmount: row.dataValues.totalAmount || 0
-        }));
+        if (!result) {
+            throw new Error("No data found");
+        }
+
+        return result.dataValues.onlineBillTotalAmount || 0; // Return 0 if no bills found
     } catch (error) {
         console.error('Error in getSumOfOnlineBillTotalAmountForDates:', error);
         throw new Error('Error fetching sum of onlineBillTotalAmount for dates: ' + error.message);
     }
 };
 
-//for Chart
+
 export const getDailyOnlineSalesDataForMonth = async (branchName, year, month) => {
     try {
         const startDate = new Date(Date.UTC(year, month - 1, 1));

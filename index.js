@@ -137,7 +137,38 @@ process.on('unhandledRejection', (err) => {
   console.error('Unhandled Promise Rejection:', err);
 });
 
-// Stripe Checkout Session Route
+// // Stripe Checkout Session Route
+// app.post('/create-checkout-session', async (req, res) => {
+//   const { items } = req.body;
+
+//   try {
+//     const session = await stripe.checkout.sessions.create({
+//       payment_method_types: ['card'],
+//       line_items: items.map(item => ({
+//         price_data: {
+//           currency: 'lkr',
+//           product_data: {
+//             name: item.productName,
+//             Subtotal:	item.Subtotal,
+//             Discount:	item.Discount,
+//             Total:	item.Total
+//           },
+//           unit_amount: item.sellingPrice * 100,  
+//         },
+//         quantity: item.quantity,
+//       })),
+//       mode: 'payment',
+//       success_url: 'http://localhost:3001/success',
+//       cancel_url: 'http://localhost:3001/cancel',
+//     });
+
+//     res.json({ sessionId: session.id });
+//   } catch (error) {
+//     console.error('Error creating checkout session:', error);
+//     res.status(500).json({ error: 'Internal Server Error' });
+//   }
+// });
+
 app.post('/create-checkout-session', async (req, res) => {
   const { items } = req.body;
 
@@ -148,12 +179,9 @@ app.post('/create-checkout-session', async (req, res) => {
         price_data: {
           currency: 'lkr',
           product_data: {
-            name: item.productName,
-            Subtotal:	item.Subtotal,
-            Discount:	item.Discount,
-            Total:	item.Total
+            name: item.product.productName,
           },
-          unit_amount: item.sellingPrice * 100,  
+          unit_amount: Math.round((item.sellingPrice * (1 - item.discount / 100)) * 100),
         },
         quantity: item.quantity,
       })),
@@ -168,6 +196,5 @@ app.post('/create-checkout-session', async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
-
 
 export { sequelize, categories, suppliers, grn, products, branches, feedback, ShoppingCart, productBatchSum, SuperAdmin, onlineBill , ProductBatchUpdateReason,bill, TransferProduct, TransferProductBatch, review};
