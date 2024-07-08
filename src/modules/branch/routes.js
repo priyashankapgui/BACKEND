@@ -6,7 +6,7 @@ import { authenticateTokenWithPermission } from '../../middleware/authentication
 const Branchrouter = express.Router();
 
 Branchrouter.get('/branches', authenticateTokenWithPermission('adjust-branch'),getBranches);
-Branchrouter.get('/branchesWeb', authenticateTokenWithPermission('adjust-branch'),getBranchesWeb);
+Branchrouter.get('/branchesWeb', getBranchesWeb);
 Branchrouter.get('/branches/:branchId', authenticateTokenWithPermission('adjust-branch'),getBranch);
 Branchrouter.post('/branches',validator.create, createNewBranch);
 Branchrouter.put('/branches/:branchId',authenticateTokenWithPermission('adjust-branch'),validator.update, updateBranch);

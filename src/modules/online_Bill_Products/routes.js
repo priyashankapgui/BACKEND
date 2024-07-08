@@ -5,7 +5,7 @@ import { authenticateTokenWithPermission } from '../../middleware/authentication
 const router = express.Router();
 
 router.post('/addproductstobill', OnlineBillProductController.addProductsToBill);
-router.get('/onlineBillProducts', /*authenticateTokenWithPermission('online-orders'),*/OnlineBillProductController.getAllOnlineBillProducts);
-router.get('/onlineBillProducts/:onlineBillNo', /*authenticateTokenWithPermission('online-orders'),*/OnlineBillProductController.getOnlineBillProductsByBillNo);
+router.get('/onlineBillProducts', OnlineBillProductController.getAllOnlineBillProducts);
+router.get('/onlineBillProducts/:onlineBillNo', OnlineBillProductController.getOnlineBillProductsByBillNo);
 
 export default router;

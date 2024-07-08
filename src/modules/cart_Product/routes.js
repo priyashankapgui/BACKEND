@@ -4,9 +4,9 @@ import { authenticateTokenWithPermission } from '../../middleware/authentication
 
 const router = express.Router();
 
-router.get("/cart/items/:cartId", /*authenticateTokenWithPermission('online-orders'),*/cartProductCtrl.getCartItemsByCartId);
+router.get("/cart/items/:cartId", cartProductCtrl.getCartItemsByCartId);
 router.post('/cart-items/add', cartProductCtrl.addToCart);
-router.put('/cart/:cartId/item/:productId', /*authenticateTokenWithPermission('online-orders'),*/cartProductCtrl.updateCartItem);
-router.delete('/cart/:cartId/item/:productId', /*authenticateTokenWithPermission('online-orders'),*/cartProductCtrl.deleteCartItem);
+router.put('/cart/:cartId/item/:productId', cartProductCtrl.updateCartItem);
+router.delete('/cart/:cartId/item/:productId', cartProductCtrl.deleteCartItem);
 
 export default router;
