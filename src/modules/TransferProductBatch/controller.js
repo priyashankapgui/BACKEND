@@ -17,6 +17,7 @@ export const submitStockTransferAndProductBatch = async (req, res) => {
       batchNo: product.batchNo,
       transferQty: product.transferQty,
       unitPrice: product.unitPrice,
+      expDate: product.expDate,
       amount: product.amount,
     }));
     const productBatchResult =

@@ -38,12 +38,15 @@ const TransferProductBatch = sequelize.define('TransferProductBatch', {
     allowNull: false,
     defaultValue: 0.0,
   },
+  expDate: {
+    type: DataTypes.DATE,
+    allowNull: true,
+  },
   amount: {
     type: DataTypes.FLOAT,
     allowNull: false,
     defaultValue: 0.0,
   },
-
   updatedAt: {
     type: 'TIMESTAMP',
     defaultValue: DataTypes.NOW,

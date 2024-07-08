@@ -20,7 +20,8 @@ export const createStockTransferProductBatchService = async (
           entry.productId,
           entry.batchNo,
           entry.supplyingBranch,
-          entry.transferQty
+          entry.transferQty,
+          entry.expDate
         );
       } catch (error) {
         if (error.name === "SequelizeValidationError") {

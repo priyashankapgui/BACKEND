@@ -99,6 +99,7 @@ export const getAllStockTransfers = async () => {
         "status",
         "createdAt",
       ],
+      order: [["createdAt", "DESC"]],
     });
     const transfersWithProducts = await Promise.all(
       stockTransfers.map(async (transfer) => {
@@ -179,7 +180,7 @@ export const getAllStockTransferDetailsBySTN_NO = async (STN_NO) => {
             STN_NO,
             productId: product.productId,
           },
-          attributes: ["batchNo", "transferQty", "unitPrice", "amount"],
+          attributes: ["batchNo", "transferQty", "unitPrice", "expDate", "amount"],
         });
         return {
           ...product.dataValues,
@@ -200,6 +201,7 @@ export const getAllStockTransferDetailsBySTN_NO = async (STN_NO) => {
           batchNo: batch.batchNo,
           transferQty: batch.transferQty,
           unitPrice: batch.unitPrice,
+          expDate: batch.expDate,
           amount: batch.amount,
         })),
       })),
