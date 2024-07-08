@@ -18,7 +18,10 @@ const SuperAdmin = sequelize.define('superAdmin', {
         type: DataTypes.STRING,
         allowNull: true,
         validate: {
-            isEmail: true,
+            isEmail: {
+                args: true,
+                msg: "Email address is invalid"
+            },
         },
     },
     password: {
@@ -29,7 +32,10 @@ const SuperAdmin = sequelize.define('superAdmin', {
         type: DataTypes.STRING,
         allowNull: true,
         validate: {
-            is: /^(?:7|0|(?:\+94))[0-9]{9,10}$/,
+            is: {
+                args: /(^(\+94|0)?[1-9]{2}[0-9]{7}$)|(^(\+94|0)?7[0-9]{8}$)/,
+                msg: "Phone number is invalid"
+            },
         },
     },
     address: {
