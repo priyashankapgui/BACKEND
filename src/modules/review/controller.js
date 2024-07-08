@@ -34,22 +34,11 @@ const createReview = async (req, res) => {
     }
 };
 
-const getReviewById = async (req, res) => {
-    const { id } = req.params;
-    try {
-        const review = await reviewService.getReviewById(id);
-        if (!review) {
-            res.status(404).json({ error: 'Review not found' });
-            return;
-        }
-        res.json(review);
-    } catch (err) {
-        res.status(400).json({ error: err.message });
-    }
-};
+
 
 const updateReview = async (req, res) => {
-    const { productId } = req.params; 
+    const { productId } = req.body; 
+    
     
     console.log(productId);// Assuming productId is part of the URL
     try {
@@ -73,18 +62,22 @@ const getAllReviews = async (req, res) => {
 };
 
 const getReviewsByProductId = async (req, res) => {
-    const { productId } = req.params;
+    const { productId } = req.body;
+   
     try {
         const reviews = await reviewService.getReviewsByProductId(productId);
+        console.log(productId);
         res.json(reviews);
     } catch (err) {
         res.status(400).json({ error: err.message });
+        console.log(err);
     }
 };
 
+
+
 export {
     createReview,
-    getReviewById,
     updateReview,
     getAllReviews,
     getReviewsByProductId,

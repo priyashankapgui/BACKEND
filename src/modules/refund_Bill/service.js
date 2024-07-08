@@ -113,18 +113,18 @@ export const getAllRefundBills = async () => {
     }
 };
 
-// Function to get refund bill by RTBNo
-export const getRefundBillByRTBNo = async (RTBNo) => {
-    try {
-        const refundBill = await RefundBill.findByPk(RTBNo);
-        if (!refundBill) {
-            throw new Error('Refund bill not found');
-        }
-        return refundBill;
-    } catch (error) {
-        throw new Error('Error fetching refund bill by RTBNo: ' + error.message);
-    }
-};
+// // Function to get refund bill by RTBNo
+// export const getRefundBillByRTBNo = async (RTBNo) => {
+//     try {
+//         const refundBill = await RefundBill.findByPk(RTBNo);
+//         if (!refundBill) {
+//             throw new Error('Refund bill not found');
+//         }
+//         return refundBill;
+//     } catch (error) {
+//         throw new Error('Error fetching refund bill by RTBNo: ' + error.message);
+//     }
+// };
 
 // Function to get refund bill products by productId
 export const getRefundBillProductsByProductId = async (productId) => {
@@ -167,5 +167,54 @@ export const getSumOfRefundBillTotalAmountForDate = async (branchName, date) => 
     } catch (error) {
         console.error('Error in getSumOfRefundBillTotalAmountForDate:', error);
         throw new Error('Error fetching sum of refundBillTotalAmount for date: ' + error.message);
+    }
+};
+
+export const getRefundBillsByBranchAndDateRange = async (branchName, startDate, endDate) => {
+    try {
+        console.log(`Fetching refund bills for branch: ${branchName}, from: ${startDate}, to: ${endDate}`);
+
+        const branchId = await mapBranchNameToId(branchName);
+        if (!branchId) {
+            throw new Error('Branch not found');
+        }
+
+        const formattedStartDate = new Date(startDate).toISOString().split('T')[0];
+        const formattedEndDate = new Date(endDate).toISOString().split('T')[0];
+
+        const refundBills = await RefundBill.findAll({
+            where: {
+                branchId,
+                createdAt: {
+                    [Op.between]: [formattedStartDate, formattedEndDate]
+                }
+            },
+            include: [{
+                model: branches,
+                attributes: ['branchName', 'address', 'contactNumber', 'email'],
+            }],
+        });
+
+        if (!refundBills.length) {
+            throw new Error("No refund bills found for the selected branch and date range");
+        }
+
+        return refundBills.map(refundBill => ({
+            RTBNo: refundBill.RTBNo,
+            billNo: refundBill.billNo,
+            branchId: refundBill.branchId,
+            branchName: refundBill.branch.branchName,
+            address: refundBill.branch.address,
+            returnedBy: refundBill.returnedBy,
+            customerName: refundBill.customerName,
+            contactNo: refundBill.contactNo,
+            reason: refundBill.reason,
+            refundTotalAmount: refundBill.refundTotalAmount,
+            status: refundBill.status,
+            createdAt: refundBill.createdAt,
+        }));
+    } catch (error) {
+        console.error('Error fetching refund bills by branch and date range:', error.message);
+        throw new Error('Failed to fetch refund bills by branch and date range');
     }
 };

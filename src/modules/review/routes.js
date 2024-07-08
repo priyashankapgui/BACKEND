@@ -3,7 +3,6 @@
 import express from 'express';
 import {
     createReview,
-    getReviewById,
     updateReview,
     getAllReviews,
     getReviewsByProductId,
@@ -12,9 +11,9 @@ import {
 const reviewRouter = express.Router();
 
 reviewRouter.post('/review', createReview);
-reviewRouter.get('/review/:id', getReviewById);
-reviewRouter.put('/review/:productId', updateReview);
+reviewRouter.put('/review/add', updateReview);
 reviewRouter.get('/reviews', getAllReviews);
-reviewRouter.get('/review/product/:productId', getReviewsByProductId);
+reviewRouter.get('/review/product', getReviewsByProductId);
+
 
 export default reviewRouter;

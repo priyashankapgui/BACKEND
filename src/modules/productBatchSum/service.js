@@ -863,6 +863,7 @@ export const getAlreadyExpProductBatchSumDataByBranch = async (branchName) => {
   }
 };
 
+
 export const getProductDetailsByBranchName = async (branchName) => {
   try {
     const branch = await branches.findOne({
@@ -938,16 +939,24 @@ export const getProductsAndBatchSumDetails = async (categoryId, branchName) => {
       return { productDetails, batchSumDetails: [] }; // No products found for the given category
     }
 
-    // Fetch product batch sums based on productIds and branchId
-    const batchSumDetails = await productBatchSum.findAll({
+    const currentDate = new Date();
+    const nearExpiryThreshold = 30 * 24 * 60 * 60 * 1000; // 30 days in milliseconds
+    const nearExpiryDate = new Date(currentDate.getTime() + nearExpiryThreshold);
+
+    // Fetch one product batch sum based on productIds and branchId, excluding near-expiration batches
+    const batchSumDetail = await productBatchSum.findOne({
       where: {
         productId: productIds,
-        branchId
+        branchId,
+        expDate: {
+          [Op.gt]: nearExpiryDate, // Exclude near-expiration batches
+        }
       },
       attributes: ['productId', 'productName', 'batchNo', 'barcode', 'totalAvailableQty', 'discount', 'branchId', 'branchName', 'expDate', 'sellingPrice'],
+      order: [['expDate', 'ASC']] // Optional: Order by expiration date
     });
 
-    return { productDetails, batchSumDetails };
+    return { productDetails, batchSumDetails: batchSumDetail ? [batchSumDetail] : [] };
   } catch (error) {
     throw new Error(error.message);
   }

@@ -49,31 +49,6 @@ const Review = sequelize.define('Review', {
         type: DataTypes.FLOAT,
         allowNull: true,
     },
-// }, {
-//     hooks: {
-//         async beforeSave(review) {
-//             console.log('Before save hook execution:', review.toJSON());
-
-//             const totalStars =
-//                 (review.oneStar || 0) * 1 +
-//                 (review.twoStars || 0) * 2 +
-//                 (review.threeStars || 0) * 3 +
-//                 (review.fourStars || 0) * 4 +
-//                 (review.fiveStars || 0) * 5;
-//             const numberOfReviews =
-//                 (review.oneStar || 0) +
-//                 (review.twoStars || 0) +
-//                 (review.threeStars || 0) +
-//                 (review.fourStars || 0) +
-//                 (review.fiveStars || 0);
-//             const averageRating = numberOfReviews ? totalStars / numberOfReviews : 0;
-
-//             review.totalStars = totalStars;
-//             review.setDataValue('numberOfReviews', numberOfReviews);
-//             review.setDataValue('averageRating', averageRating);
-//         },
-//     },
-  
 });
 
 Review.belongsTo(products, { foreignKey: 'productId' });
