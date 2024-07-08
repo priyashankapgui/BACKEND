@@ -59,17 +59,18 @@ async function addToCart(customerId, productId, productName, batchNo, branchId, 
       throw new Error('Customer not found');
     }
     const cartId = customer.cartId;
-      // Fetch the batch number with the longest expiry date for the given productId and branchId
-      const productBatch = await ProductBatchSum.findOne({
-        where: { productId, branchId },
-        order: [['expDate', 'DESC']],
-      });
-      
-      if (!productBatch) {
-        throw new Error('Product batch not found in the selected branch');
-      }
-  
-      const { batchNo } = productBatch;
+    
+    // Fetch the batch number with the longest expiry date for the given productId and branchId
+    const productBatch = await ProductBatchSum.findOne({
+      where: { productId, branchId },
+      order: [['expDate', 'DESC']],
+    });
+
+    if (!productBatch) {
+      throw new Error('Product batch not found in the selected branch');
+    }
+
+    const { batchNo } = productBatch;
 
     // Check if the product is already in the cart
     let cartItem = await cart_Product.findOne({
@@ -81,15 +82,14 @@ async function addToCart(customerId, productId, productName, batchNo, branchId, 
 
     if (cartItem) {
       // If the item already exists in the cart, update its quantity and other fields
-      const updatedCartItem = await cartItem.update({
+      await cartItem.update({
         quantity: cartItem.quantity + quantity,
         sellingPrice,
         discount,
       });
-      return updatedCartItem;
     } else {
       // If the item does not exist in the cart, create a new entry
-      cartItem = await cart_Product.create({
+      await cart_Product.create({
         cartId,
         productId,
         productName,
@@ -100,12 +100,22 @@ async function addToCart(customerId, productId, productName, batchNo, branchId, 
         discount,
         customerId,
       });
-      return cartItem;
     }
+
+    const totalProductCount = await cart_Product.count({
+      where: {
+        cartId,
+      },
+      distinct: true,
+      col: 'productId',
+    });
+
+    return { totalProductCount };
   } catch (error) {
     throw new Error(`Failed to add item to cart: ${error.message}`);
   }
 }
+
 
 async function updateCartItem(cartId, productId, updatedFields) {
   try {
