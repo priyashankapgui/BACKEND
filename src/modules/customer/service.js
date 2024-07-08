@@ -146,7 +146,7 @@ export const resetPasswordEmail = async (email, emaliTemplate, returnHostLink) =
           expiresIn: "15m",
         }
       );
-      const resetLink = `http://${returnHostLink}/login/forgotpw/resetpw?token=${passwordResetToken}`;
+      const resetLink = `${returnHostLink}/login/forgotpw/resetpw?token=${passwordResetToken}`;
       emailjs.init({
         publicKey: "U4RoOjKB87mzLhhqW",
         privateKey: process.env.EMAILJS_API_KEY,
