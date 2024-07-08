@@ -183,3 +183,19 @@ export const getDailySalesDataForMonthController = async (req, res) => {
         ERROR(res, { message: 'Failed to fetch daily sales data for month', error: error.message }, req.span, 500);
     }
 };
+
+export const getAllBillsByBranchAndDateRangeController = async (req, res) => {
+    try {
+        const { branchName, startDate, endDate } = req.query;
+
+        if (!branchName || !startDate || !endDate) {
+            return ERROR(res, { message: 'branchName, startDate, and endDate parameters are required' }, req.span, 400);
+        }
+
+        const bills = await Service.getAllBillsByBranchAndDateRange(branchName, startDate, endDate);
+        SUCCESS(res, Codes.SUC_CODES, bills, req.span);
+    } catch (error) {
+        console.error('Error fetching bills by branch and date range:', error);
+        ERROR(res, { message: 'Failed to fetch bills by branch and date range', error: error.message }, req.span, 500);
+    }
+};
